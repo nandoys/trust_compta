@@ -361,7 +361,7 @@ function deleteMultiple() {
     }
   });
   if (typeof ids_array !== 'undefined' && ids_array.length > 0) {
-    if (confirm('Are you sure you want to delete this?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ceci?')) {
         Array.from(ids_array).forEach(function (id) {
         customerList.remove("id", `<a href="javascript:void(0);" class="fw-medium link-primary">${id}</a>`);
       });
@@ -371,7 +371,7 @@ function deleteMultiple() {
     }
   } else {
     Swal.fire({
-      title: 'Please select at least one checkbox',
+      title: 'Veuillez cocher au moins une case',
       confirmButtonClass: 'btn btn-info',
       buttonsStyling: false,
       showCloseButton: true
