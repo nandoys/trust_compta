@@ -105,6 +105,7 @@ def accounting_budget(request, pk, fy):
         budget_form = BudgetAccountingForm()
         adjunct_form = AdjunctAccountingForm()
         fiscal_year_form = FiscalYearForm()
+        total = total_budget['amount__sum'] * fiscal_year.rate if total_budget['amount__sum'] is not None else 0
 
         context = {
             'budget_form': budget_form,
@@ -114,7 +115,7 @@ def accounting_budget(request, pk, fy):
             'additional_accounting': additional_accounting,
             'budgets': budgets,
             'total_budget': total_budget,
-            'total_budget_converted': total_budget['amount__sum'] * fiscal_year.rate
+            'total_budget_converted': total * fiscal_year.rate
         }
         return render(request, 'accounting_plan/accounting_budget.html', context)
     except Additional.DoesNotExist:

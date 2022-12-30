@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 import os
 from pathlib import Path
-
-import django_jinja.backend
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -57,8 +55,6 @@ THIRDPARTY_APPS = [
     'allauth.socialaccount',
     # Google Providers
     'allauth.socialaccount.providers.google',
-    # Django Jinja
-    'django_jinja'
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS + THIRDPARTY_APPS

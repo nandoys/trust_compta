@@ -39,6 +39,10 @@ urlpatterns = [
     ),
     # All Auth 
     path('account/', include('allauth.urls')),
+
     path('social-auth/',include('social_django.urls', namespace='social')),
-    path('plan-comptable/', include('accounting_plan.urls'))
+
+    path('plan-comptable/', include('accounting_plan.urls')),
+
+    path('tresorerie/', include('treasury.urls'))
 ]

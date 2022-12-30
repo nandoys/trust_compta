@@ -37,21 +37,21 @@
                         <li class="nav-item">
                             <a class="nav-link menu-link" href="#sidebarDashboards" data-bs-toggle="collapse" role="button"
                                 aria-expanded="false" aria-controls="sidebarDashboards">
-                                <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Dashboards</span>
+                                <i class="ri-dashboard-2-line"></i> <span data-key="t-dashboards">Décaissement</span>
                             </a>
                             <div class="collapse menu-dropdown" id="sidebarDashboards">
                                 <ul class="nav nav-sm flex-column">
                                     <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-analytics"> Analytics </a>
+                                        <a href="{% url 'treasury_outcomes' 'cdf' 2022 %}" class="nav-link" data-key="t-analytics"> CDF (2022) </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-crm"> CRM </a>
+                                        <a href="{% url 'treasury_outcomes' 'usd' 2022 %}" class="nav-link" data-key="t-crm"> USD (2022) </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="{% url 'dashboards:dashboard' %}" class="nav-link" data-key="t-ecommerce"> Ecommerce </a>
+                                        <a href="{% url 'treasury_outcomes' 'cdf' 2023 %}" class="nav-link" data-key="t-ecommerce"> CDF (2023) </a>
                                     </li>
                                     <li class="nav-item">
-                                        <a href="#" class="nav-link" data-key="t-crypto"> Crypto </a>
+                                        <a href="{% url 'treasury_outcomes' 'usd' 2023 %}" class="nav-link" data-key="t-crypto"> USD (2023) </a>
                                     </li>
                                     <li class="nav-item">
                                         <a href="#" class="nav-link" data-key="t-projects"> Projects </a>
