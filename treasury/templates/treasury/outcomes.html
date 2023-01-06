@@ -18,10 +18,10 @@
             <div class="page-content">
                 <div class="container-fluid">
                     {% block header %}
-                    {% include "partials/topbar.html" with checkouts=currencies current_flag=current_checkout current_year=fiscal_year %}
+                    {% include "partials/topbar.html" with url_name='treasury_outcomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout current_year=fiscal_year %}
                     {% endblock header %}
                     {% block pagetitle %}
-                    {% include "partials/page-title.html" with pageurl="/plan-comptable" pagetitle="Dépenses" title="Dépenses" %}
+                    {% include "partials/page-title.html" with pageurl="/plan-comptable" pagetitle="Dépenses" title="Dépenses" in_year=fiscal_year %}
                     {% endblock pagetitle %}
 
                     <!-- end page title -->
@@ -31,19 +31,19 @@
                             <div class="p-4 d-flex flex-column h-100">
 
                                 <div class="px-4 mx-n4"style="height: calc(100vh - 468px);">
-                                    <form method="post" data-tags-url="{% url 'tags_input' %}" id="outcome_form">
+                                    <form method="post" data-year="{{ fiscal_year }}" data-url-adjunct="{% url 'accounting_adjunct_input' %}" data-url-accounting-additional="{% url 'accounting_additional_input' %}" id="treasury_form">
                                         {% csrf_token %}
                                         {% for field in outcome_form %}
                                         <div class="mb-4">
-                                            <label for="year-field" class="form-label">{{ field.label }}</label>
+                                            <label for="{{ field.name }}" class="form-label">{{ field.label }}</label>
                                             {{ field }}
                                         </div>
-                                        {% if field.name == 'accounting' %}
-                                            <div class="mb-4" id="tag-div"></div>
+                                        {% if field.name == 'accounting_main' %}
+                                            <div class="mb-4" id="accounting-additional-div"></div>
+                                            <div class="mb-4" id="accounting-adjunct-div"></div>
                                         {% endif %}
                                         {% endfor %}
                                         <div class="hstack gap-2 justify-content-end">
-                                            <button type="button" class="btn btn-ghost-success" data-bs-dismiss="modal"><i class="ri-close-line align-bottom"></i> Fermer</button>
                                             <button type="submit" class="btn btn-primary" id="addNewProject">Ajouter</button>
                                         </div>
                                     </form>
@@ -52,7 +52,7 @@
                         </div><!--end side content-->
                         <div class="file-manager-content w-100 p-4 pb-0">
                             <div class="hstack mb-4">
-                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Total: {{ total_checkout.amount__sum }}</h5>
+                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Total: {{ total_checkout.amount__sum|default:" 0" }} {{ currency.symbol_iso }}</h5>
                                 <div class="hstack gap-2">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         <button class="btn btn-icon fw-semibold btn-soft-danger"><i class="ri-arrow-go-back-line"></i></button>
@@ -63,19 +63,20 @@
                             <div class="p-3 bg-light rounded mb-4">
                                 <div class="row g-2">
                                     <div class="col-lg-auto">
-                                        <select class="form-control" data-choices data-choices-search-false name="choices-select-sortlist" id="choices-select-sortlist">
-                                            <option value="">Sort</option>
-                                            <option value="By ID">By ID</option>
-                                            <option value="By Name">By Name</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-lg-auto">
-                                        <select class="form-control" data-choices data-choices-search-false name="choices-select-status" id="choices-select-status">
-                                            <option value="">Mois</option>
-                                            <option value="Completed">Montant</option>
-                                            <option value="Inprogress">Inprogress</option>
-                                            <option value="Pending">Pending</option>
-                                            <option value="New">New</option>
+                                        <select class="form-select"  data-choices-search-false name="choices-select-status" id="choices-select-status">
+                                            <option value="" disabled selected>Mois</option>
+                                            <option value="Janvier">Janvier</option>
+                                            <option value="Février">Février</option>
+                                            <option value="Mars">Mars</option>
+                                            <option value="Avril">Avril</option>
+                                            <option value="Mai">Mai</option>
+                                            <option value="Juin">Juin</option>
+                                            <option value="Juillet">Juillet</option>
+                                            <option value="Août">Août</option>
+                                            <option value="Septembre">Septembre</option>
+                                            <option value="Octobre">Octobre</option>
+                                            <option value="Novembre">Novembre</option>
+                                            <option value="Décembre">Décembre</option>
                                         </select>
                                     </div>
                                     <div class="col-lg">
@@ -360,38 +361,6 @@
 {% block extra_js %}
         <!-- dragula init js -->
     <script src="{% static 'libs/dragula/dist/dragula.min.js' %}"></script>
-    <script src="{% static 'libs/dom-autoscroller/dist/dom-autoscroller.min.js' %}"></script>
-
-    <script src="{% static 'js/pages/todo.init.js' %}"></script>
-    <script>
-        let accounting_field = document.getElementById('accounting-field')
-        let form = document.getElementById('outcome_form')
-        let tag = document.getElementById('tag-div')
-        let url = form.getAttribute('data-tags-url')
-
-
-        accounting_field.addEventListener('change',function (evt){
-            let id_accounting = evt.detail.value
-
-            const xhttp = new XMLHttpRequest();
-
-            xhttp.onload = function () {
-              let json_records = JSON.parse(this.responseText);
-              let html_data = `
-                    <label for="tag-field" class="form-label" id="tag-label">Libellé du compte</label>
-                     <select class="form-select mb-3" data-choices="True" data-choices-removeItem name="tag" required>
-                        <option value="" disabled selected>Entrez un libellé</option>`
-              Array.from(json_records).forEach(data => {
-
-                 data === undefined ? html_data=`` : html_data+= `<option value='${data.id}' data-custom-properties='[object Object]'>${data.adjunct_account_name}</option>`
-              });
-                html_data+=`</select>`
-                tag.innerHTML = html_data
-            }
-            xhttp.open("GET", url+"?accounting_id="+id_accounting, true);
-            xhttp.send();
-
-        })
-    </script>
+    <script src="{% static 'js/pages/treasury.init.js' %}"></script>
 
 {% endblock extra_js %}

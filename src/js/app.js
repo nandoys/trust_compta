@@ -16,7 +16,7 @@ File: Main Js File
 
     var navbarMenuHTML = document.querySelector(".navbar-menu").innerHTML;
     var horizontalMenuSplit = 7; // after this number all horizontal menus will be moved in More menu options
-    var default_lang = "en"; // set Default Language
+    var default_lang = "fr"; // set Default Language
     var language = localStorage.getItem("language");
 
     function initLanguage() {
@@ -203,6 +203,7 @@ File: Main Js File
             Array.from(flatpickrExamples).forEach(function (item) {
                 if (item.getAttribute("data-provider") == "flatpickr") {
                     var dateData = {};
+                    dateData.locale = "fr"
                     var isFlatpickerVal = item.attributes;
                     if (isFlatpickerVal["data-date-format"]) {
                         dateData.dateFormat = isFlatpickerVal["data-date-format"].value.toString();
@@ -952,45 +953,6 @@ File: Main Js File
     }
 
     function initTopbarComponents() {
-        // notification cart dropdown
-        if (document.getElementsByClassName("dropdown-item-cart")) {
-            var dropdownItemCart = document.querySelectorAll(".dropdown-item-cart").length;
-            Array.from(document.querySelectorAll("#page-topbar .dropdown-menu-cart .remove-item-btn")).forEach(function (item) {
-                item.addEventListener("click", function (e) {
-                    dropdownItemCart--;
-                    this.closest(".dropdown-item-cart").remove();
-                    Array.from(document.getElementsByClassName("cartitem-badge")).forEach(function (e) {
-                            e.innerHTML = dropdownItemCart;
-                        });
-                    updateCartPrice();
-                    document.getElementById("empty-cart").style.display =
-                        dropdownItemCart == 0 ? "block" : "none";
-                    document.getElementById("checkout-elem").style.display =
-                        dropdownItemCart == 0 ? "none" : "block";
-                });
-            });
-            Array.from(document.getElementsByClassName("cartitem-badge")).forEach(function (e) {
-                e.innerHTML = dropdownItemCart;
-            });
-            if (document.getElementById("empty-cart") !== null) {
-                document.getElementById("empty-cart").style.display = "none";
-            }
-            if (document.getElementById("checkout-elem") !== null) {
-                document.getElementById("checkout-elem").style.display = "block";
-            }
-
-            function updateCartPrice() {
-                var currencySign = "$";
-                var subtotal = 0;
-                Array.from(document.getElementsByClassName("cart-item-price")).forEach(function (e) {
-                        subtotal += parseFloat(e.innerHTML);
-                    });
-                document.getElementById("cart-item-total").innerHTML =
-                    currencySign + subtotal.toFixed(2);
-            }
-            updateCartPrice();
-        }
-
         // notification messages
         if (document.getElementsByClassName("notification-check")) {
             Array.from(document.querySelectorAll(".notification-check input")).forEach(function (element) {

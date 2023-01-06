@@ -38,7 +38,7 @@ urlpatterns = [
         name="account_set_password",
     ),
     # All Auth 
-    path('account/', include('allauth.urls')),
+    path('account/', include('users.urls')),
 
     path('social-auth/',include('social_django.urls', namespace='social')),
 

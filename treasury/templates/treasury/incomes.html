@@ -17,8 +17,11 @@
 
             <div class="page-content">
                 <div class="container-fluid">
+                    {% block header %}
+                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout current_year=fiscal_year %}
+                    {% endblock header %}
                     {% block pagetitle %}
-                    {% include "partials/page-title.html" with pageurl="/plan-comptable" pagetitle="Revenus" title="Revenus" %}
+                    {% include "partials/page-title.html" with pageurl="/plan-comptable" pagetitle="Recettes" title="Recettes" in_year=fiscal_year %}
                     {% endblock pagetitle %}
 
                     <!-- end page title -->
@@ -26,29 +29,29 @@
                      <div class="chat-wrapper d-lg-flex gap-1 mx-n4 mt-n4 p-1">
                         <div class="file-manager-sidebar">
                             <div class="p-4 d-flex flex-column h-100">
-                                <div class="mb-3">
-                                    <button class="btn btn-success w-100" data-bs-target="#createYearModal" data-bs-toggle="modal"><i class="ri-add-line align-bottom"></i> Ajouter Année</button>
-                                </div>
-
-                                <div class="px-4 mx-n4" data-simplebar style="height: calc(100vh - 468px);">
-                                    <ul class="to-do-menu list-unstyled" id="projectlist-data">
-                                        {% for year in fiscal_years %}
-                                        <li>
-                                            <a href="#!"><i class="ri-stop-mini-fill align-middle fs-15 text-danger"></i>
-                                                {{ year }}</a>
-                                        </li>
+                                <div class="px-4 mx-n4"style="height: calc(100vh - 468px);">
+                                    <form method="post" data-year="{{ fiscal_year }}" data-url-adjunct="{% url 'accounting_adjunct_input' %}" data-url-accounting-additional="{% url 'accounting_additional_input' %}" id="treasury_form">
+                                        {% csrf_token %}
+                                        {% for field in income_form %}
+                                        <div class="mb-4">
+                                            <label for="{{ field.name }}" class="form-label">{{ field.label }}</label>
+                                            {{ field }}
+                                        </div>
+                                        {% if field.name == 'accounting_main' %}
+                                            <div class="mb-4" id="accounting-additional-div"></div>
+                                            <div class="mb-4" id="accounting-adjunct-div"></div>
+                                        {% endif %}
                                         {% endfor %}
-                                    </ul>
-                                </div>
-
-                                <div class="mt-auto text-center">
-                                    <img src="{% static 'images/task.png' %}" alt="Task" class="img-fluid" />
+                                        <div class="hstack gap-2 justify-content-end">
+                                            <button type="submit" class="btn btn-primary" id="addNewProject">Ajouter</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div><!--end side content-->
                         <div class="file-manager-content w-100 p-4 pb-0">
                             <div class="hstack mb-4">
-                                <h5 class="fw-semibold flex-grow-1 mb-0">Compte {{ additional_accounting.account_number }} | {{ additional_accounting.account_name }}</h5>
+                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Total: {{ total_checkout.amount__sum|default:" 0" }} {{ currency.symbol_iso }}</h5>
                                 <div class="hstack gap-2">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         <button class="btn btn-icon fw-semibold btn-soft-danger"><i class="ri-arrow-go-back-line"></i></button>
@@ -371,8 +374,7 @@
 {% block extra_js %}
         <!-- dragula init js -->
     <script src="{% static 'libs/dragula/dist/dragula.min.js' %}"></script>
-    <script src="{% static 'libs/dom-autoscroller/dist/dom-autoscroller.min.js' %}"></script>
 
-    <script src="{% static 'js/pages/todo.init.js' %}"></script>
+    <script src="{% static 'js/pages/treasury.init.js' %}"></script>
 
 {% endblock extra_js %}

@@ -1,7 +1,7 @@
 import uuid
 from django.db import models
 
-from accounting_plan.models import Additional, Adjunct
+from accounting_plan.models import Main, Additional, Adjunct
 
 
 # Create your models here.
@@ -33,8 +33,9 @@ class CurrencyDailyRate(models.Model):
 class Outcome(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
-    accounting = models.ForeignKey(Additional, on_delete=models.CASCADE)
-    tag = models.ForeignKey(Adjunct, on_delete=models.SET_NULL, null=True)
+    accounting_main = models.ForeignKey(Main, on_delete=models.CASCADE)
+    accounting_additional = models.ForeignKey(Additional, on_delete=models.CASCADE)
+    accounting_adjunct = models.ForeignKey(Adjunct, on_delete=models.SET_NULL, null=True)
     slip_number = models.CharField(max_length=255, unique=True)
     amount = models.FloatField()
     out_at = models.DateField()

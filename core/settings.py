@@ -43,7 +43,8 @@ LOCAL_APPS = [
     "layouts",
     "pages",
     "accounting_plan",
-    "treasury"
+    "treasury",
+    "users.apps.UsersConfig"
 ]
 THIRDPARTY_APPS = [
     # Crispy Forms
@@ -61,6 +62,7 @@ INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS + THIRDPARTY_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -131,6 +133,8 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
