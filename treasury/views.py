@@ -31,7 +31,13 @@ def incomes(request, symbol):
     currency = Currency.objects.get(symbol_iso=symbol)
 
     incomes_obj = Income.objects.filter(currency=currency, in_at__year=fiscal_year.year).all()
-    total_checkout = incomes_obj.aggregate(Sum('amount'))
+    outcomes_obj = Outcome.objects.filter(currency=currency, out_at__year=fiscal_year.year).all()
+
+    total_checkout_income = incomes_obj.aggregate(Sum('amount'))
+
+    total_checkout_outcome = outcomes_obj.aggregate(Sum('amount'))
+
+    balance = total_checkout_income['amount__sum'] - total_checkout_outcome['amount__sum']
 
     if request.method == 'POST':
         form = IncomeModelForm(request.POST)
@@ -71,7 +77,8 @@ def incomes(request, symbol):
         'currency': currency,
         'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
         'incomes': incomes_obj,
-        'total_checkout': total_checkout
+        'total_checkout': total_checkout_income,
+        'balance': balance
     }
     return render(request, 'treasury/incomes.html', context)
 
@@ -90,8 +97,15 @@ def outcomes(request, symbol):
             'flag': 'images/flags/' + currency.country_iso + '.svg'
         })
     currency = Currency.objects.get(symbol_iso=symbol)
+
+    incomes_obj = Income.objects.filter(currency=currency, in_at__year=fiscal_year.year).all()
     outcomes_obj = Outcome.objects.filter(currency=currency, out_at__year=fiscal_year.year).all()
-    total_checkout = outcomes_obj.aggregate(Sum('amount'))
+
+    total_checkout_income = incomes_obj.aggregate(Sum('amount'))
+
+    total_checkout_outcome = outcomes_obj.aggregate(Sum('amount'))
+
+    balance = total_checkout_income['amount__sum'] - total_checkout_outcome['amount__sum']
 
     if request.method == 'POST':
 
@@ -125,7 +139,8 @@ def outcomes(request, symbol):
         'currency': currency,
         'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
         'outcomes': outcomes_obj,
-        'total_checkout': total_checkout
+        'total_checkout': total_checkout_outcome,
+        'balance': balance
     }
     return render(request, 'treasury/outcomes.html', context)
 

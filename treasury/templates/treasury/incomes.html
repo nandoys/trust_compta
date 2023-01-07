@@ -51,7 +51,7 @@
                         </div><!--end side content-->
                         <div class="file-manager-content w-100 p-4 pb-0">
                             <div class="hstack mb-4">
-                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Total: {{ total_checkout.amount__sum|default:" 0" }} {{ currency.symbol_iso }}</h5>
+                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | {{ balance|default:" 0" }} {{ currency.symbol_iso }}</h5>
                                 <div class="hstack gap-2">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         <button class="btn btn-icon fw-semibold btn-soft-danger"><i class="ri-arrow-go-back-line"></i></button>
