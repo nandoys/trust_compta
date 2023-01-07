@@ -56,6 +56,7 @@ THIRDPARTY_APPS = [
     'allauth.socialaccount',
     # Google Providers
     'allauth.socialaccount.providers.google',
+    'rest_framework',
 ]
 
 INSTALLED_APPS = DEFAULT_APPS + LOCAL_APPS + THIRDPARTY_APPS

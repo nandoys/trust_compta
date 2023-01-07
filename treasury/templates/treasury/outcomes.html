@@ -81,7 +81,7 @@
                                     </div>
                                     <div class="col-lg">
                                         <div class="search-box">
-                                            <input type="text" id="searchTaskList" class="form-control search" placeholder="Search task name">
+                                            <input type="text" id="searchTaskList" class="form-control search" placeholder="Cherchez par date">
                                             <i class="ri-search-line search-icon"></i>
                                         </div>
                                     </div>
@@ -91,10 +91,10 @@
                             <div class="todo-content position-relative px-4 mx-n4" id="todo-content">
                                 <div class="todo-task" id="todo-task">
                                     <div class="table-responsive">
-                                        <table class="table align-middle position-relative">
+                                        <table class="table align-middle position-relative" data-treasury-type="decaissement" data-api-url="/tresorerie/outcome/" id="treasury_table">
                                             <thead class="table-active">
                                                 <tr>
-                                                    <th scope="col">Date de l'op</th>
+                                                    <th scope="col">Date de l'opération</th>
                                                     <th scope="col">Compte</th>
                                                     <th scope="col">Libellé</th>
                                                     <th scope="col">Détail</th>
@@ -118,7 +118,7 @@
                                                             <button class="btn btn-sm btn-soft-danger remove-list" data-bs-toggle="modal" data-bs-target="#removeTaskItemModal" data-remove-id="15">
                                                                 <i class="ri-delete-bin-5-fill align-bottom"></i>
                                                             </button>
-                                                            <button class="btn btn-sm btn-soft-info edit-list" data-bs-toggle="modal" data-bs-target="#createTask" data-edit-id="15">
+                                                            <button class="btn btn-sm btn-soft-info edit-list" data-bs-toggle="modal" data-bs-target="#updateOutcome" data-edit-id="{{ outcome.id }}">
                                                                     <i class="ri-pencil-fill align-bottom"></i>
                                                             </button>
                                                         </div>
@@ -180,149 +180,47 @@
     <!-- End Create Year Modal -->
 
         <!-- Modal -->
-    <div class="modal fade" id="createTask" tabindex="-1" aria-labelledby="createTaskLabel" aria-hidden="true">
+    <div class="modal fade" id="updateOutcome" tabindex="-1" aria-labelledby="updateOutcomeLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0">
                 <div class="modal-header p-3 bg-soft-success">
-                    <h5 class="modal-title" id="createTaskLabel">Create Task</h5>
+                    <h5 class="modal-title" id="updateOutcomeLabel">Modifier Opération</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" id="createTaskBtn-close" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div id="task-error-msg" class="alert alert-danger py-2"></div>
                     <form autocomplete="off" action="" id="creattask-form">
                         <input type="hidden" id="taskid-input" class="form-control">
-                        <div class="mb-3">
-                            <label for="task-title-input" class="form-label">Task Title</label>
-                            <input type="text" id="task-title-input" class="form-control" placeholder="Enter task title">
-                        </div>
-                        <div class="mb-3 position-relative">
-                            <label for="task-assign-input" class="form-label">Assigned To</label>
-
-                            <div class="avatar-group justify-content-center" id="assignee-member"></div>
-                            <div class="select-element">
-                                <button class="btn btn-light w-100 d-flex justify-content-between" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
-                                    <span>Assigned To<b id="total-assignee" class="mx-1">0</b>Members</span> <i class="mdi mdi-chevron-down"></i>
-                                </button>
-                                <div class="dropdown-menu w-100">
-                                    <div data-simplebar style="max-height: 141px">
-                                        <ul class="list-unstyled mb-0">
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-2.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">James Forbes</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-3.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">John Robles</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-4.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Mary Gant</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-1.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Curtis Saenz</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-5.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Virgie Price</div>
-                                                </a>
-                                            </li>
-
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-10.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Anthony Mills</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-6.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Marian Angel</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-7.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Johnnie Walton</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-8.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Donna Weston</div>
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a class="dropdown-item d-flex align-items-center" href="#">
-                                                    <div class="avatar-xxs flex-shrink-0 me-2">
-                                                        <img src="{% static 'images/users/avatar-9.jpg' %}" alt="" class="img-fluid rounded-circle" />
-                                                    </div>
-                                                    <div class="flex-grow-1">Diego Norris</div>
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3 position-relative" id="update_main_div">
+                            <label for="task-assign-input" class="form-label">Compte principal</label>
                         </div>
                         <div class="row g-4 mb-3">
-                            <div class="col-lg-6">
-                                <label for="task-status" class="form-label">Status</label>
-                                <select class="form-control" data-choices data-choices-search-false id="task-status-input">
-                                    <option value="">Status</option>
-                                    <option value="New" selected>New</option>
-                                    <option value="Inprogress">Inprogress</option>
-                                    <option value="Pending">Pending</option>
-                                    <option value="Completed">Completed</option>
-                                </select>
-                            </div>
+                            <div class="col-lg-6" id="update_additional_div"></div>
                             <!--end col-->
-                            <div class="col-lg-6">
-                                <label for="priority-field" class="form-label">Priority</label>
-                                <select class="form-control" data-choices data-choices-search-false id="priority-field">
-                                    <option value="">Priority</option>
-                                    <option value="High">High</option>
-                                    <option value="Medium">Medium</option>
-                                    <option value="Low">Low</option>
-                                </select>
-                            </div>
+                            <div class="col-lg-6" id="update_adjunct_div"> </div>
                             <!--end col-->
                         </div>
+                        <div class="mb-3">
+                            <label for="slip_number_input" class="form-label">Numéro bordereau</label>
+                            <input type="text" id="slip_number_input" class="form-control" placeholder="Entrez le numéro de bordereau">
+                        </div>
+                        <div class="mb-3">
+                            <label for="amount_input" class="form-label">Montant</label>
+                            <input type="text" id="amount_input" class="form-control" placeholder="Entrez un montant">
+                        </div>
                         <div class="mb-4">
-                            <label for="task-duedate-input" class="form-label">Due Date:</label>
-                            <input type="date" id="task-duedate-input" class="form-control" placeholder="Due date">
+                            <label for="done_at_input" class="form-label">Date de l'opération</label>
+                            <input type="date" id="done_at_input" class="form-control" placeholder="Entrez la date de l'opération">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="description_input" class="form-label">Description</label>
+                            <input type="text" id="description_input" class="form-control" placeholder="Entrez une description">
                         </div>
 
                         <div class="hstack gap-2 justify-content-end">
                             <button type="button" class="btn btn-ghost-success" data-bs-dismiss="modal"><i class="ri-close-fill align-bottom"></i> Close</button>
-                            <button type="submit" class="btn btn-primary" id="addNewTodo">Add Task</button>
+                            <button type="submit" class="btn btn-primary" id="addNewTodo">Modifier</button>
                         </div>
                     </form>
                 </div>

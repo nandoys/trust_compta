@@ -1,11 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, reverse, resolve_url
 from django.http import JsonResponse
 from django.db.models import Sum
 from django.contrib.auth.decorators import login_required
 
-from .forms import OutcomeForm, Currency, CurrencyDailyRate, OutcomeModelForm, IncomeForm
-from .models import Outcome
 from accounting_plan.models import Main, Additional, Adjunct, Budget, FiscalYear
+from .forms import OutcomeForm, OutcomeModelForm, IncomeForm, IncomeModelForm
+from .models import Outcome, Income, Currency, CurrencyDailyRate
+from .serializer import IncomeSerializer, OutcomeSerializer
 
 
 # Create your views here.
@@ -29,8 +30,37 @@ def incomes(request, symbol):
         })
     currency = Currency.objects.get(symbol_iso=symbol)
 
-    incomes_obj = Outcome.objects.filter(currency=currency, out_at__year=fiscal_year.year).all()
+    incomes_obj = Income.objects.filter(currency=currency, in_at__year=fiscal_year.year).all()
     total_checkout = incomes_obj.aggregate(Sum('amount'))
+
+    if request.method == 'POST':
+        form = IncomeModelForm(request.POST)
+
+        if form.is_valid():
+            income = form.save(commit=False)
+            income.currency = currency
+            income.slip_number = request.POST['slip_number']
+            income.more = request.POST['more']
+
+            has_accounting_additional = request.POST.get('accounting_additional', None)
+            has_accounting_ajunct = request.POST.get('accounting_adjunct', None)
+
+            if has_accounting_additional is not None:
+                account_additional = Additional.objects.get(id=request.POST['accounting_additional'])
+                income.accounting_additional = account_additional
+
+            if has_accounting_ajunct is not None:
+                account_adjunct = Adjunct.objects.get(id=request.POST['accounting_adjunct'])
+                income.accounting_adjunct = account_adjunct
+
+            if currency.is_local:
+                daily_rate = CurrencyDailyRate.objects.get(to_currency=currency, in_use=True)
+                income.daily_rate = daily_rate
+
+            income.save()
+
+            path = resolve_url(request.path)
+            return redirect(path)
 
     income_form = IncomeForm()
 
@@ -40,7 +70,7 @@ def incomes(request, symbol):
         'currencies': currencies,
         'currency': currency,
         'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
-        'incomes_obj': incomes_obj,
+        'incomes': incomes_obj,
         'total_checkout': total_checkout
     }
     return render(request, 'treasury/incomes.html', context)
@@ -83,6 +113,9 @@ def outcomes(request, symbol):
 
             outcome.save()
 
+            path = resolve_url(request.path)
+            return redirect(path)
+
     outcome_form = OutcomeForm()
 
     context = {
@@ -106,8 +139,8 @@ def accounting_additional(request):
 
 
 def accounting_adjunct(request):
-    year = request.GET.get('fiscal_year')
-    fiscal_year = FiscalYear.objects.get(year=year)
+    # year = request.GET.get('fiscal_year')
+    # fiscal_year = FiscalYear.objects.get(year=year)
 
     accounting_additional_id = request.GET.get('accounting_additional_id')
     accounting_additional = Additional.objects.get(id=accounting_additional_id)
@@ -118,3 +151,17 @@ def accounting_adjunct(request):
     # print(budget_warn)
 
     return JsonResponse(list(accountings_adjunct.values('id', 'adjunct_account_name')), safe=False)
+
+
+def edit_income(request, pk):
+    income = Income.objects.get(id=pk)
+    income_serializer = IncomeSerializer(income, many=False)
+    print(income_serializer.data)
+    return JsonResponse(income_serializer.data, safe=False)
+
+
+def edit_outcome(request, pk):
+    outcome = Outcome.objects.get(id=pk)
+    outcome_serializer = OutcomeSerializer(outcome, many=False)
+    print(outcome_serializer.data)
+    return JsonResponse(outcome_serializer.data, safe=False)

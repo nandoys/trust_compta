@@ -2,8 +2,14 @@ import datetime
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Sum
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+
 from .models import Main, Additional, FiscalYear, Budget
-from .forms import MainAccountingForm, AdditionalAccountingForm, AdjunctAccountingForm, BudgetAccountingForm, FiscalYearForm
+from .forms import MainAccountingForm, AdditionalAccountingForm, AdjunctAccountingForm, BudgetAccountingForm, \
+    FiscalYearForm
+from .serializer import MainSerializer
 
 
 # Create your views here.
@@ -39,7 +45,7 @@ def accounting_main_details(request, pk):
         if request.method == 'POST':
 
             if 'delete-item' in request.POST.keys():
-                print('kjdjdksjdskjdskdjskj')
+
                 additional_accounting = Additional.objects.filter(id=request.POST['delete-item'])
                 additional_accounting.delete()
             else:
@@ -122,3 +128,11 @@ def accounting_budget(request, pk, fy):
         return redirect('accounting_plan_index')
     except FiscalYear.DoesNotExist:
         return redirect('accounting_plan_index')
+
+
+@api_view(['GET'])
+def api_get_accounting_main_by_type(request, account_type):
+    main = Main.objects.filter(account_type=account_type).all()
+    serializer = MainSerializer(main, many=True)
+
+    return Response(serializer.data)

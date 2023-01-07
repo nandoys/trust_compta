@@ -39,5 +39,21 @@ class Outcome(models.Model):
     slip_number = models.CharField(max_length=255, unique=True)
     amount = models.FloatField()
     out_at = models.DateField()
+    write_at = models.DateTimeField(auto_now=True)
     more = models.CharField(max_length=255, null=True)
     daily_rate = models.ForeignKey(CurrencyDailyRate, on_delete=models.SET_NULL, null=True)
+
+
+class Income(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
+    currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
+    accounting_main = models.ForeignKey(Main, on_delete=models.CASCADE)
+    accounting_additional = models.ForeignKey(Additional, on_delete=models.CASCADE, null=True)
+    accounting_adjunct = models.ForeignKey(Adjunct, on_delete=models.SET_NULL, null=True)
+    slip_number = models.CharField(max_length=255, unique=True, null=True)
+    amount = models.FloatField()
+    in_at = models.DateField()
+    write_at = models.DateTimeField(auto_now=True)
+    more = models.CharField(max_length=255, null=True)
+    daily_rate = models.ForeignKey(CurrencyDailyRate, on_delete=models.SET_NULL, null=True)
+

@@ -7,5 +7,8 @@ urlpatterns = [
     path('<str:symbol>/revenus/', views.incomes, name="treasury_incomes"),
     path('<str:symbol>/depenses/', views.outcomes, name="treasury_outcomes"),
     path('additioinal/tags', views.accounting_additional, name="accounting_additional_input"),
-    path('adjunct/tags', views.accounting_adjunct, name="accounting_adjunct_input")
+    path('adjunct/tags', views.accounting_adjunct, name="accounting_adjunct_input"),
+    path('income/<uuid:pk>', views.edit_income, name="edit_income"),
+    path('outcome/<uuid:pk>', views.edit_outcome, name="edit_outcome")
+
 ]
