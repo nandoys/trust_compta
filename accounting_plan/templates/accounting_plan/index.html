@@ -14,6 +14,9 @@
 
             <div class="page-content">
                 <div class="container-fluid">
+                    {% block header %}
+                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout current_year=fiscal_year %}
+                    {% endblock header %}
                     {% block pagetitle %}
                     {% include "partials/page-title.html" with pagetitle="Accueil" title="Plan comptable" %}
                     {% endblock pagetitle %}

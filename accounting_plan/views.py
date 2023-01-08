@@ -11,10 +11,27 @@ from .forms import MainAccountingForm, AdditionalAccountingForm, AdjunctAccounti
     FiscalYearForm
 from .serializer import MainSerializer
 
+from treasury.models import Currency
+
 
 # Create your views here.
 
 def index(request):
+
+    year_id = request.session.get('year')
+    fiscal_year = FiscalYear.objects.get(id=year_id)
+
+    currencies = list()
+    for currency in Currency.objects.all():
+        currencies.append({
+            'name': currency.name,
+            'symbol_iso': currency.symbol_iso,
+            'country_iso': currency.country_iso,
+            'flag': 'images/flags/' + currency.country_iso + '.svg'
+        })
+
+    currency = Currency.objects.get(symbol_iso='usd')
+
     if request.method == 'POST':
 
         if 'delete-item' in request.POST.keys():
@@ -32,7 +49,11 @@ def index(request):
     form = MainAccountingForm()
     context = {
         'main_accountings': main_accountings,
-        'form': form
+        'form': form,
+        'fiscal_year': fiscal_year,
+        'currencies': currencies,
+        'currency': currency,
+        'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
     }
     return render(request, 'accounting_plan/index.html', context)
 
@@ -65,7 +86,7 @@ def accounting_main_details(request, pk):
         context = {
             'main_accounting': main_accounting,
             'additional_accountings': additional_accountings,
-            'form': form
+            'form': form,
         }
         return render(request, 'accounting_plan/main_accounting_details.html', context)
     except Main.DoesNotExist:
@@ -80,6 +101,17 @@ def accounting_budget(request, pk, fy):
         budgets = Budget.objects.filter(accounting=additional_accounting, fiscal_year=fiscal_year)
 
         total_budget = budgets.aggregate(Sum('amount'))
+
+        currencies = list()
+        for currency in Currency.objects.all():
+            currencies.append({
+                'name': currency.name,
+                'symbol_iso': currency.symbol_iso,
+                'country_iso': currency.country_iso,
+                'flag': 'images/flags/' + currency.country_iso + '.svg'
+            })
+
+        currency = Currency.objects.get(symbol_iso='cdf')
 
         if request.method == 'POST':
 
@@ -118,6 +150,9 @@ def accounting_budget(request, pk, fy):
             'adjunct_form': adjunct_form,
             'fiscal_year_form': fiscal_year_form,
             'fiscal_years': fiscal_years,
+            'fiscal_year': fiscal_year,
+            'currencies': currencies,
+            'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
             'additional_accounting': additional_accounting,
             'budgets': budgets,
             'total_budget': total_budget,
