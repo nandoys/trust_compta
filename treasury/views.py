@@ -36,15 +36,18 @@ def incomes(request, symbol):
     outcomes_obj = Outcome.objects.filter(currency=currency, out_at__year=fiscal_year.year).all()
 
     total_checkout_income = incomes_obj.aggregate(Sum('amount'))
+    balance_income = 0
 
     total_checkout_outcome = outcomes_obj.aggregate(Sum('amount'))
+    balance_outcome = 0
 
-    if total_checkout_income['amount__sum'] is None:
-        total_checkout_income['amount__sum'] = 0
-    elif total_checkout_outcome['amount__sum'] is None:
-        total_checkout_outcome['amount__sum'] = 0
+    if total_checkout_income['amount__sum'] is not None:
+        balance_income = total_checkout_income['amount__sum']
 
-    balance = total_checkout_income['amount__sum'] - total_checkout_outcome['amount__sum']
+    if total_checkout_outcome['amount__sum'] is not None:
+        balance_outcome = total_checkout_outcome['amount__sum']
+
+    balance = balance_income - balance_outcome
 
     if request.method == 'POST':
 
@@ -126,15 +129,18 @@ def outcomes(request, symbol):
     outcomes_obj = Outcome.objects.filter(currency=currency, out_at__year=fiscal_year.year).all()
 
     total_checkout_income = incomes_obj.aggregate(Sum('amount'))
+    balance_income = 0
 
     total_checkout_outcome = outcomes_obj.aggregate(Sum('amount'))
+    balance_outcome = 0
 
-    if total_checkout_income['amount__sum'] is None:
-        total_checkout_income['amount__sum'] = 0
-    elif total_checkout_outcome['amount__sum'] is None:
-        total_checkout_outcome['amount__sum'] = 0
+    if total_checkout_income['amount__sum'] is not None:
+        balance_income = total_checkout_income['amount__sum']
 
-    balance = total_checkout_income['amount__sum'] - total_checkout_outcome['amount__sum']
+    if total_checkout_outcome['amount__sum'] is not None:
+        balance_outcome = total_checkout_outcome['amount__sum']
+
+    balance = balance_income - balance_outcome
 
     if request.method == 'POST':
 
