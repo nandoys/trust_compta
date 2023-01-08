@@ -2,6 +2,9 @@ from django.forms import ModelForm, Form
 from django.utils import timezone
 from django import forms
 from django.forms.widgets import TextInput, NumberInput, Select, DateInput
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
+
 from .models import Income, Outcome
 from accounting_plan.models import Main
 
@@ -114,7 +117,7 @@ class IncomeModelForm(ModelForm):
             'amount': NumberInput(attrs={'id': 'amount-field', 'class': 'form-control',
                                          'placeholder': 'Entrez le montant', 'required': True}),
             'in_at': DateInput(attrs={'id': 'out_at-field', 'class': 'form-control',
-                                       'placeholder': 'Entrez la date', 'required': True}),
+                                      'placeholder': 'Entrez la date', 'required': True}),
             'more': TextInput(attrs={'id': 'more-field', 'class': 'form-control',
                                      'placeholder': 'Entrez une description'})
         }

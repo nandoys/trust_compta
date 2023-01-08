@@ -27,10 +27,17 @@
                     <!-- end page title -->
 
                      <div class="chat-wrapper d-lg-flex gap-1 mx-n4 mt-n4 p-1">
-                        <div class="file-manager-sidebar">
+                        <div class="file-manager-sidebar" style="overflow:auto;">
                             <div class="p-4 d-flex flex-column h-100">
 
                                 <div class="px-4 mx-n4"style="height: calc(100vh - 468px);">
+                                    {% if messages %}
+                                    {% for message in messages %}
+                                         <div class="alert {{ message.tags }}" role="alert">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                    {% endif %}
                                     <form method="post" data-year="{{ fiscal_year }}" data-url-adjunct="{% url 'accounting_adjunct_input' %}" data-url-accounting-additional="{% url 'accounting_additional_input' %}" id="treasury_form">
                                         {% csrf_token %}
                                         {% for field in outcome_form %}
@@ -52,7 +59,7 @@
                         </div><!--end side content-->
                         <div class="file-manager-content w-100 p-4 pb-0">
                             <div class="hstack mb-4">
-                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Balance: {{ balance|default:" 0" }} {{ currency.symbol_iso }}</h5>
+                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Balance: {{ balance }} {{ currency.symbol_iso }}</h5>
                                 <div class="hstack gap-2">
                                     <div class="btn-group" role="group" aria-label="Basic example">
                                         <button class="btn btn-icon fw-semibold btn-soft-danger"><i class="ri-arrow-go-back-line"></i></button>
@@ -108,8 +115,8 @@
                                                 {% for outcome in outcomes %}
                                                 <tr>
                                                     <td>{{ outcome.out_at }}</td>
-                                                    <td>{{ outcome.accounting.account_name }}</td>
-                                                    <td>{{ outcome.tag.adjunct_account_name }}</td>
+                                                    <td>{{ outcome.accounting_additional }}</td>
+                                                    <td>{{ outcome.accounting_adjunct|default:"-" }}</td>
                                                     <td>{{ outcome.more }}</td>
                                                     <td><span class="badge bg-danger text-uppercase">{{ outcome.slip_number }}</span></td>
                                                      <td>{{ outcome.amount }}</td>
@@ -189,10 +196,11 @@
                 </div>
                 <div class="modal-body">
                     <div id="task-error-msg" class="alert alert-danger py-2"></div>
-                    <form autocomplete="off" action="" id="creattask-form">
-                        <input type="hidden" id="taskid-input" class="form-control">
+                    <form autocomplete="off" method="post" id="update-form">
+                        {% csrf_token %}
+                        <input type="hidden" id="update_record_id" name="update_record_id" class="form-control">
                         <div class="mb-3 position-relative" id="update_main_div">
-                            <label for="task-assign-input" class="form-label">Compte principal</label>
+                            <label for="update_main_input" class="form-label">Compte principal</label>
                         </div>
                         <div class="row g-4 mb-3">
                             <div class="col-lg-6" id="update_additional_div"></div>
@@ -202,24 +210,24 @@
                         </div>
                         <div class="mb-3">
                             <label for="slip_number_input" class="form-label">Numéro bordereau</label>
-                            <input type="text" id="slip_number_input" class="form-control" placeholder="Entrez le numéro de bordereau">
+                            <input type="text" id="slip_number_input" name="slip_number" class="form-control" placeholder="Entrez le numéro de bordereau">
                         </div>
                         <div class="mb-3">
                             <label for="amount_input" class="form-label">Montant</label>
-                            <input type="text" id="amount_input" class="form-control" placeholder="Entrez un montant">
+                            <input type="text" id="amount_input" name="amount" class="form-control" placeholder="Entrez un montant">
                         </div>
                         <div class="mb-4">
                             <label for="done_at_input" class="form-label">Date de l'opération</label>
-                            <input type="date" id="done_at_input" class="form-control" placeholder="Entrez la date de l'opération">
+                            <input type="date" id="done_at_input" name="out_at" class="form-control" placeholder="Entrez la date de l'opération">
                         </div>
 
                         <div class="mb-4">
                             <label for="description_input" class="form-label">Description</label>
-                            <input type="text" id="description_input" class="form-control" placeholder="Entrez une description">
+                            <input type="text" id="description_input" name="more" class="form-control" placeholder="Entrez une description">
                         </div>
 
                         <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-ghost-success" data-bs-dismiss="modal"><i class="ri-close-fill align-bottom"></i> Close</button>
+                            <button type="button" class="btn btn-ghost-success" data-bs-dismiss="modal"><i class="ri-close-fill align-bottom"></i> Fermer</button>
                             <button type="submit" class="btn btn-primary" id="addNewTodo">Modifier</button>
                         </div>
                     </form>

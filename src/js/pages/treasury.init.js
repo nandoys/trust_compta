@@ -1,7 +1,6 @@
 let form = document.getElementById('treasury_form')
 let treasury_table = document.getElementById('treasury_table')
 
-
 let accounting_field = document.getElementById('accounting-field')
 
 let accounting_additional_div = document.getElementById('accounting-additional-div')
@@ -20,15 +19,15 @@ let update_main_div = document.getElementById('update_main_div')
 let update_additional_div = document.getElementById('update_additional_div')
 let update_adjunct_div = document.getElementById('update_adjunct_div')
 
-let html_select_update_main= `<select class="form-select" name="update_main" id="update_main_field" required>
+let html_select_update_main= `<select class="form-select" name="accounting_main" id="update_main_field" required>
                                 </select>`
 
 let html_label_update_additional = `<label for="update_additional_field" class="form-label" id="update_additional_label">Sous compte</label>`
-let html_select_update_additional= `<select class="form-select" name="update_additional" id="update_additional_field" required>
+let html_select_update_additional= `<select class="form-select" name="accounting_additional" id="update_additional_field" required>
                                 </select>`
 
 let html_label_update_adjunct = `<label for="update_adjunct_field" class="form-label" id="update_adjunct_label">Annexe</label>`
-let html_select_update_adjunct = `<select class="form-select" name="update_adjunct" id="update_adjunct_field" required>
+let html_select_update_adjunct = `<select class="form-select" name="accounting_adjunct" id="update_adjunct_field" required>
                                 </select>`
 
 let accounting_additional_url = form.getAttribute('data-url-accounting-additional')
@@ -264,6 +263,7 @@ document.addEventListener('change',(evt)=>{
 
 function editTodoList() {
 
+    let id = document.getElementById('update_record_id')
     let slip_number = document.getElementById('slip_number_input')
     let amount = document.getElementById('amount_input');
     let done_at = document.getElementById('done_at_input')
@@ -272,6 +272,7 @@ function editTodoList() {
     Array.from(document.querySelectorAll(".edit-list")).forEach(function (elem) {
         elem.addEventListener('click', function (event) {
             getEditid = elem.getAttribute('data-edit-id');
+            id.value = getEditid
             const xhttp = new XMLHttpRequest();
 
             xhttp.onload = function () {
