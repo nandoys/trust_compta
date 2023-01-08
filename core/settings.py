@@ -128,10 +128,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'trust_app',
-        'USER': 'nandoys',
-        'PASSWORD': '',
-        'HOST': '',
-        'PORT': '5432',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': '192.168.1.114',
+        'PORT': '5433',
     }
 }
 
