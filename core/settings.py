@@ -130,7 +130,7 @@ DATABASES = {
         'NAME': 'trust_app',
         'USER': 'postgres',
         'PASSWORD': '1234',
-        'HOST': '192.168.1.114',
+        'HOST': '192.168.0.102',
         'PORT': '5433',
     }
 }
