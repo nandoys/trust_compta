@@ -12,7 +12,17 @@ def login_view(request):
     login_form = LoginForm()
 
     if request.user.is_authenticated:
-        return redirect('accounting_plan_index')
+        roles = list()
+        for role in request.user.role_set.values():
+            roles.append(role['name'])
+
+        if 'Caisse' in roles:
+            redirect_url = '/tresorerie/tableau-de-bord'
+        else:
+            redirect_url = '/plan-comptable/'
+
+        next = resolve(request.GET.get('next', redirect_url))
+        return redirect(reverse(next.view_name, kwargs=next.kwargs))
 
     if request.method == 'POST':
 
@@ -24,6 +34,7 @@ def login_view(request):
             user = User.objects.get(username=username)
         except User.DoesNotExist:
             print('Utilisateur pas trouvé')
+
         user = authenticate(request, username=username, password=password)
 
         if user is not None:

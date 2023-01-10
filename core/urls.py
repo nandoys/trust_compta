@@ -17,10 +17,11 @@ from django.contrib import admin
 from django.urls import path,include
 from django.contrib.auth.decorators import login_required
 from .views import MyPasswordChangeView, MyPasswordSetView
+from users.views import login_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     # Dashboard
-    path('',include('dashboards.urls')),
+    path('', login_view),
     
     # Layouts
     path('layouts/',include('layouts.urls')),
