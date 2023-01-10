@@ -128,10 +128,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'trust_app',
-        'USER': 'postgres',
-        'PASSWORD': '1234',
-        'HOST': '192.168.0.102',
-        'PORT': '5433',
+        'USER': 'nandoys',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '5432',
     }
 }
 
@@ -158,9 +158,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'fr'
+LANGUAGE_CODE = 'fr-fr'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Kinshasa'
 
 USE_I18N = True
 

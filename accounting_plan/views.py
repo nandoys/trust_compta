@@ -13,22 +13,39 @@ from .serializer import MainSerializer
 
 from treasury.models import Currency
 
-
 # Create your views here.
 
-def index(request):
+months = [
+    {'id': 1, 'name': 'Janvier', 'balance': {}}, {'id': 2, 'name': 'Février', 'balance': {}},
+    {'id': 3, 'name': 'Mars', 'balance': {}},
+    {'id': 4, 'name': 'Avril', 'balance': {}}, {'id': 5, 'name': 'Mai', 'balance': {}},
+    {'id': 6, 'name': 'Juin', 'balance': {}},
+    {'id': 7, 'name': 'Juillet', 'balance': {}}, {'id': 8, 'name': 'Août', 'balance': {}},
+    {'id': 9, 'name': 'Septembre', 'balance': {}},
+    {'id': 10, 'name': 'Octobre', 'balance': {}}, {'id': 11, 'name': 'Novembre', 'balance': {}},
+    {'id': 12, 'name': 'Décembre', 'balance': {}}
+]
 
+currencies = list()
+for curr in Currency.objects.all():
+    currencies.append({
+        'name': curr.name,
+        'symbol_iso': curr.symbol_iso,
+        'country_iso': curr.country_iso,
+        'flag': 'images/flags/' + curr.country_iso + '.svg'
+    })
+
+
+def index(request):
     year_id = request.session.get('year')
+    get_month = request.session.get('mois',1)
+
     fiscal_year = FiscalYear.objects.get(id=year_id)
 
-    currencies = list()
-    for currency in Currency.objects.all():
-        currencies.append({
-            'name': currency.name,
-            'symbol_iso': currency.symbol_iso,
-            'country_iso': currency.country_iso,
-            'flag': 'images/flags/' + currency.country_iso + '.svg'
-        })
+    selected_month = dict()
+    for m in months:
+        if m.get('id') == get_month:
+            selected_month = m
 
     currency = Currency.objects.get(symbol_iso='usd')
 
@@ -51,6 +68,7 @@ def index(request):
         'main_accountings': main_accountings,
         'form': form,
         'fiscal_year': fiscal_year,
+        'selected_month': selected_month,
         'currencies': currencies,
         'currency': currency,
         'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
@@ -101,15 +119,6 @@ def accounting_budget(request, pk, fy):
         budgets = Budget.objects.filter(accounting=additional_accounting, fiscal_year=fiscal_year)
 
         total_budget = budgets.aggregate(Sum('amount'))
-
-        currencies = list()
-        for currency in Currency.objects.all():
-            currencies.append({
-                'name': currency.name,
-                'symbol_iso': currency.symbol_iso,
-                'country_iso': currency.country_iso,
-                'flag': 'images/flags/' + currency.country_iso + '.svg'
-            })
 
         currency = Currency.objects.get(symbol_iso='cdf')
 

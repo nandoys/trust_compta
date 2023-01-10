@@ -15,6 +15,8 @@ const sourcemaps = require("gulp-sourcemaps");
 const cleanCSS = require('gulp-clean-css');
 const rtlcss = require('gulp-rtlcss');
 const fs = require('fs'); // Read a file
+const $  = require( 'jquery' );
+
 
 const isSourceMap = true;
 const sourceMapWrite = (isSourceMap) ? "./" : false;

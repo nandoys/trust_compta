@@ -141,7 +141,7 @@
                             <div class="dropdown-menu dropdown-menu-end">
                                 {% for checkout in checkouts %}
                                 <!-- item-->
-                                <a href="{% url url_name checkout.symbol_iso %}" class="dropdown-item notify-item language py-2"
+                                <a href="{% url url_name checkout.symbol_iso selected_month.id %}" class="dropdown-item notify-item language py-2"
                                     title="{{ checkout.name }}" data-lang="fr">
                                     <img src="{% static checkout.flag %}" alt="user-image" class="me-2 rounded" height="18">
                                     <span class="align-middle">{{ checkout.name }}</span>
@@ -159,10 +159,10 @@
                                 <div class="p-3 border-top-0 border-start-0 border-end-0 border-dashed border">
                                     <div class="row align-items-center">
                                         <div class="col">
-                                            <h6 class="m-0 fw-semibold fs-15"> Web Apps </h6>
+                                            <h6 class="m-0 fw-semibold fs-15"> Modules </h6>
                                         </div>
                                         <div class="col-auto">
-                                            <a href="#!" class="btn btn-sm btn-soft-info"> View All Apps
+                                            <a href="{% url 'treasury_index' %}" class="btn btn-sm btn-soft-info"> Tableau de bord
                                                 <i class="ri-arrow-right-s-line align-middle"></i></a>
                                         </div>
                                     </div>
@@ -171,19 +171,19 @@
                                 <div class="p-2">
                                     <div class="row g-0">
                                         <div class="col">
-                                            <a class="dropdown-icon-item" href="{% url 'treasury_incomes' current_currency %}">
+                                            <a class="dropdown-icon-item" href="{% url 'treasury_incomes' current_currency selected_month.id %}">
                                                 <img src="{% static 'images/brands/github.png'%}" alt="Github">
                                                 <span>Recettes</span>
                                             </a>
                                         </div>
                                         <div class="col">
-                                            <a class="dropdown-icon-item" href="{% url 'treasury_outcomes' current_currency %}">
+                                            <a class="dropdown-icon-item" href="{% url 'treasury_outcomes' current_currency selected_month.id %}">
                                                 <img src="{% static 'images/brands/bitbucket.png'%}" alt="bitbucket">
                                                 <span>Dépenses</span>
                                             </a>
                                         </div>
                                         <div class="col">
-                                            <a class="dropdown-icon-item" href="{% url 'accounting_plan_index' %}">
+                                            <a class="dropdown-icon-item" href="{% url 'accounting_plan_index' %}?mois={{ selected_month.id|default:'1' }}">
                                                 <img src="{% static 'images/brands/dribbble.png'%}" alt="dribbble">
                                                 <span>Plan comptable</span>
                                             </a>

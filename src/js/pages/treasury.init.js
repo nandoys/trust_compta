@@ -41,6 +41,12 @@ let treasury_api_url = treasury_table.getAttribute('data-api-url')
 let getEditid = 0;
 let getEdit;
 
+let getDeleteid = 0;
+
+document.addEventListener('DOMContentLoaded', function () {
+
+});
+
 accounting_field.addEventListener('change',function (evt){
 
     let id_accounting = evt.detail.value
@@ -261,9 +267,9 @@ document.addEventListener('change',(evt)=>{
 })
 
 
-function editTodoList() {
+function editTreasory() {
 
-    let id = document.getElementById('update_record_id')
+    let id = document.getElementById('edit_record_id')
     let slip_number = document.getElementById('slip_number_input')
     let amount = document.getElementById('amount_input');
     let done_at = document.getElementById('done_at_input')
@@ -520,5 +526,17 @@ function editTodoList() {
     });
 };
 
-editTodoList()
+function deleteTreasory(){
+    let id = document.getElementById('remove_record_id')
+
+    Array.from(document.querySelectorAll(".remove-list")).forEach(function (elem) {
+        elem.addEventListener('click', function (event) {
+            getDeleteid = elem.getAttribute('data-remove-id');
+            id.value = getDeleteid
+        });
+    });
+}
+
+editTreasory()
+deleteTreasory()
 

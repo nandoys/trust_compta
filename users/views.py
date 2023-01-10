@@ -35,7 +35,7 @@ def login_view(request):
                 roles.append(role['name'])
 
             if 'Caisse' in roles:
-                redirect_url = '/tresorerie/cdf/depenses/'
+                redirect_url = '/tresorerie/tableau-de-bord'
             else:
                 redirect_url = '/plan-comptable/'
 

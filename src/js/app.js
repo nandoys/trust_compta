@@ -439,7 +439,6 @@ File: Main Js File
                 }
             }
             // add all sidebar menu icons
-            document.getElementById("two-column-menu").innerHTML = ul.outerHTML;
 
             // show submenu on sidebar menu click
             Array.from(document.querySelector("#two-column-menu ul").querySelectorAll("li a")).forEach(function (element) {

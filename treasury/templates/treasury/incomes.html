@@ -19,27 +19,27 @@
             <div class="page-content">
                 <div class="container-fluid">
                     {% block header %}
-                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout current_year=fiscal_year %}
+                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout selected_month=selected_month current_year=fiscal_year %}
                     {% endblock header %}
                     {% block pagetitle %}
-                    {% include "partials/page-title.html" with pageurl="/plan-comptable" pagetitle="Recettes" title="Recettes" in_year=fiscal_year %}
+                    {% include "partials/page-title.html" with pageurl="/plan-comptable" pagetitle="Recettes" title="Recettes" selected_month=selected_month in_year=fiscal_year %}
                     {% endblock pagetitle %}
 
                     <!-- end page title -->
 
                      <div class="chat-wrapper d-lg-flex gap-1 mx-n4 mt-n4 p-1">
-                        <div class="file-manager-sidebar" style="overflow:auto;">
-                            <div class="p-4 d-flex flex-column h-100">
+                        <div class="col-xl-3 col-md-3 col-lg-3 card" style="overflow: auto;height: 570px">
+                            <div class="p-4 d-flex flex-column">
                                 <div class="px-4 mx-n4" style="height: calc(100vh - 468px);">
 
-                                {% if messages %}
-                                {% for message in messages %}
-                                     <div class="alert {{ message.tags }}" role="alert">
-                                        {{ message }}
-                                    </div>
-                                {% endfor %}
-                                {% endif %}
-                                <form method="post"  data-year="{{ fiscal_year }}" data-url-adjunct="{% url 'accounting_adjunct_input' %}" data-url-accounting-additional="{% url 'accounting_additional_input' %}" id="treasury_form">
+                                    {% if messages %}
+                                    {% for message in messages %}
+                                         <div class="alert {{ message.tags }}" role="alert">
+                                            {{ message }}
+                                        </div>
+                                    {% endfor %}
+                                    {% endif %}
+                                    <form method="post"  data-year="{{ fiscal_year }}" data-url-adjunct="{% url 'accounting_adjunct_input' %}" data-url-accounting-additional="{% url 'accounting_additional_input' %}" id="treasury_form">
                                         {% csrf_token %}
                                         {% for field in income_form %}
                                         <div class="mb-4">
@@ -58,35 +58,12 @@
                                 </div>
                             </div>
                         </div><!--end side content-->
-                        <div class="file-manager-content w-100 p-4 pb-0">
+                        <div class="col-xl-9 col-md-9 col-lg-9">
                             <div class="hstack mb-4">
-                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} |  Balance: {{ balance }} {{ currency.symbol_iso }}</h5>
-                                <div class="hstack gap-2">
-                                    <div class="btn-group" role="group" aria-label="Basic example">
-                                        <button class="btn btn-icon fw-semibold btn-soft-danger"><i class="ri-arrow-go-back-line"></i></button>
-                                        <button class="btn btn-icon fw-semibold btn-soft-success"><i class="ri-arrow-go-forward-line"></i></button>
-                                    </div>
-                                </div>
+                                <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} |  Balance Caisse: {{ balance }} {{ currency.symbol_iso }}</h5>
                             </div>
                             <div class="p-3 bg-light rounded mb-4">
                                 <div class="row g-2">
-                                    <div class="col-lg-auto">
-                                        <select class="form-select"  data-choices-search-false name="choices-select-status" id="choices-select-status">
-                                            <option value="" disabled selected>Mois</option>
-                                            <option value="Janvier">Janvier</option>
-                                            <option value="Février">Février</option>
-                                            <option value="Mars">Mars</option>
-                                            <option value="Avril">Avril</option>
-                                            <option value="Mai">Mai</option>
-                                            <option value="Juin">Juin</option>
-                                            <option value="Juillet">Juillet</option>
-                                            <option value="Août">Août</option>
-                                            <option value="Septembre">Septembre</option>
-                                            <option value="Octobre">Octobre</option>
-                                            <option value="Novembre">Novembre</option>
-                                            <option value="Décembre">Décembre</option>
-                                        </select>
-                                    </div>
                                     <div class="col-lg">
                                         <div class="search-box">
                                             <input type="text" id="searchTaskList" class="form-control search" placeholder="Cherchez par date">
@@ -96,10 +73,10 @@
                                 </div>
                             </div>
 
-                           <div class="todo-content position-relative px-4 mx-n4" id="todo-content">
-                                <div class="todo-task" id="todo-task">
+                           <div class="todo-content px-4 mx-n4" id="todo-content">
+                                <div class="" id="todo-task">
                                     <div class="table-responsive">
-                                        <table class="table align-middle position-relative" data-treasury-type="encaissement" data-api-url="/tresorerie/income/" id="treasury_table">
+                                        <table class="table table-hover table-light table-bordered table-nowrap" style="width:100%" data-treasury-type="encaissement" data-api-url="/tresorerie/income/" id="treasury_table">
                                             <thead class="table-active">
                                                 <tr>
                                                     <th scope="col">Date de l'opération</th>
@@ -112,7 +89,7 @@
                                             </thead>
 
                                             <tbody id="budget-list">
-                                                {% for income in incomes %}
+                                                {% for income in incomes|dictsortreversed:"in_at" %}
                                                 <tr>
                                                     <td>{{ income.in_at }}</td>
                                                     <td>{{ income.accounting_main }}</td>
@@ -121,7 +98,7 @@
                                                      <td>{{ income.amount }}</td>
                                                     <td>
                                                         <div class="hstack gap-2">
-                                                            <button class="btn btn-sm btn-soft-danger remove-list" data-bs-toggle="modal" data-bs-target="#removeTaskItemModal" data-remove-id="15">
+                                                            <button class="btn btn-sm btn-soft-danger remove-list" data-bs-toggle="modal" data-bs-target="#deleteIncome" data-remove-id="{{ income.id }}">
                                                                 <i class="ri-delete-bin-5-fill align-bottom"></i>
                                                             </button>
                                                             <button class="btn btn-sm btn-soft-info edit-list" data-bs-toggle="modal" data-bs-target="#updateIncome" data-edit-id="{{ income.id }}">
@@ -154,37 +131,6 @@
         </div>
         <!-- end main content-->
 
-        <!-- Start Create Year Modal -->
-    <div class="modal fade zoomIn" id="createYearModal" tabindex="-1" aria-labelledby="createYearModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header p-3 bg-soft-success">
-                    <h5 class="modal-title" id="createProjectModalLabel">Année d'exercice</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" id="addProjectBtn-close" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div>
-                        <form method="post">
-                            {% csrf_token %}
-                            {% for field in fiscal_year_form %}
-                            <div class="mb-4">
-                                <label for="year-field" class="form-label">{{ field.label }}</label>
-                                {{ field }}
-                            </div>
-                            {% endfor %}
-                            <div class="hstack gap-2 justify-content-end">
-                                <button type="button" class="btn btn-ghost-success" data-bs-dismiss="modal"><i class="ri-close-line align-bottom"></i> Fermer</button>
-                                <button type="submit" class="btn btn-primary" id="addNewProject">Ajouter</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!-- end modal-dialog -->
-    </div>
-    <!-- End Create Year Modal -->
-
         <!-- Modal -->
     <div class="modal fade" id="updateIncome" tabindex="-1" aria-labelledby="updateIncomeLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -197,7 +143,7 @@
                     <div id="task-error-msg" class="alert alert-danger py-2"></div>
                     <form autocomplete="off" method="post" id="update-form">
                         {% csrf_token %}
-                        <input type="hidden" id="update_record_id" name="update_record_id" class="form-control">
+                        <input type="hidden" id="edit_record_id" name="edit_record_id" class="form-control">
                         <div class="mb-3 position-relative" id="update_main_div">
                             <label for="update_main_input" class="form-label">Compte principal</label>
                         </div>
@@ -237,7 +183,7 @@
     <!--end create taks-->
 
     <!-- removeFileItemModal -->
-    <div id="removeTaskItemModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
+    <div id="deleteIncome" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
@@ -247,13 +193,17 @@
                     <div class="mt-2 text-center">
                         <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
                         <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                            <h4>Are you sure ?</h4>
-                            <p class="text-muted mx-4 mb-0">Are you sure you want to remove this task ?</p>
+                            <h4>Êtes-vous sûr?</h4>
+                            <p class="text-muted mx-4 mb-0">Êtes-vous sûr de vouloir supprimer cette recette ?</p>
                         </div>
                     </div>
                     <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
-                        <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="button" class="btn w-sm btn-danger" id="remove-todoitem">Yes, Delete It!</button>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" id="remove_record_id" name="remove_record_id" class="form-control">
+                            <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                            <button type="submit" class="btn w-sm btn-danger" id="remove-income">Oui, Je suis sûr!</button>
+                        </form>
                     </div>
                 </div>
             </div><!-- /.modal-content -->
