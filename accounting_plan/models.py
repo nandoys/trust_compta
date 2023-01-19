@@ -48,7 +48,6 @@ class FiscalYear(models.Model):
 class Budget(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     accounting = models.ForeignKey(Additional, on_delete=models.CASCADE, null=True, blank=True)
-    fiscal_year = models.ForeignKey(FiscalYear, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.IntegerField()
     plan_at = models.DateField(null=True, blank=True)
     warning_at = models.IntegerField()

@@ -64,20 +64,9 @@
                             <div class="hstack mb-4">
                                 <h5 class="fw-semibold flex-grow-1 mb-0">Caisse {{ currency.name }} | Balance Caisse: {{ balance }} {{ currency.symbol_iso }}</h5>
                             </div>
-                            <div class="p-3 bg-light rounded mb-4">
-                                <div class="row g-2">
-                                    <div class="col-lg">
-                                        <div class="search-box">
-                                            <input type="text" id="searchTaskList" class="form-control search" placeholder="Cherchez par date">
-                                            <i class="ri-search-line search-icon"></i>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <div class="todo-content px-4 mx-n4">
-                                <div class="" id="todo-task">
-                                    <div class="table-responsive">
+                            <div class="px-4 mx-n4">
+                                <div class="table-responsive">
                                         <table class="table table-hover table-light table-bordered table-nowrap" style="width:100%" data-treasury-type="decaissement" data-api-url="/tresorerie/outcome/" id="treasury_table">
                                             <thead class="table-active">
                                                 <tr>
@@ -116,7 +105,6 @@
                                             </tbody>
                                         </table>
                                     </div>
-                                </div>
                                 <div class="py-4 mt-4 text-center" id="noresult" style="display: none;">
                                     <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#405189,secondary:#0ab39c" style="width:72px;height:72px"></lord-icon>
                                     <h5 class="mt-4">Désolé! Aucun Résultat Trouvé</h5>
@@ -218,8 +206,19 @@
 {% endblock content %}
 
 {% block extra_js %}
-        <!-- dragula init js -->
-    <script src="{% static 'libs/dragula/dist/dragula.min.js' %}"></script>
+        <!--datatable js-->
+    <script src="{%  static 'js/jquery-3.6.0.js' %}"></script>
+    <script src="{%  static 'js/jquery.dataTables.js' %}"></script>
+    <script src="{%  static 'js/dataTables.bootstrap5.js' %}"></script>
+    <script src="{%  static 'js/dataTables.responsive.js' %}"></script>
+    <script src="{%  static 'js/dataTables.buttons.js' %}"></script>
+    <script src="{%  static 'js/buttons.print.js' %}"></script>
+    <script src="{%  static 'js/buttons.html5.js' %}"></script>
+    <script src="{%  static 'js/vfs_fonts.js' %}"></script>
+    <script src="{%  static 'js/pdfmake.js' %}"></script>
+    <script src="{%  static 'js/jszip.js' %}"></script>
+
     <script src="{% static 'js/pages/treasury.init.js' %}"></script>
+    <script src="{% static 'js/pages/datatables.treasury.js' %}"></script>
 
 {% endblock extra_js %}

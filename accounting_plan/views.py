@@ -2,6 +2,7 @@ import datetime
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db.models import Sum
+from django.contrib.auth.decorators import login_required
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -11,7 +12,7 @@ from .forms import MainAccountingForm, AdditionalAccountingForm, AdjunctAccounti
     FiscalYearForm
 from .serializer import MainSerializer
 
-from treasury.models import Currency
+from treasury.models import Currency, Income, Outcome
 
 # Create your views here.
 
@@ -36,11 +37,110 @@ for curr in Currency.objects.all():
     })
 
 
+@login_required()
 def index(request):
     year_id = request.session.get('year')
-    get_month = request.session.get('mois',1)
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
 
-    fiscal_year = FiscalYear.objects.get(id=year_id)
+    currency_cdf = Currency.objects.get(symbol_iso='cdf')
+    currency_usd = Currency.objects.get(symbol_iso='usd')
+
+    incomes_general_cdf = Income.objects.filter(currency=currency_cdf).all()
+    incomes_general_usd = Income.objects.filter(currency=currency_usd).all()
+
+    incomes_cdf = Income.objects.filter(currency=currency_cdf, in_at__year=fiscal_year.year).all()
+    incomes_usd = Income.objects.filter(currency=currency_usd, in_at__year=fiscal_year.year).all()
+
+    outcomes_general_cdf = Outcome.objects.filter(currency=currency_cdf).all()
+    outcomes_general_usd = Outcome.objects.filter(currency=currency_usd).all()
+
+    outcomes_cdf = Outcome.objects.filter(currency=currency_cdf, out_at__year=fiscal_year.year).all()
+    outcomes_usd = Outcome.objects.filter(currency=currency_usd, out_at__year=fiscal_year.year).all()
+
+    checkout_general_income_cdf = incomes_general_cdf.aggregate(Sum('amount'))
+    balance_general_income_cdf = 0
+
+    checkout_general_income_usd = incomes_general_usd.aggregate(Sum('amount'))
+    balance_general_income_usd = 0
+
+    total_checkout_income_cdf = incomes_cdf.aggregate(Sum('amount'))
+    balance_income_cdf = 0
+
+    total_checkout_income_usd = incomes_usd.aggregate(Sum('amount'))
+    balance_income_usd = 0
+
+    checkout_general_outcome_cdf = outcomes_general_cdf.aggregate(Sum('amount'))
+    balance_general_outcome_cdf = 0
+
+    checkout_general_outcome_usd = outcomes_general_usd.aggregate(Sum('amount'))
+    balance_general_outcome_usd = 0
+
+    total_checkout_outcome_cdf = outcomes_cdf.aggregate(Sum('amount'))
+    balance_outcome_cdf = 0
+
+    total_checkout_outcome_usd = outcomes_usd.aggregate(Sum('amount'))
+    balance_outcome_usd = 0
+
+    if checkout_general_income_cdf['amount__sum'] is not None:
+        balance_general_income_cdf = checkout_general_income_cdf['amount__sum']
+
+    if checkout_general_income_usd['amount__sum'] is not None:
+        balance_general_income_usd = checkout_general_income_usd['amount__sum']
+
+    if total_checkout_income_cdf['amount__sum'] is not None:
+        balance_income_cdf = total_checkout_income_cdf['amount__sum']
+
+    if total_checkout_income_usd['amount__sum'] is not None:
+        balance_income_usd = total_checkout_income_usd['amount__sum']
+
+    if checkout_general_outcome_cdf['amount__sum'] is not None:
+        balance_general_outcome_cdf = checkout_general_outcome_cdf['amount__sum']
+
+    if checkout_general_outcome_usd['amount__sum'] is not None:
+        balance_general_outcome_usd = checkout_general_outcome_usd['amount__sum']
+
+    if total_checkout_outcome_cdf['amount__sum'] is not None:
+        balance_outcome_cdf = total_checkout_outcome_cdf['amount__sum']
+
+    if total_checkout_outcome_usd['amount__sum'] is not None:
+        balance_outcome_usd = total_checkout_outcome_usd['amount__sum']
+
+    balance_cdf = balance_income_cdf - balance_outcome_cdf
+    balance_usd = balance_income_usd - balance_outcome_usd
+
+    balance_general_cdf = balance_general_income_cdf - balance_general_outcome_cdf
+    balance_general_usd = balance_general_income_usd - balance_general_outcome_usd
+
+    context = {
+        'months': months,
+        'income': {
+            'cdf': balance_income_cdf, 'usd': balance_income_usd
+        },
+        'outcome': {
+            'cdf': balance_outcome_cdf, 'usd': balance_outcome_usd
+        },
+        'balance': {
+            'cdf': balance_cdf, 'usd': balance_usd
+        },
+        'balance_general_cdf': balance_general_cdf,
+        'balance_general_usd': balance_general_usd,
+        'current_year': fiscal_year.year.__str__()
+    }
+    return render(request, 'accounting_plan/dashboard.html', context)
+
+
+@login_required()
+def accounting_plan(request):
+    year_id = request.session.get('year')
+    get_month = request.session.get('mois', 1)
+
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
 
     selected_month = dict()
     for m in months:
@@ -63,9 +163,54 @@ def index(request):
                 messages.error(request, 'Les valeurs envoyées sont incorrectes')
 
     main_accountings = Main.objects.all()
+
+    overalls = list()
+
+    for accounting in main_accountings:
+
+        if accounting.account_type == 'encaissement':
+            try:
+                incomes = Income.objects.filter(in_at__year=fiscal_year.year, accounting_main=accounting)
+                total_incomes = incomes.aggregate(Sum('amount'))['amount__sum']
+                overalls.append({
+                    'id': accounting.id,
+                    'account_number': accounting.account_number,
+                    'account_name': accounting.account_name,
+                    'account_type': accounting.account_type,
+                    'total': total_incomes
+                })
+            except Income.DoesNotExist:
+                overalls.append({
+                    'id': accounting.id,
+                    'account_number': accounting.account_number,
+                    'account_name': accounting.account_name,
+                    'account_type': accounting.account_type,
+                    'total': 0
+                })
+        else:
+            try:
+                outcomes = Outcome.objects.filter(out_at__year=fiscal_year.year, accounting_main=accounting)
+                total_outcomes = outcomes.aggregate(Sum('amount'))['amount__sum']
+                overalls.append({
+                    'id': accounting.id,
+                    'account_number': accounting.account_number,
+                    'account_name': accounting.account_name,
+                    'account_type': accounting.account_type,
+                    'total': total_outcomes
+                })
+            except Outcome.DoesNotExist:
+                overalls.append({
+                    'id': accounting.id,
+                    'account_number': accounting.account_number,
+                    'account_name': accounting.account_name,
+                    'account_type': accounting.account_type,
+                    'total': 0
+                })
+
     form = MainAccountingForm()
     context = {
         'main_accountings': main_accountings,
+        'overalls': overalls,
         'form': form,
         'fiscal_year': fiscal_year,
         'selected_month': selected_month,
@@ -76,6 +221,7 @@ def index(request):
     return render(request, 'accounting_plan/index.html', context)
 
 
+@login_required()
 def accounting_main_details(request, pk):
     try:
         main_accounting = Main.objects.filter(id=pk).get()
@@ -111,12 +257,13 @@ def accounting_main_details(request, pk):
         return redirect('accounting_plan_index')
 
 
+@login_required()
 def accounting_budget(request, pk, fy):
     try:
         fiscal_years = FiscalYear.objects.all()
         fiscal_year = FiscalYear.objects.get(year=fy)
         additional_accounting = Additional.objects.get(id=pk)
-        budgets = Budget.objects.filter(accounting=additional_accounting, fiscal_year=fiscal_year)
+        budgets = Budget.objects.filter(accounting=additional_accounting, plan_at__year=fiscal_year.year)
 
         total_budget = budgets.aggregate(Sum('amount'))
 
@@ -136,7 +283,6 @@ def accounting_budget(request, pk, fy):
 
                     if form.is_valid():
                         budget = form.save(commit=False)
-                        budget.fiscal_year = fiscal_year
                         budget.accounting = additional_accounting
                         budget.plan_at = datetime.date.replace(datetime.date.today(), fy, month, 1)
                         budget.save()

@@ -6,7 +6,7 @@ from django.utils.formats import localize
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from accounting_plan.models import Main, Additional, Adjunct, FiscalYear
+from accounting_plan.models import Main, Additional, Adjunct, FiscalYear, Budget
 from .forms import OutcomeForm, OutcomeModelForm, IncomeForm, IncomeModelForm
 from .models import Outcome, Income, Currency, CurrencyDailyRate
 from .serializer import IncomeSerializer, OutcomeSerializer
@@ -36,7 +36,10 @@ for curr in Currency.objects.all():
 @login_required()
 def index(request):
     year_id = request.session.get('year')
-    fiscal_year = FiscalYear.objects.get(id=year_id)
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
 
     for month in months:
         for currency in currencies:
@@ -73,7 +76,10 @@ def index(request):
 @login_required()
 def incomes(request, symbol, month):
     year_id = request.session.get('year')
-    fiscal_year = FiscalYear.objects.get(id=year_id)
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
     selected_month = dict()
 
     for m in months:
@@ -190,7 +196,10 @@ def incomes(request, symbol, month):
 @login_required()
 def outcomes(request, symbol, month):
     year_id = request.session.get('year')
-    fiscal_year = FiscalYear.objects.get(id=year_id)
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
 
     selected_month = dict()
 
@@ -231,7 +240,8 @@ def outcomes(request, symbol, month):
                 form.save()
                 messages.success(request,
                                  'Dépense pour le compte [{}] du [{}] a été modifiée avec succès. Montant: [{}] [{}]'.format(
-                                     outcome.accounting_additional, localize(outcome.out_at, use_l10n=True), outcome.amount,
+                                     outcome.accounting_additional, localize(outcome.out_at, use_l10n=True),
+                                     outcome.amount,
                                      outcome.currency.symbol_iso))
             path = resolve_url(request.path)
             return redirect(path)
@@ -305,6 +315,7 @@ def outcomes(request, symbol, month):
     return render(request, 'treasury/outcomes.html', context)
 
 
+@login_required()
 def accounting_additional(request):
     accounting_main_id = request.GET.get('accounting_main_id')
     accounting_main = Main.objects.get(id=accounting_main_id)
@@ -313,6 +324,7 @@ def accounting_additional(request):
     return JsonResponse(list(accountings_additional.values('id', 'account_name')), safe=False)
 
 
+@login_required()
 def accounting_adjunct(request):
     # year = request.GET.get('fiscal_year')
     # fiscal_year = FiscalYear.objects.get(year=year)
@@ -326,13 +338,55 @@ def accounting_adjunct(request):
     return JsonResponse(list(accountings_adjunct.values('id', 'adjunct_account_name')), safe=False)
 
 
+@login_required()
 def edit_income(request, pk):
     income = Income.objects.get(id=pk)
     income_serializer = IncomeSerializer(income, many=False)
     return JsonResponse(income_serializer.data, safe=False)
 
 
+@login_required()
 def edit_outcome(request, pk):
     outcome = Outcome.objects.get(id=pk)
     outcome_serializer = OutcomeSerializer(outcome, many=False)
     return JsonResponse(outcome_serializer.data, safe=False)
+
+
+@login_required()
+def api_balance(request, symbol):
+    year_id = request.session.get('year')
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
+
+    currency = Currency.objects.get(symbol_iso=symbol)
+    balances = list()
+    for i in range(1, 13):
+
+        incomes_total = Income.objects.filter(currency=currency, in_at__month=i, in_at__year=fiscal_year.year).all()
+        outcomes_total = Outcome.objects.filter(currency=currency, out_at__month=i, out_at__year=fiscal_year.year).all()
+        budget = Budget.objects.filter(plan_at__month=i, plan_at__year=fiscal_year.year)
+
+        total_checkout_income = incomes_total.aggregate(Sum('amount'))
+        balance_income = 0
+
+        total_checkout_outcome = outcomes_total.aggregate(Sum('amount'))
+        balance_outcome = 0
+
+        budget_total = budget.aggregate(Sum('amount'))
+        balance_budget = 0
+
+        if total_checkout_income['amount__sum'] is not None:
+            balance_income = total_checkout_income['amount__sum']
+
+        if total_checkout_outcome['amount__sum'] is not None:
+            balance_outcome = total_checkout_outcome['amount__sum']
+
+        if budget_total['amount__sum'] is not None:
+            balance_budget = budget_total['amount__sum']
+
+        balances.append(
+            {'month': i, 'year': fiscal_year.year, 'income': balance_income, 'outcome': balance_outcome,
+             'budget': balance_budget, 'currency': currency.symbol_iso})
+    return JsonResponse(balances, safe=False)
