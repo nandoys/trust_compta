@@ -29,8 +29,7 @@
                                                 <h4 class="fs-18 lh-base mb-0">Comptes: Principaux, Sous-compte et Annexes <br> de votre <span class="text-success">Comptabilité.</span> </h4>
                                                 <p class="mb-0 mt-2 pt-1 text-muted">Ici vous pouvez afficher, créer votre plan comptable ou votre budgétisation.</p>
                                                 <div class="d-flex gap-3 mt-4">
-                                                    <a href="" class="btn btn-primary">Plan comptable </a>
-                                                    <a href="" class="btn btn-success">Budget</a>
+                                                    <a href="{% url 'accounting_plan' %}" class="btn btn-primary">Plan comptable </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -90,7 +89,7 @@
                                                     </a>
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         {% for month in months %}
-                                                        <a class="dropdown-item" href="#">{{ month.name }}</a>
+                                                        <a class="dropdown-item" href="{% url 'accounting_reporting' 'cdf' %}?mois={{ month.id }} ">{{ month.name }}</a>
                                                         {% endfor %}
                                                     </div>
                                                 </div>
@@ -125,7 +124,7 @@
                                                     </a>
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         {% for month in months %}
-                                                        <a class="dropdown-item" href="#">{{ month.name }}</a>
+                                                        <a class="dropdown-item" href="{% url 'accounting_reporting' 'usd' %}?mois={{ month.id }} ">{{ month.name }}</a>
                                                         {% endfor %}
                                                     </div>
                                                 </div>
@@ -167,10 +166,6 @@
 {% endblock content %}
 
 {% block extra_js %}
-    <!-- Swiper Js -->
-    <script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
-
-    <script src="{% static 'js/pages/form-input-spin.init.js' %}"></script>
 
      <!-- apexcharts -->
     <script src="{%  static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>

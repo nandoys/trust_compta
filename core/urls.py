@@ -43,7 +43,7 @@ urlpatterns = [
 
     path('social-auth/',include('social_django.urls', namespace='social')),
 
-    path('plan-comptable/', include('accounting_plan.urls')),
+    path('comptabilite/', include('accounting_plan.urls')),
 
     path('tresorerie/', include('treasury.urls'))
 ]
