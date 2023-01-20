@@ -3,7 +3,7 @@ var checkAll = document.getElementById("checkAll");
 if (checkAll) {
     checkAll.onclick = function () {
         var checkboxes = document.querySelectorAll('.form-check-all input[type="checkbox"]');
-        if (checkAll.checked == true) {
+        if (checkAll.checked === true) {
             Array.from(checkboxes).forEach(function (checkbox) {
                 checkbox.checked = true;
                 checkbox.closest("tr").classList.add("table-active");

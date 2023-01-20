@@ -33,7 +33,7 @@
                                         <div class="row g-4 mb-3">
                                             <div class="col-sm-auto">
                                                 <div>
-                                                    <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i> Ajouter</button>
+                                                    <button type="button" class="btn btn-success add-btn" id="add-btn" data-bs-toggle="modal" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i> Ajouter</button>
                                                     <button class="btn btn-soft-danger" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
                                                 </div>
                                             </div>
@@ -82,7 +82,7 @@
                                                         <td>
                                                             <div class="d-flex gap-2">
                                                                 <div class="edit">
-                                                                    <button class="btn btn-sm btn-success edit-item-btn" data-bs-toggle="modal" data-bs-target="#showModal">Modifier</button>
+                                                                    <button class="btn btn-sm btn-success edit-item-btn" data-bs-toggle="modal" data-bs-target="#showModal" id="edit-btn">Modifier</button>
                                                                 </div>
                                                                 <div class="remove">
                                                                     <button class="btn btn-sm btn-danger remove-item-btn" data-id="{{ main_accounting.id }}" data-bs-toggle="modal" data-bs-target="#deleteRecordModal">Supprimer</button>
@@ -121,6 +121,43 @@
                         <!-- end col -->
                     </div>
                     <!-- end row -->
+
+                     <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-light p-3">
+                                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                                </div>
+                                <form method="post">
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+                                        {% for field in form %}
+                                            {% if field.name == 'id' %}
+                                                <div class="mb-3" id="modal-id" style="display: none;">
+                                            {% else %}
+                                                <div class="mb-3">
+                                            {% endif %}
+                                            <label for="{{ field.name }}" class="form-label">{{ field.label }}</label>
+                                            {{ field }}
+                                        </div>
+                                        {% endfor %}
+                                        <div class="mb-3" id="modal-id" style="display: none;">
+                                            <label for="id-field" class="form-label">ID</label>
+                                            <input type="text" id="id-field" class="form-control" placeholder="ID" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="hstack gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="btn btn-success">Ajouter Compte</button>
+                                            <button type="button" class="btn btn-success" id="edit-btn">Mettre à jour</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
                     <!-- Modal -->
                     <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1" aria-hidden="true">
@@ -164,9 +201,6 @@
 
 {% block extra_js %}
 
-<!-- apexcharts -->
-<script src="{% static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
-<script src="{% static 'js/pages/plan-manager.init.js' %}"></script>
     <!-- prismjs plugin -->
 <script src="{% static 'libs/prismjs/prism.js' %}"></script>
 <script src="{% static 'libs/list.js/dist/list.min.js' %}"></script>
@@ -192,4 +226,6 @@
 <script src="{% static 'libs/aos/dist/aos.js' %}"></script>
 <!-- animation init -->
 <script src="{% static 'js/pages/animation-aos.init.js' %}"></script>
+ <!-- App js -->
+<script src="{%  static 'js/app.js' %}"></script>
 {% endblock extra_js %}
