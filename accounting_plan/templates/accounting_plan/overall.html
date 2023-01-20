@@ -1,0 +1,87 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Tableau de bord{% endblock title %}
+{% block extra_css %}
+    <link href="{% static  'libs/swiper/swiper-bundle.min.css' %}" rel="stylesheet" />
+{% endblock extra_css %}
+
+{% block content %}
+            <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pagetitle="Tableau de bord" title="Tableau de bord" %}
+                    {% endblock pagetitle %}
+
+                    {% for report_main in reports %}
+                        <div class="accordion" id="report-{{ report_main.acc_number }}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-{{ report_main.acc_number }}">
+                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_main.acc_number }}" aria-expanded="true" aria-controls="collapse-{{ report_main.acc_number }}">
+                                        {{ report_main.acc_number }} | {{ report_main.acc_name }} {{ report_main.balance }}
+                                    </button>
+                                </h2>
+                                <div id="collapse-{{ report_main.acc_number }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ report_main.acc_number }}" data-bs-parent="#report-{{ report_main.acc_number }}">
+                                    <div class="accordion-body">
+                                        {% for report_additional in report_main.acc_additionals %}
+                                            <div class="accordion" id="report-{{ report_additional.acc_number }}">
+                                                <div class="accordion-item">
+                                                    <h2 class="accordion-header" id="heading-{{ report_additional.acc_number }}">
+                                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_additional.acc_number }}" aria-expanded="true" aria-controls="collapse-{{ report_additional.acc_number }}">
+                                                            {{ report_additional.acc_number }} | {{ report_additional.acc_name }} {{ report_additional.balance }}
+                                                        </button>
+                                                    </h2>
+                                                    <div id="collapse-{{ report_additional.acc_number }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ report_additional.acc_number }}" data-bs-parent="#report-{{ report_additional.acc_number }}">
+                                                        <div class="accordion-body"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <ul>
+                            <ul>
+
+                                    <li>{{ report_additional.acc_number }} | {{ report_additional.acc_name }} {{ report_additional.balance }}</li>
+                                    <ul>
+                                        {% for report_adjunct in report_additional.acc_adjunct %}
+                                            <li>{{ report_adjunct.acc_name }} {{ report_adjunct.balance }}</li>
+                                        {% endfor %}
+                                    </ul>
+
+                            </ul>
+
+                    </ul>
+                </div>
+                <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+{% block extra_js %}
+    <!-- Swiper Js -->
+    <script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
+
+    <script src="{% static 'js/pages/form-input-spin.init.js' %}"></script>
+
+     <!-- apexcharts -->
+    <script src="{%  static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+
+    <!-- Dashboard init -->
+    <script src="{%  static 'js/pages/dashboard-balance.init.js' %}"></script>
+    <!-- App js -->
+    <script src="{%  static 'js/app.js' %}"></script>
+{% endblock extra_js %}

@@ -133,6 +133,78 @@ def index(request):
 
 
 @login_required()
+def overall(request, symbol):
+    year_id = request.session.get('year')
+
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+        currency = Currency.objects.get(symbol_iso=symbol)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
+    except Currency.DoesNotExist:
+        return redirect('accounting_plan_index')
+
+    main_acc_outcomes = Main.objects.filter(account_type='decaissement').all()
+
+    main_reports = list()
+
+    for main_acc_outcome in main_acc_outcomes:
+        total_outcomes = main_acc_outcome.outcome_set.filter(currency=currency, out_at__year=fiscal_year.year).all()
+        report_outcomes = total_outcomes.aggregate(Sum('amount'))
+        balance_main_report = 0
+
+        additional_acc_outcomes = main_acc_outcome.additional_set.all()
+
+        additional_reports = list()
+        for additional_acc_outcome in additional_acc_outcomes:
+            total_additional_acc_outcomes = additional_acc_outcome.outcome_set.filter(currency=currency,
+                                                                                      out_at__year=fiscal_year.year).all()
+            report_additional_acc_outcomes = total_additional_acc_outcomes.aggregate(Sum('amount'))
+            balance_additional_report = 0
+
+            adjunct_acc_outcomes = additional_acc_outcome.adjunct_set.all()
+
+            adjunct_reports = list()
+            for adjunct_acc_outcome in adjunct_acc_outcomes:
+                total_adjunct_acc_outcomes = adjunct_acc_outcome.outcome_set.filter(currency=currency,
+                                                                                    out_at__year=fiscal_year.year).all()
+                report_adjunct_acc_outcomes = total_adjunct_acc_outcomes.aggregate(Sum('amount'))
+                balance_adjunct_report = 0
+
+                if report_adjunct_acc_outcomes['amount__sum'] is not None:
+                    balance_adjunct_report = report_adjunct_acc_outcomes['amount__sum']
+
+                adjunct_reports.append({
+                    'acc_name': adjunct_acc_outcome.adjunct_account_name,
+                    'balance': balance_adjunct_report
+                })
+
+            if report_additional_acc_outcomes['amount__sum'] is not None:
+                balance_additional_report = report_additional_acc_outcomes['amount__sum']
+
+            additional_reports.append({
+                'acc_name': additional_acc_outcome.account_name,
+                'acc_number': additional_acc_outcome.account_number,
+                'balance': balance_additional_report,
+                'acc_adjunct': adjunct_reports
+            })
+
+        if report_outcomes['amount__sum'] is not None:
+            balance_main_report = report_outcomes['amount__sum']
+
+        main_reports.append({
+            'acc_name': main_acc_outcome.account_name,
+            'acc_number': main_acc_outcome.account_number,
+            'balance': balance_main_report,
+            'acc_additionals': additional_reports
+        })
+
+    context = {
+        'reports': main_reports
+    }
+    return render(request, 'accounting_plan/overall.html', context)
+
+@login_required()
 def accounting_plan(request):
     year_id = request.session.get('year')
     get_month = request.session.get('mois', 1)

@@ -41,7 +41,7 @@ class Outcome(models.Model):
     out_at = models.DateField()
     write_at = models.DateTimeField(auto_now=True)
     more = models.CharField(max_length=255, null=True)
-    daily_rate = models.ForeignKey(CurrencyDailyRate, on_delete=models.SET_NULL, null=True)
+    daily_rate = models.ForeignKey(CurrencyDailyRate, on_delete=models.SET_NULL, null=True, blank=True)
 
 
 class Income(models.Model):

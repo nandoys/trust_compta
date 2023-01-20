@@ -1,1 +1,0 @@
-document.addEventListener("DOMContentLoaded",function(){new DataTable("#treasury_table",{dom:"Bfrtip",buttons:["copy","csv","excel","print","pdf"]})});
