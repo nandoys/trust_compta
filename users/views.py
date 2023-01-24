@@ -19,7 +19,7 @@ def login_view(request):
         if 'Caisse' in roles:
             redirect_url = '/tresorerie/tableau-de-bord'
         else:
-            redirect_url = '/plan-comptable/'
+            redirect_url = '/comptabilite/'
 
         next = resolve(request.GET.get('next', redirect_url))
         return redirect(reverse(next.view_name, kwargs=next.kwargs))
@@ -48,7 +48,7 @@ def login_view(request):
             if 'Caisse' in roles:
                 redirect_url = '/tresorerie/tableau-de-bord'
             else:
-                redirect_url = '/plan-comptable/'
+                redirect_url = '/comptabilite/'
 
             next = resolve(request.GET.get('next', redirect_url))
             return redirect(reverse(next.view_name, kwargs=next.kwargs))

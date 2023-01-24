@@ -112,7 +112,7 @@ def incomes(request, symbol, month):
 
         if request.POST.get('edit_record_id'):
             pk = request.POST['edit_record_id']
-            print(pk)
+
             income_data = Income.objects.get(id=pk)
             form = IncomeModelForm(request.POST, instance=income_data)
 

@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.query import Q
 import uuid
 
 
@@ -50,7 +51,12 @@ class Budget(models.Model):
     accounting = models.ForeignKey(Additional, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.IntegerField()
     plan_at = models.DateField(null=True, blank=True)
-    warning_at = models.IntegerField()
+    warning_at = models.IntegerField(default=0)
 
     def __str__(self):
         return self.accounting.account_name
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['accounting', 'plan_at'], name='unique_budget'),
+        ]

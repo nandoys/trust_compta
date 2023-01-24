@@ -1,31 +1,27 @@
 import datetime
+import pandas as pd
+import json
 from django.shortcuts import render, redirect
+
 from django.contrib import messages
 from django.db.models import Sum
+from django.db.models.query import F
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import RequestAborted, ObjectDoesNotExist
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
+from utils.files import upload_file
+from utils.calendar import months_of_year
 from .models import Main, Additional, FiscalYear, Budget
-from .forms import MainAccountingForm, AdditionalAccountingForm, AdjunctAccountingForm, BudgetAccountingForm, \
-    FiscalYearForm
+from .forms import MainAccountingForm, AdditionalAccountingForm, BudgetAccountingForm
 from .serializer import MainSerializer
 
 from treasury.models import Currency, Income, Outcome
 
 # Create your views here.
 
-months = [
-    {'id': 1, 'name': 'Janvier', 'balance': {}}, {'id': 2, 'name': 'Février', 'balance': {}},
-    {'id': 3, 'name': 'Mars', 'balance': {}},
-    {'id': 4, 'name': 'Avril', 'balance': {}}, {'id': 5, 'name': 'Mai', 'balance': {}},
-    {'id': 6, 'name': 'Juin', 'balance': {}},
-    {'id': 7, 'name': 'Juillet', 'balance': {}}, {'id': 8, 'name': 'Août', 'balance': {}},
-    {'id': 9, 'name': 'Septembre', 'balance': {}},
-    {'id': 10, 'name': 'Octobre', 'balance': {}}, {'id': 11, 'name': 'Novembre', 'balance': {}},
-    {'id': 12, 'name': 'Décembre', 'balance': {}}
-]
 
 currencies = list()
 for curr in Currency.objects.all():
@@ -115,7 +111,7 @@ def index(request):
     balance_general_usd = balance_general_income_usd - balance_general_outcome_usd
 
     context = {
-        'months': months,
+        'months': months_of_year(),
         'income': {
             'cdf': balance_income_cdf, 'usd': balance_income_usd
         },
@@ -140,7 +136,7 @@ def overall(request, symbol):
 
     reporting_period = 'Annuel'
 
-    for month in months:
+    for month in months_of_year():
         if selected_month != 0:
             if str(month['id']) == selected_month:
                 reporting_period = month['name']
@@ -315,7 +311,7 @@ def overall(request, symbol):
         'currency': currency.symbol_iso.upper(),
         'reporting_period': reporting_period,
         'reporting_title': 'Reporting {}'.format(reporting_period),
-        'months': months,
+        'months': months_of_year(),
         'current_year': str(fiscal_year.year)
     }
     return render(request, 'accounting_plan/overall.html', context)
@@ -332,13 +328,43 @@ def accounting_plan(request):
         return redirect('account_logout')
 
     selected_month = dict()
-    for m in months:
+    for m in months_of_year():
         if m.get('id') == get_month:
             selected_month = m
 
     currency = Currency.objects.get(symbol_iso='usd')
 
     if request.method == 'POST':
+
+        if request.FILES.get('filebudget'):
+            file = request.FILES['filebudget']
+
+            def save_budget(account, row):
+                for i in range(1, 13):
+                    amount = row[i + 1]
+                    plan_at = datetime.date.replace(datetime.date.today(), fiscal_year.year, i, 1)
+                    budget = Budget(accounting=account, plan_at=plan_at, amount=amount)
+                    budget.save()
+
+            if file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                path = upload_file(file)
+
+                df = pd.read_excel(path)
+                print(df)
+            elif file.content_type == 'text/csv':
+                path = upload_file(file)
+                df = pd.read_csv(path, sep=";")
+                for row in df.values:
+                    account_number = row[0]
+
+                    try:
+                        additional_account = Additional.objects.get(account_number=account_number)
+                        save_budget(additional_account, row)
+                    except Additional.DoesNotExist:
+                        raise ObjectDoesNotExist("Ce compte n'existe pas")
+
+            else:
+                raise RequestAborted()
 
         if 'delete-item' in request.POST.keys():
             main_accounting = Main.objects.filter(id=request.POST['delete-item'])
@@ -448,66 +474,165 @@ def accounting_main_details(request, pk):
 
 
 @login_required()
-def accounting_budget(request, pk, fy):
+def accounting_budget(request):
+    year_id = request.session.get('year')
     try:
-        fiscal_years = FiscalYear.objects.all()
-        fiscal_year = FiscalYear.objects.get(year=fy)
-        additional_accounting = Additional.objects.get(id=pk)
-        budgets = Budget.objects.filter(accounting=additional_accounting, plan_at__year=fiscal_year.year)
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
+    try:
+        additional_accounts = Additional.objects.filter(account_main__account_type__contains='decaissement').all()
 
-        total_budget = budgets.aggregate(Sum('amount'))
+        accounts = list()
+
+        months = months_of_year()
+        total_general_budget = 0
+
+        for account in additional_accounts:
+            try:
+                total_budget = 0
+                budgets = Budget.objects.filter(accounting=account, plan_at__year=fiscal_year.year)
+                month_budget = list()
+                for month in months:
+                    budget = budgets.get(plan_at__month=month['id'])
+                    total_budget += budget.amount
+                    month['balance'] += budget.amount
+                    month_budget.append({
+                        'month': month['name'],
+                        'amount': budget.amount
+                    })
+                accounts.append({
+                    'id': account.id,
+                    'account_number': account.account_number,
+                    'account_name': account.account_name,
+                    'budgets': month_budget,
+                    'total_budget': total_budget
+                })
+            except Budget.DoesNotExist:
+                pass
+
+        for month in months:
+            total_general_budget += month['balance']
 
         currency = Currency.objects.get(symbol_iso='cdf')
 
         if request.method == 'POST':
 
-            if 'year' in request.POST.keys() and 'rate' in request.POST.keys():
-                form = FiscalYearForm(request.POST)
+            if request.FILES.get('filebudget'):
+                file = request.FILES['filebudget']
 
-                if form.is_valid():
-                    form.save()
-            elif 'amount' in request.POST.keys() and 'warning_at' in request.POST.keys():
+                def save_budget(subaccount, rows):
+                    for i in range(1, 13):
+                        amount = rows[i + 1]
+                        plan_at = datetime.date.replace(datetime.date.today(), fiscal_year.year, i, 1)
+                        budgetize = Budget(accounting=subaccount, plan_at=plan_at, amount=amount)
+                        budgetize.save()
+
+                if file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+                    path = upload_file(file)
+
+                    df = pd.read_excel(path)
+                    print(df)
+                elif file.content_type == 'text/csv':
+                    path = upload_file(file)
+                    df = pd.read_csv(path, sep=";")
+                    for row in df.values:
+                        account_number = row[0]
+
+                        try:
+                            additional_account = Additional.objects.get(account_number=account_number)
+                            save_budget(additional_account, row)
+                        except Additional.DoesNotExist:
+                            raise ObjectDoesNotExist("Ce compte n'existe pas")
+
+                else:
+                    raise RequestAborted()
+
+            if 'amount' in request.POST.keys() and 'warning_at' in request.POST.keys():
 
                 for month in range(1, 13):
                     form = BudgetAccountingForm(request.POST)
 
                     if form.is_valid():
-                        budget = form.save(commit=False)
-                        budget.accounting = additional_accounting
-                        budget.plan_at = datetime.date.replace(datetime.date.today(), fy, month, 1)
-                        budget.save()
-
-            elif 'adjunct_account_name' in request.POST.keys():
-                form = AdjunctAccountingForm(request.POST)
-
-                if form.is_valid():
-                    adjunct = form.save(commit=False)
-                    adjunct.account_additional = additional_accounting
-                    adjunct.save()
+                        pass
+                        # budget = form.save(commit=False)
+                        # budget.accounting = additional_accounting
+                        # budget.plan_at = datetime.date.replace(datetime.date.today(), fy, month, 1)
+                        # budget.save()
 
         budget_form = BudgetAccountingForm()
-        adjunct_form = AdjunctAccountingForm()
-        fiscal_year_form = FiscalYearForm()
-        total = total_budget['amount__sum'] * fiscal_year.rate if total_budget['amount__sum'] is not None else 0
+
+        # total = total_budget['amount__sum'] * fiscal_year.rate if total_budget['amount__sum'] is not None else 0
 
         context = {
             'budget_form': budget_form,
-            'adjunct_form': adjunct_form,
-            'fiscal_year_form': fiscal_year_form,
-            'fiscal_years': fiscal_years,
             'fiscal_year': fiscal_year,
+            'months': months,
             'currencies': currencies,
             'current_checkout': 'images/flags/' + currency.country_iso + '.svg',
-            'additional_accounting': additional_accounting,
-            'budgets': budgets,
-            'total_budget': total_budget,
-            'total_budget_converted': total * fiscal_year.rate
+            'accounts': accounts,
+            'total_general_budget': total_general_budget
+            # 'budgets': budgets,
+            # 'total_budget': total_budget,
+            # 'total_budget_converted': total * fiscal_year.rate
         }
-        return render(request, 'accounting_plan/accounting_budget.html', context)
+        return render(request, 'accounting_plan/budget.html', context)
     except Additional.DoesNotExist:
         return redirect('accounting_index')
     except FiscalYear.DoesNotExist:
         return redirect('accounting_index')
+
+
+@login_required()
+def budget_usage(request, pk):
+    year_id = request.session.get('year')
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
+    try:
+        account_additional = Additional.objects.get(id=pk)
+        months = list()
+        for month in months_of_year():
+            budget = Budget.objects.get(accounting=account_additional, plan_at__month=month['id'],
+                                        plan_at__year=fiscal_year.year)
+            outcomes_in_usd = Outcome.objects.filter(accounting_additional=account_additional,
+                                                     out_at__month=month['id'],
+                                                     out_at__year=fiscal_year.year,
+                                                     currency__symbol_iso__icontains='usd')
+
+            outcome_in_cdf = Outcome.objects.filter(accounting_additional=account_additional, out_at__month=month['id'],
+                                                    out_at__year=fiscal_year.year,
+                                                    currency__symbol_iso__icontains='cdf')
+
+            annote = outcome_in_cdf.annotate(conversion=F('amount') / F('daily_rate__rate'))
+
+            total_usd = 0
+            spent = 0
+            total_outcomes_usd = outcomes_in_usd.aggregate(Sum('amount'))
+            if total_outcomes_usd['amount__sum'] is not None:
+                total_usd = total_outcomes_usd['amount__sum']
+
+            if len(annote) > 0:
+                print(annote)
+                total_converted = annote.aggregate(Sum('conversion'))
+                spent = round(total_usd + total_converted['conversion__sum'], 2)
+
+            months.append({
+                'id': month['id'],
+                'name': month['name'],
+                'planed': budget.amount,
+                'spent': spent.__str__()
+            })
+    except Additional.DoesNotExist:
+        return redirect('accounting_budget')
+    months_json = json.dumps(months)
+    context = {
+        'months': months,
+        'months_json': months_json,
+        'year': fiscal_year.year.__str__()
+    }
+    return render(request, 'accounting_plan/budget_usage.html', context)
 
 
 @api_view(['GET'])
@@ -516,3 +641,8 @@ def api_get_accounting_main_by_type(request, account_type):
     serializer = MainSerializer(main, many=True)
 
     return Response(serializer.data)
+
+
+@login_required()
+def print_report(request, symbol):
+    return render(request, 'accounting_plan/print_report.html')

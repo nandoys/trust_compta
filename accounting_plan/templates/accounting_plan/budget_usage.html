@@ -1,0 +1,100 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Tableau de bord{% endblock title %}
+{% block extra_css %}
+        <!-- Filepond css -->
+    <link rel="stylesheet" href="{% static 'libs/filepond/dist/filepond.min.css'%}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'%}">
+{% endblock extra_css %}
+
+{% block content %}
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+                    {% block header %}
+                    {% include "partials/topbar-compta.html" %}
+                    {% endblock header %}
+
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pageurl="/comptabilite/budget/" pagetitle="Budget" title="Consommation" %}
+                    {% endblock pagetitle %}
+                    <div class="row">
+                        <div class="col-xl-12">
+                                <div class="d-flex flex-column h-100">
+                                    <div class="row" id="budget-data" data-budget-usage="{{ months_json }}">
+                                        {% for month in months %}
+                                        <div class="col-xl-3 col-md-3">
+                                            <div class="card card-animate overflow-hidden">
+                                                <div class="position-absolute start-0" style="z-index: 0;">
+                                                    <svg version="1.2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120" width="200" height="120">
+                                                        <style>
+                                                            .s0 {
+                                                                opacity: .05;
+                                                                fill: var(--vz-primary)
+                                                            }
+                                                        </style>
+                                                        <path id="Shape 8" class="s0" d="m189.5-25.8c0 0 20.1 46.2-26.7 71.4 0 0-60 15.4-62.3 65.3-2.2 49.8-50.6 59.3-57.8 61.5-7.2 2.3-60.8 0-60.8 0l-11.9-199.4z" />
+                                                    </svg>
+                                                </div>
+                                                <div class="card-body" style="z-index:1 ;">
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="flex-grow-1 overflow-hidden">
+                                                            <p class="text-uppercase fw-medium text-muted text-truncate mb-3">
+                                                                {{ month.name}} {{ year }}</p>
+                                                            <h4 class="fs-22 fw-semibold ff-secondary mb-0"><span class="counter-value" data-target="{{ month.spent }}">0</span></h4>
+                                                        </div>
+                                                        <div class="flex-shrink-0">
+                                                            <div id="month-{{ month.id}}" data-colors='["--vz-success"]' class="apex-charts" dir="ltr"></div>
+                                                        </div>
+                                                    </div>
+                                                </div><!-- end card body -->
+                                            </div><!-- end card -->
+                                        </div><!--end col-->
+                                        {% endfor %}
+                                    </div><!--end row-->
+                                </div>
+                            </div><!--end col-->
+                    </div>
+
+                </div><!-- container-fluid -->
+            </div><!-- End Page-content -->
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+ <!-- end main content-->
+{% endblock content %}
+
+
+{% block extra_js %}
+
+    <!-- prismjs plugin -->
+<script src="{% static 'libs/prismjs/prism.js' %}"></script>
+<script src="{% static 'libs/list.js/dist/list.min.js' %}"></script>
+<script src="{% static 'libs/list.pagination.js/dist/list.pagination.min.js' %}"></script>
+
+<!-- Sweet Alerts js -->
+<script src="{% static 'libs/sweetalert2/dist/sweetalert2.min.js' %}"></script>
+
+    <!-- Swiper Js -->
+<script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
+
+<script src="{% static 'js/pages/form-input-spin.init.js' %}"></script>
+
+<script src="{% static 'libs/card/dist/card.js' %}"></script>
+ <!-- apexcharts -->
+<script src="{% static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+   <!-- gridjs js -->
+<script src="{% static 'libs/gridjs/dist/gridjs.umd.js' %}"></script>
+
+<!-- Dashboard init -->
+<script src="{% static 'js/pages/budget-usage.init.js' %}"></script>
+
+ <!-- App js -->
+<script src="{%  static 'js/app.js' %}"></script>
+{% endblock extra_js %}

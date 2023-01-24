@@ -61,6 +61,7 @@
     "gridjs": "^5.0.2",
     "isotope-layout": "^3.0.6",
     "jquery": "^3.6.3",
+    "json5": "^2.2.3",
     "jsvectormap": "1.4.2",
     "leaflet": "^1.8.0",
     "list.js": "^2.3.1",

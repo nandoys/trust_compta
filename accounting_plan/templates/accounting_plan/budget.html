@@ -1,0 +1,223 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Tableau de bord{% endblock title %}
+{% block extra_css %}
+        <!-- Filepond css -->
+    <link rel="stylesheet" href="{% static 'libs/filepond/dist/filepond.min.css'%}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'%}">
+{% endblock extra_css %}
+
+{% block content %}
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+                    {% block header %}
+                    {% include "partials/topbar-compta.html" %}
+                    {% endblock header %}
+
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pageurl="/comptabilite/" pagetitle="Tableau de bord" title="Budgetisation" %}
+                    {% endblock pagetitle %}
+                     <div class="card">
+                        <div class="card-header">
+
+                        </div><!-- end card header -->
+                        <div class="card-body">
+                                <div class="row g-4 mb-3">
+                                    <div class="col-sm-auto">
+                                        <div>
+                                             <button type="button" class="btn btn-success add-btn" id="add-budget-btn" data-bs-toggle="modal" id="create-btn" data-bs-target="#uploadBudgetModal"><i class="ri-add-line align-bottom me-1"></i> Ajouter budget</button>
+                                            <button class="btn btn-soft-danger" onClick="deletexple()"><i class="ri-delete-bin-2-line"></i></button>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm">
+                                        <div class="d-flex justify-content-sm-end">
+                                            <div class="search-box ms-2">
+                                                <input type="text" class="form-control search" placeholder="Recherche...">
+                                                <i class="ri-search-line search-icon"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive table-card  mt-3 mb-1">
+                                    <table class="table table-hover table-nowrap">
+                                        <thead class="table-active">
+                                            <tr>
+                                                <th scope="col" style="width: 50px;">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" id="checkAll" value="option">
+                                                    </div>
+                                                </th>
+                                                <th class="sort" data-sort="accounting_number">Numéro du compte</th>
+                                                <th class="sort" data-sort="accounting_name">Intitulé du compte</th>
+                                                <th scope="col" class="text-center">Jan</th>
+                                                <th scope="col" class="text-center">Fév</th>
+                                                <th scope="col" class="text-center">Mar</th>
+                                                <th scope="col" class="text-center">Avr</th>
+                                                <th scope="col" class="text-center">Mai</th>
+                                                <th scope="col" class="text-center">Juin</th>
+                                                <th scope="col" class="text-center">Juil</th>
+                                                <th scope="col" class="text-center">Août</th>
+                                                <th scope="col" class="text-center">Sept</th>
+                                                <th scope="col" class="text-center">Oct</th>
+                                                <th scope="col" class="text-center">Nov</th>
+                                                <th scope="col" class="text-center">Déc</th>
+                                                <th scope="col" class="text-center">Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="list form-check-all">
+                                            {% for account in accounts %}
+                                            <tr>
+                                                <th scope="row">
+                                                    <div class="form-check">
+                                                        <input class="form-check-input" type="checkbox" name="chk_child" value="option1">
+                                                    </div>
+                                                </th>
+                                                <td class="id" style="display:none;"><a href="javascript:void(0);" class="fw-medium link-primary">{{ account.id }}</a></td>
+                                                <td>
+                                                    <a href="{% url 'budget_usage' account.id %}"  class="accounting_number">{{ account.account_number }}</a>
+                                                </td>
+                                                <td>
+                                                    <a href="{% url 'budget_usage' account.id %}" class="accounting_name">{{ account.account_name }}</a>
+                                                </td>
+                                                {% for budget in account.budgets %}
+                                                    <td class="accounting_budget">{{ budget.amount }}</td>
+                                                {% endfor %}
+                                                    <td class="accounting_total">{{ account.total_budget }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                        <tfoot class="table-light">
+                                            <tr>
+                                                <td colspan="3">Total</td>
+                                                {% for month in months %}
+                                                    <td>{{ month.balance }}</td>
+                                                {% endfor %}
+                                                <td>{{ total_general_budget }}</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                    <div class="noresult" style="display: none">
+                                        <div class="text-center">
+                                            <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>
+                                            <h5 class="mt-2">Désolé! Aucun résultat trouvé</h5>
+                                            <p class="text-muted mb-0">Nous n'avons trouvé aucune correspondace pour votre recherche.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-end">
+                                    <div class="pagination-wrap hstack gap-2">
+                                        <a class="page-item pagination-prev disabled" href="#">
+                                            Précédent
+                                        </a>
+                                        <ul class="pagination listjs-pagination mb-0"></ul>
+                                        <a class="page-item pagination-next" href="#">
+                                            Suivant
+                                        </a>
+                                    </div>
+                                </div>
+                        </div><!-- end card -->
+                     </div>
+                    <div class="modal fade" id="uploadBudgetModal" tabindex="-1" aria-labelledby="budgetModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-light p-3">
+                                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                                </div>
+                                <form method="post" id="budget-form" data-url="{% url 'accounting_budget' %}">
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+
+                                        <div class="row mt-2">
+                                            <div class="col-lg-12">
+                                                <div class="row">
+                                                    <div class="col-lg-12">
+                                                        <div class="card">
+                                                            <div class="card-header">
+                                                                <h4 class="card-title mb-0">Charger votre budget</h4>
+                                                            </div><!-- end card header -->
+
+                                                            <div class="card-body">
+                                                                <p class="text-muted">Veuillez charger uniquement un fichier excel (.xlsx) ou un fichier csv. Cliquez  pour voir
+                                                                    <a href="/uploads/Modèle%20budget.csv" target="_blank"> le modèle en csv</a> ou
+                                                                    <a href="/uploads/Modèle%20budget.xlsx" target="_blank">le modèle en excel</a>
+                                                                </p>
+                                                                <input type="file" class="filepond filepond-input-multiple" id="filebudget" name="filebudget" data-allow-reorder="true" data-max-file-size="3MB" data-max-files="1" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/csv">
+                                                            </div>
+                                                            <!-- end card body -->
+                                                        </div>
+                                                        <!-- end card -->
+                                                    </div> <!-- end col -->
+                                                </div>
+                                                <!-- end row -->
+                                            </div>
+                                            <!-- end col -->
+                                        </div>
+                                        <!-- end row -->
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="hstack gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fermer</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+
+
+{% block extra_js %}
+
+    <!-- prismjs plugin -->
+<script src="{% static 'libs/prismjs/prism.js' %}"></script>
+<script src="{% static 'libs/list.js/dist/list.min.js' %}"></script>
+<script src="{% static 'libs/list.pagination.js/dist/list.pagination.min.js' %}"></script>
+
+<!-- Sweet Alerts js -->
+<script src="{% static 'libs/sweetalert2/dist/sweetalert2.min.js' %}"></script>
+
+    <!-- Swiper Js -->
+<script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
+
+<script src="{% static 'js/pages/form-input-spin.init.js' %}"></script>
+
+<script src="{% static 'libs/card/dist/card.js' %}"></script>
+
+<!-- Widget init -->
+<script src="{% static 'js/pages/widgets.init.js' %}"></script>
+
+    <!-- aos js -->
+<script src="{% static 'libs/aos/dist/aos.js' %}"></script>
+<!-- animation init -->
+<script src="{% static 'js/pages/animation-aos.init.js' %}"></script>
+
+<!-- filepond js -->
+<script src="{% static 'libs/filepond/dist/filepond.min.js'%}"></script>
+<script src="{% static 'libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.js'%}"></script>
+<script src="{% static 'libs/filepond-plugin-file-validate-size/dist/filepond-plugin-file-validate-size.min.js'%}"></script>
+<script src="{% static 'libs/filepond-plugin-image-exif-orientation/dist/filepond-plugin-image-exif-orientation.min.js'%}"></script>
+<script src="{% static 'libs/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.min.js'%}"></script>
+
+    <!-- File upload js -->
+<script src="{% static 'js/pages/form-file-budget-upload.init.js'%}"></script>
+ <!-- App js -->
+<script src="{%  static 'js/app.js' %}"></script>
+{% endblock extra_js %}

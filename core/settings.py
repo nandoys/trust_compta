@@ -79,6 +79,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = os.path.join(BASE_DIR, 'static')
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = '/uploads/'
+MEDIA_ROOT = BASE_DIR / 'uploads'
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -132,7 +136,15 @@ DATABASES = {
         'PASSWORD': '',
         'HOST': '',
         'PORT': '5432',
-    }
+    },
+    'default:pro': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'trust_app',
+        'USER': 'postgres',
+        'PASSWORD': '1234',
+        'HOST': '192.168.1.114',
+        'PORT': '5433',
+    },
 }
 
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'

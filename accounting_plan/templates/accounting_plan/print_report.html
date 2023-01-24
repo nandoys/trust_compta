@@ -1,0 +1,208 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Tableau de bord{% endblock title %}
+{% block extra_css %}
+    <link href="{% static  'libs/swiper/swiper-bundle.min.css' %}" rel="stylesheet" />
+{% endblock extra_css %}
+
+{% block content %}
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+                    {% block pagetitle %}
+                        {% include "partials/page-title.html" with pagetitle="Tableau de bord" title="Impression" %}
+                    {% endblock pagetitle %}
+                    <!-- Table Nesting -->
+                    <table class="table table-bordered border-dark table-">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <table class="table table-nowrap mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col">Rubrique</th>
+                                                <th scope="col" class="text-center">Jan</th>
+                                                <th scope="col" class="text-center">Fév</th>
+                                                <th scope="col" class="text-center">Mar</th>
+                                                <th scope="col" class="text-center">Avr</th>
+                                                <th scope="col" class="text-center">Mai</th>
+                                                <th scope="col" class="text-center">Juin</th>
+                                                <th scope="col" class="text-center">Juil</th>
+                                                <th scope="col" class="text-center">Août</th>
+                                                <th scope="col" class="text-center">Sept</th>
+                                                <th scope="col" class="text-center">Oct</th>
+                                                <th scope="col" class="text-center">Nov</th>
+                                                <th scope="col" class="text-center">Déc</th>
+                                                <th scope="col" class="text-center">Total</th>
+                                                 <th scope="col" class="text-center">Moyenne</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>Dimes</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                             <tr>
+                                                <td>Dimes</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td>Recettes totales</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table class="table table-nowrap mb-0">
+                                        <tbody>
+                                             <tr>
+                                                <td>Dimes</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Dimes</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot>
+                                             <tr>
+                                                <td>Dépenses totales</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <table class="table mb-0">
+                                        <tfoot>
+                                             <tr>
+                                                <td>Flux de trésorerie</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                                <td class="text-center">12222</td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% block footer %}
+                {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+
+{% block extra_js %}
+
+     <!-- apexcharts -->
+    <script src="{%  static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+
+    <!-- Dashboard init -->
+    <script src="{%  static 'js/pages/dashboard-balance.init.js' %}"></script>
+    <!-- App js -->
+    <script src="{%  static 'js/app.js' %}"></script>
+{% endblock extra_js %}
