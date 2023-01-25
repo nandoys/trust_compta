@@ -6,8 +6,6 @@ document.addEventListener('DOMContentLoaded', function () {
             'csv', 'excel', 'print'
         ],
         fixedHeader: true,
-        responsive: true,
-        select: true,
         order: false,
         language: {
             "decimal":        "",

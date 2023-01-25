@@ -16,6 +16,7 @@ let html_select_accounting_adjunct = `<select class="form-select" name="accounti
                                     </select>`
 
 let update_main_div = document.getElementById('update_main_div')
+let api_get_account_url = update_main_div.getAttribute('data-api-url')
 let update_additional_div = document.getElementById('update_additional_div')
 let update_adjunct_div = document.getElementById('update_adjunct_div')
 
@@ -335,7 +336,7 @@ function editTreasory() {
                             }
                             choices_update_main.setChoices(accounting_main)
                         }
-                        xhttp_account_main.open("GET", "/plan-comptable/comptes/"+treasury_type, true);
+                        xhttp_account_main.open("GET", api_get_account_url, true);
                         xhttp_account_main.send();
 
                         if(json_records.accounting_additional != null){

@@ -25,6 +25,11 @@
                     {% endblock pagetitle %}
                     <div class="row">
                         <div class="col-xl-12">
+                            <h4>{{ account_additional|capfirst }}</h4>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xl-12">
                                 <div class="d-flex flex-column h-100">
                                     <div class="row" id="budget-data" data-budget-usage="{{ months_json }}">
                                         {% for month in months %}
@@ -46,7 +51,9 @@
                                                         <div class="flex-grow-1 overflow-hidden">
                                                             <p class="text-uppercase fw-medium text-muted text-truncate mb-3">
                                                                 {{ month.name}} {{ year }}</p>
-                                                            <h4 class="fs-22 fw-semibold ff-secondary mb-0"><span class="counter-value" data-target="{{ month.spent }}">0</span></h4>
+                                                            Prévu: <h5 class="fs-21 ff-secondary mb-0"><span class="counter-value" data-target="{{ month.planed }}">0</span> usd</h5>
+                                                            Dépensé: <h5 class="fs-21 ff-secondary mb-0"><span class="counter-value" data-target="{{ month.spent }}">0</span> usd</h5>
+                                                            Solde: <h5 class="fs-21 ff-secondary mb-0"><span class="counter-value" data-target="{{ month.balance }}">0</span> usd</h5>
                                                         </div>
                                                         <div class="flex-shrink-0">
                                                             <div id="month-{{ month.id}}" data-colors='["--vz-success"]' class="apex-charts" dir="ltr"></div>

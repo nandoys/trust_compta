@@ -14,6 +14,7 @@ from rest_framework.response import Response
 
 from utils.files import upload_file
 from utils.calendar import months_of_year
+from utils.treasury import outcomes_with_subaccount
 from .models import Main, Additional, FiscalYear, Budget
 from .forms import MainAccountingForm, AdditionalAccountingForm, BudgetAccountingForm
 from .serializer import MainSerializer
@@ -596,14 +597,10 @@ def budget_usage(request, pk):
         for month in months_of_year():
             budget = Budget.objects.get(accounting=account_additional, plan_at__month=month['id'],
                                         plan_at__year=fiscal_year.year)
-            outcomes_in_usd = Outcome.objects.filter(accounting_additional=account_additional,
-                                                     out_at__month=month['id'],
-                                                     out_at__year=fiscal_year.year,
-                                                     currency__symbol_iso__icontains='usd')
 
-            outcome_in_cdf = Outcome.objects.filter(accounting_additional=account_additional, out_at__month=month['id'],
-                                                    out_at__year=fiscal_year.year,
-                                                    currency__symbol_iso__icontains='cdf')
+            outcomes_in_usd = outcomes_with_subaccount(account_additional, month['id'], fiscal_year.year, 'usd')
+
+            outcome_in_cdf = outcomes_with_subaccount(account_additional, month['id'], fiscal_year.year, 'cdf')
 
             annote = outcome_in_cdf.annotate(conversion=F('amount') / F('daily_rate__rate'))
 
@@ -614,15 +611,15 @@ def budget_usage(request, pk):
                 total_usd = total_outcomes_usd['amount__sum']
 
             if len(annote) > 0:
-                print(annote)
                 total_converted = annote.aggregate(Sum('conversion'))
                 spent = round(total_usd + total_converted['conversion__sum'], 2)
 
             months.append({
                 'id': month['id'],
                 'name': month['name'],
-                'planed': budget.amount,
-                'spent': spent.__str__()
+                'planed': budget.amount.__str__(),
+                'spent': spent.__str__(),
+                'balance': str(budget.amount - spent)
             })
     except Additional.DoesNotExist:
         return redirect('accounting_budget')
@@ -630,6 +627,7 @@ def budget_usage(request, pk):
     context = {
         'months': months,
         'months_json': months_json,
+        'account_additional': account_additional,
         'year': fiscal_year.year.__str__()
     }
     return render(request, 'accounting_plan/budget_usage.html', context)
@@ -644,5 +642,114 @@ def api_get_accounting_main_by_type(request, account_type):
 
 
 @login_required()
-def print_report(request, symbol):
-    return render(request, 'accounting_plan/print_report.html')
+def print_report(request):
+    year_id = request.session.get('year')
+    try:
+        fiscal_year = FiscalYear.objects.get(id=year_id)
+    except FiscalYear.DoesNotExist:
+        return redirect('account_logout')
+
+    incomes_report = list()
+    incomes_months = months_of_year()
+    total_general_incomes = 0
+
+    outcomes_report = list()
+    outcomes_months = months_of_year()
+    total_general_outcomes = 0
+    try:
+        main_income_accounts = Main.objects.filter(account_type='encaissement').all()
+        main_outcome_accounts = Main.objects.filter(account_type='decaissement').all()
+
+        for main_income_account in main_income_accounts:
+            report_months = list()
+            total_general = 0
+
+            for month in incomes_months:
+                incomes_usd = Income.objects.filter(accounting_main=main_income_account, in_at__month=month['id'],
+                                                    in_at__year=fiscal_year.year, currency__symbol_iso__icontains='usd')
+
+                incomes_cdf = Income.objects.filter(accounting_main=main_income_account, in_at__month=month['id'],
+                                                    in_at__year=fiscal_year.year, currency__symbol_iso__icontains='cdf')
+
+                annote = incomes_cdf.annotate(conversion=F('amount') / F('daily_rate__rate'))
+
+                total_month = 0
+
+                total_incomes_usd = incomes_usd.aggregate(Sum('amount'))
+                if total_incomes_usd['amount__sum'] is not None:
+                    total_month += incomes_usd['amount__sum']
+
+                if len(annote) > 0:
+                    total_converted = annote.aggregate(Sum('conversion'))
+                    total_month = round(total_month + total_converted['conversion__sum'], 2)
+                month['balance'] += total_month
+                total_general += total_month
+                report_months.append({
+                    'id': month['id'],
+                    'balance': total_month
+                })
+
+            incomes_report.append({
+                'account_id': main_income_account.id,
+                'account_number': main_income_account.account_number,
+                'account_name': main_income_account.account_name,
+                'months': report_months,
+                'total_general': total_general,
+                'average': round(total_general / 12, 2)
+            })
+
+        for main_outcome_account in main_outcome_accounts:
+            report_months = list()
+            total_general = 0
+
+            for month in outcomes_months:
+                outcomes_usd = Outcome.objects.filter(accounting_main=main_outcome_account, out_at__month=month['id'],
+                                                      out_at__year=fiscal_year.year, currency__symbol_iso__icontains='usd')
+
+                outcomes_cdf = Outcome.objects.filter(accounting_main=main_outcome_account, out_at__month=month['id'],
+                                                    out_at__year=fiscal_year.year, currency__symbol_iso__icontains='cdf')
+
+                annote = outcomes_cdf.annotate(conversion=F('amount') / F('daily_rate__rate'))
+
+                total_month = 0
+
+                total_outcomes_usd = outcomes_usd.aggregate(Sum('amount'))
+                if total_outcomes_usd['amount__sum'] is not None:
+                    total_month += outcomes_usd['amount__sum']
+
+                if len(annote) > 0:
+                    total_converted = annote.aggregate(Sum('conversion'))
+                    total_month = round(total_month + total_converted['conversion__sum'], 2)
+                month['balance'] += total_month
+                total_general += total_month
+                report_months.append({
+                    'id': month['id'],
+                    'balance': total_month
+                })
+
+            outcomes_report.append({
+                'account_id': main_outcome_account.id,
+                'account_number': main_outcome_account.account_number,
+                'account_name': main_outcome_account.account_name,
+                'months': report_months,
+                'total_general': total_general,
+                'average': round(total_general / 12, 2)
+            })
+    except Main.DoesNotExist:
+        pass
+
+    for month in incomes_months:
+        total_general_incomes += month['balance']
+
+    context = {
+        'incomes_report': incomes_report,
+        'incomes_months': incomes_months,
+        'total_general_incomes': total_general_incomes,
+        'average_incomes': round(total_general_incomes / 12, 2),
+
+        'outcomes_report': outcomes_report,
+        'outcomes_months': outcomes_months,
+        'total_general_outcomes': total_general_outcomes,
+        'average_outcomes': round(total_general_outcomes / 12, 2)
+    }
+    return render(request, 'accounting_plan/print_report.html', context)

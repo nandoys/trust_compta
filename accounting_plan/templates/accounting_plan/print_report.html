@@ -14,14 +14,15 @@
             <div class="page-content">
                 <div class="container-fluid">
                     {% block pagetitle %}
-                        {% include "partials/page-title.html" with pagetitle="Tableau de bord" title="Impression" %}
+                        {% include "partials/page-title.html" with pageurl="/comptabilite/" pagetitle="Tableau de bord" title="Rapport" %}
                     {% endblock pagetitle %}
                     <!-- Table Nesting -->
-                    <table class="table table-bordered border-dark table-">
+                    <div class="card">
+                        <table class="table table-bordered border-dark table-">
                         <tbody>
                             <tr>
                                 <td>
-                                    <table class="table table-nowrap mb-0">
+                                    <table class="table table-nowrap">
                                         <thead class="table-light">
                                             <tr>
                                                 <th scope="col">Rubrique</th>
@@ -42,58 +43,25 @@
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            {% for income in incomes_report %}
                                             <tr>
-                                                <td>Dimes</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
+                                                <td>{{ income.account_number }} | {{ income.account_name }}</td>
+                                                {% for month in income.months %}
+                                                    <td class="text-center">{{ month.balance }}</td>
+                                                {% endfor %}
+                                                <td>{{ income.total_general }}</td>
+                                                <td>{{ income.average }}</td>
                                             </tr>
-                                             <tr>
-                                                <td>Dimes</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                            </tr>
+                                            {% endfor %}
                                         </tbody>
-                                        <tfoot>
+                                        <tfoot class="table-light">
                                             <tr>
                                                 <td>Recettes totales</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
+                                                {% for month in incomes_months %}
+                                                    <td class="text-center">{{ month.balance }}</td>
+                                                {% endfor %}
+                                                    <td>{{ total_general_incomes }}</td>
+                                                    <td>{{ average_incomes }}</td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -101,62 +69,48 @@
                             </tr>
                             <tr>
                                 <td>
-                                    <table class="table table-nowrap mb-0">
-                                        <tbody>
-                                             <tr>
-                                                <td>Dimes</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                            </tr>
+                                    <table class="table table-nowrap">
+                                    <thead class="table-light">
                                             <tr>
-                                                <td>Dimes</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
+                                                <th scope="col">Rubrique</th>
+                                                <th scope="col" class="text-center">Jan</th>
+                                                <th scope="col" class="text-center">Fév</th>
+                                                <th scope="col" class="text-center">Mar</th>
+                                                <th scope="col" class="text-center">Avr</th>
+                                                <th scope="col" class="text-center">Mai</th>
+                                                <th scope="col" class="text-center">Juin</th>
+                                                <th scope="col" class="text-center">Juil</th>
+                                                <th scope="col" class="text-center">Août</th>
+                                                <th scope="col" class="text-center">Sept</th>
+                                                <th scope="col" class="text-center">Oct</th>
+                                                <th scope="col" class="text-center">Nov</th>
+                                                <th scope="col" class="text-center">Déc</th>
+                                                <th scope="col" class="text-center">Total</th>
+                                                 <th scope="col" class="text-center">Moyenne</th>
                                             </tr>
+                                    </thead>
+                                    <tbody>
+                                            {% for outcome in outcomes_report %}
+                                            <tr>
+                                                <td>{{ outcome.account_number }} | {{ outcome.account_name }}</td>
+                                                {% for month in outcome.months %}
+                                                    <td class="text-center">{{ month.balance }}</td>
+                                                {% endfor %}
+                                                <td>{{ outcome.total_general }}</td>
+                                                <td>{{ outcome.average }}</td>
+                                            </tr>
+                                            {% endfor %}
                                         </tbody>
-                                        <tfoot>
-                                             <tr>
-                                                <td>Dépenses totales</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                            </tr>
-                                        </tfoot>
+                                    <tfoot class="table-light">
+                                        <tr>
+                                            <td>Dépenses totales</td>
+                                            {% for month in outcomes_months %}
+                                                <td class="text-center">{{ month.balance }}</td>
+                                            {% endfor %}
+                                             <td>{{ total_general_incomes }}</td>
+                                             <td>{{ average_incomes }}</td>
+                                        </tr>
+                                    </tfoot>
                                     </table>
                                 </td>
                             </tr>
@@ -166,20 +120,7 @@
                                         <tfoot>
                                              <tr>
                                                 <td>Flux de trésorerie</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
-                                                <td class="text-center">12222</td>
+                                                <td class="text-center">0</td>
                                             </tr>
                                         </tfoot>
                                     </table>
@@ -187,6 +128,7 @@
                             </tr>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
             {% block footer %}
@@ -205,4 +147,7 @@
     <script src="{%  static 'js/pages/dashboard-balance.init.js' %}"></script>
     <!-- App js -->
     <script src="{%  static 'js/app.js' %}"></script>
+    <script>
+        window.print()
+    </script>
 {% endblock extra_js %}

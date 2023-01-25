@@ -9,5 +9,5 @@ urlpatterns = [
     path('budget/<uuid:pk>', views.budget_usage, name="budget_usage"),
     path('comptes/<str:account_type>', views.api_get_accounting_main_by_type, name="api_get_accounting_main_by_type"),
     path('reporting/<str:symbol>/', views.overall, name="accounting_reporting"),
-    path('reporting/<str:symbol>/print', views.print_report, name="print_report")
+    path('reporting/print', views.print_report, name="print_report")
 ]

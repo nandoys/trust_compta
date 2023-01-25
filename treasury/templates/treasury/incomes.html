@@ -132,7 +132,7 @@
                     <form autocomplete="off" method="post" id="update-form">
                         {% csrf_token %}
                         <input type="hidden" id="edit_record_id" name="edit_record_id" class="form-control">
-                        <div class="mb-3 position-relative" id="update_main_div">
+                        <div class="mb-3 position-relative" id="update_main_div" data-api-url="{% url 'api_get_accounting_main_by_type' 'encaissement' %}">
                             <label for="update_main_input" class="form-label">Compte principal</label>
                         </div>
                         <div class="row g-4 mb-3">
