@@ -644,6 +644,20 @@ def api_get_accounting_main_by_type(request, account_type):
 @login_required()
 def print_report(request):
     year_id = request.session.get('year')
+
+    """
+        here goes the code for the filter
+    """
+    month_filter = request.GET.get('mois', None)
+    is_filter = False
+    selected_month = None
+
+    if month_filter:
+        is_filter = True
+        for month in months_of_year():
+            if month['id'] == int(request.GET.get('mois')):
+                selected_month = month
+
     try:
         fiscal_year = FiscalYear.objects.get(id=year_id)
     except FiscalYear.DoesNotExist:
@@ -652,10 +666,13 @@ def print_report(request):
     incomes_report = list()
     incomes_months = months_of_year()
     total_general_incomes = 0
+    count_incomes_total_average = 0
 
     outcomes_report = list()
     outcomes_months = months_of_year()
     total_general_outcomes = 0
+    count_outcomes_total_average = 0
+
     try:
         main_income_accounts = Main.objects.filter(account_type='encaissement').all()
         main_outcome_accounts = Main.objects.filter(account_type='decaissement').all()
@@ -663,13 +680,33 @@ def print_report(request):
         for main_income_account in main_income_accounts:
             report_months = list()
             total_general = 0
+            count_incomes_month_average = 0
 
             for month in incomes_months:
-                incomes_usd = Income.objects.filter(accounting_main=main_income_account, in_at__month=month['id'],
-                                                    in_at__year=fiscal_year.year, currency__symbol_iso__icontains='usd')
+                if month_filter:
+                    if selected_month['id'] is not month['id']:
+                        continue
+                    incomes_usd = Income.objects.filter(accounting_main=main_income_account,
+                                                        in_at__month=selected_month['id'],
+                                                        in_at__year=fiscal_year.year,
+                                                        currency__symbol_iso__icontains='usd')
 
-                incomes_cdf = Income.objects.filter(accounting_main=main_income_account, in_at__month=month['id'],
-                                                    in_at__year=fiscal_year.year, currency__symbol_iso__icontains='cdf')
+                    incomes_cdf = Income.objects.filter(accounting_main=main_income_account,
+                                                        in_at__month=selected_month['id'],
+                                                        in_at__year=fiscal_year.year,
+                                                        currency__symbol_iso__icontains='cdf')
+                else:
+                    incomes_usd = Income.objects.filter(accounting_main=main_income_account, in_at__month=month['id'],
+                                                        in_at__year=fiscal_year.year,
+                                                        currency__symbol_iso__icontains='usd')
+
+                    incomes_cdf = Income.objects.filter(accounting_main=main_income_account, in_at__month=month['id'],
+                                                        in_at__year=fiscal_year.year,
+                                                        currency__symbol_iso__icontains='cdf')
+
+                if incomes_cdf.exists() or incomes_usd.exists():
+                    count_incomes_total_average += 1
+                    count_incomes_month_average += 1
 
                 annote = incomes_cdf.annotate(conversion=F('amount') / F('daily_rate__rate'))
 
@@ -689,25 +726,51 @@ def print_report(request):
                     'balance': total_month
                 })
 
+            # check if count equal zero, then reset to 1 to avoid DivideByZero error
+            if count_incomes_month_average == 0:
+                count_incomes_month_average = 1
+
             incomes_report.append({
                 'account_id': main_income_account.id,
                 'account_number': main_income_account.account_number,
                 'account_name': main_income_account.account_name,
                 'months': report_months,
                 'total_general': total_general,
-                'average': round(total_general / 12, 2)
+                'average': round(total_general / count_incomes_month_average, 2)
             })
 
         for main_outcome_account in main_outcome_accounts:
             report_months = list()
             total_general = 0
+            count_outcomes_month_average = 0
 
             for month in outcomes_months:
-                outcomes_usd = Outcome.objects.filter(accounting_main=main_outcome_account, out_at__month=month['id'],
-                                                      out_at__year=fiscal_year.year, currency__symbol_iso__icontains='usd')
+                if month_filter:
+                    if selected_month['id'] is not month['id']:
+                        continue
+                    outcomes_usd = Outcome.objects.filter(accounting_main=main_outcome_account,
+                                                          out_at__month=selected_month['id'],
+                                                          out_at__year=fiscal_year.year,
+                                                          currency__symbol_iso__icontains='usd')
 
-                outcomes_cdf = Outcome.objects.filter(accounting_main=main_outcome_account, out_at__month=month['id'],
-                                                    out_at__year=fiscal_year.year, currency__symbol_iso__icontains='cdf')
+                    outcomes_cdf = Outcome.objects.filter(accounting_main=main_outcome_account,
+                                                          out_at__month=selected_month['id'],
+                                                          out_at__year=fiscal_year.year,
+                                                          currency__symbol_iso__icontains='cdf')
+                else:
+                    outcomes_usd = Outcome.objects.filter(accounting_main=main_outcome_account,
+                                                          out_at__month=month['id'],
+                                                          out_at__year=fiscal_year.year,
+                                                          currency__symbol_iso__icontains='usd')
+
+                    outcomes_cdf = Outcome.objects.filter(accounting_main=main_outcome_account,
+                                                          out_at__month=month['id'],
+                                                          out_at__year=fiscal_year.year,
+                                                          currency__symbol_iso__icontains='cdf')
+
+                if outcomes_cdf.exists() or outcomes_usd.exists():
+                    count_outcomes_total_average += 1
+                    count_outcomes_month_average += 1
 
                 annote = outcomes_cdf.annotate(conversion=F('amount') / F('daily_rate__rate'))
 
@@ -727,29 +790,81 @@ def print_report(request):
                     'balance': total_month
                 })
 
+            # check if count equal zero, then reset to 1 to avoid DivideByZero error
+            if count_outcomes_month_average == 0:
+                count_outcomes_month_average = 1
+
             outcomes_report.append({
                 'account_id': main_outcome_account.id,
                 'account_number': main_outcome_account.account_number,
                 'account_name': main_outcome_account.account_name,
                 'months': report_months,
                 'total_general': total_general,
-                'average': round(total_general / 12, 2)
+                'average': round(total_general / count_outcomes_month_average, 2)
             })
     except Main.DoesNotExist:
         pass
 
     for month in incomes_months:
-        total_general_incomes += month['balance']
+        if month_filter:
+            if selected_month['id'] is not month['id']:
+                continue
+            total_general_incomes += month['balance']
+        else:
+            total_general_incomes += month['balance']
+
+    for month in outcomes_months:
+        if month_filter:
+            if selected_month['id'] is not month['id']:
+                continue
+            total_general_outcomes += month['balance']
+        else:
+            total_general_outcomes += month['balance']
+
+    # check if count equal zero, then reset to 1 to avoid DivideByZero error
+    if count_incomes_total_average == 0:
+        count_incomes_total_average = 1
+
+    # check if count equal zero, then reset to 1 to avoid DivideByZero error
+    if count_outcomes_total_average == 0:
+        count_outcomes_total_average = 1
+
+    average_incomes = round(total_general_incomes / count_incomes_total_average, 2)
+    average_outcomes = round(total_general_outcomes / count_outcomes_total_average, 2)
+
+    cash_flow = list()
+    cash_flow_total = 0
+    cash_flow_average = 0
+
+    for i in range(0, 12):
+
+        cash = incomes_months[i]['balance'] - outcomes_months[i]['balance']
+        if month_filter:
+            if selected_month['id'] is not (i + 1):
+                continue
+            cash_flow.append(cash)
+        else:
+            cash_flow.append(cash)
+        cash_flow_total = total_general_incomes - total_general_outcomes
+        cash_flow_average = average_incomes - average_outcomes
 
     context = {
         'incomes_report': incomes_report,
         'incomes_months': incomes_months,
         'total_general_incomes': total_general_incomes,
-        'average_incomes': round(total_general_incomes / 12, 2),
+        'average_incomes': average_incomes,
 
         'outcomes_report': outcomes_report,
         'outcomes_months': outcomes_months,
         'total_general_outcomes': total_general_outcomes,
-        'average_outcomes': round(total_general_outcomes / 12, 2)
+        'average_outcomes': average_outcomes,
+
+        'months': months_of_year(),
+        'cash_flow': cash_flow,
+        'cash_flow_total': cash_flow_total,
+        'cash_flow_average': cash_flow_average,
+
+        'is_filter': is_filter,
+        'selected_month': selected_month
     }
     return render(request, 'accounting_plan/print_report.html', context)

@@ -16,119 +16,231 @@
                     {% block pagetitle %}
                         {% include "partials/page-title.html" with pageurl="/comptabilite/" pagetitle="Tableau de bord" title="Rapport" %}
                     {% endblock pagetitle %}
-                    <!-- Table Nesting -->
-                    <div class="card">
-                        <table class="table table-bordered border-dark table-">
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <table class="table table-nowrap">
+                     <div class="chat-wrapper d-flex gap-2 mx-n4 mt-n4 p-1">
+                        <div class="file-manager-sidebar">
+                            <div class="p-4 d-flex flex-column h-100 d-print-none">
+
+                                <div class="px-4 mx-n4" style="height: calc(100vh - 468px);">
+                                    <a href="{% url 'print_report' %}">
+                                        <i class="ri-stop-mini-fill align-middle fs-15 text-danger"></i>
+                                        Annuel
+                                    </a>
+                                    <ul class="to-do-menu list-unstyled" id="projectlist-data">
+                                        {% for month in months %}
+                                        <li>
+                                            <a href="?mois={{ month.id }}"><i class="ri-stop-mini-fill align-middle fs-15 text-danger"></i>
+                                                {{ month.name }}</a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                    <div class="mt-auto text-center">
+                                    <img src="{% static 'images/task.png' %}" alt="Task" class="img-fluid" />
+                                </div>
+                                </div>
+                            </div>
+                        </div><!--end side content-->
+                        <div class="file-manager-content w-100 p-4 pb-0">
+                            <div class="row g-3 d-print-none">
+                                <div class="col-lg-auto">
+                                    <div class="hstack gap-2">
+                                        <button class="btn btn-primary btn-sm" onclick="window.print()">
+                                            <i class="ri-printer-fill align-bottom me-1"></i> Imprimer
+                                        </button>
+                                    </div>
+                                </div>
+                                <!--end col-->
+                            </div>
+                            <!-- Table Nesting -->
+                            {% if not is_filter %}
+                                <table class="table border-dark table-">
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <table class="table border-dark table-nowrap">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th scope="col">Rubrique</th>
+                                                    <th scope="col" class="text-center">Jan</th>
+                                                    <th scope="col" class="text-center">Fév</th>
+                                                    <th scope="col" class="text-center">Mar</th>
+                                                    <th scope="col" class="text-center">Avr</th>
+                                                    <th scope="col" class="text-center">Mai</th>
+                                                    <th scope="col" class="text-center">Juin</th>
+                                                    <th scope="col" class="text-center">Juil</th>
+                                                    <th scope="col" class="text-center">Août</th>
+                                                    <th scope="col" class="text-center">Sept</th>
+                                                    <th scope="col" class="text-center">Oct</th>
+                                                    <th scope="col" class="text-center">Nov</th>
+                                                    <th scope="col" class="text-center">Déc</th>
+                                                    <th scope="col" class="text-center">Total</th>
+                                                     <th scope="col" class="text-center">Moyenne</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for income in incomes_report %}
+                                                <tr>
+                                                    <td>{{ income.account_number }} | {{ income.account_name }}</td>
+                                                    {% for month in income.months %}
+                                                        <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                    {% endfor %}
+                                                    <td>{{ income.total_general|default:"-" }}</td>
+                                                    <td>{{ income.average|default:"-" }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr>
+                                                    <td>Recettes totales</td>
+                                                    {% for month in incomes_months %}
+                                                        <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                    {% endfor %}
+                                                        <td>{{ total_general_incomes|default:"-" }}</td>
+                                                        <td>{{ average_incomes|default:"-" }}</td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table class="table border-dark table-nowrap">
                                         <thead class="table-light">
-                                            <tr>
-                                                <th scope="col">Rubrique</th>
-                                                <th scope="col" class="text-center">Jan</th>
-                                                <th scope="col" class="text-center">Fév</th>
-                                                <th scope="col" class="text-center">Mar</th>
-                                                <th scope="col" class="text-center">Avr</th>
-                                                <th scope="col" class="text-center">Mai</th>
-                                                <th scope="col" class="text-center">Juin</th>
-                                                <th scope="col" class="text-center">Juil</th>
-                                                <th scope="col" class="text-center">Août</th>
-                                                <th scope="col" class="text-center">Sept</th>
-                                                <th scope="col" class="text-center">Oct</th>
-                                                <th scope="col" class="text-center">Nov</th>
-                                                <th scope="col" class="text-center">Déc</th>
-                                                <th scope="col" class="text-center">Total</th>
-                                                 <th scope="col" class="text-center">Moyenne</th>
-                                            </tr>
+                                                <tr>
+                                                    <th scope="col">Rubrique</th>
+                                                    <th scope="col" class="text-center">Jan</th>
+                                                    <th scope="col" class="text-center">Fév</th>
+                                                    <th scope="col" class="text-center">Mar</th>
+                                                    <th scope="col" class="text-center">Avr</th>
+                                                    <th scope="col" class="text-center">Mai</th>
+                                                    <th scope="col" class="text-center">Juin</th>
+                                                    <th scope="col" class="text-center">Juil</th>
+                                                    <th scope="col" class="text-center">Août</th>
+                                                    <th scope="col" class="text-center">Sept</th>
+                                                    <th scope="col" class="text-center">Oct</th>
+                                                    <th scope="col" class="text-center">Nov</th>
+                                                    <th scope="col" class="text-center">Déc</th>
+                                                    <th scope="col" class="text-center">Total</th>
+                                                     <th scope="col" class="text-center">Moyenne</th>
+                                                </tr>
                                         </thead>
                                         <tbody>
-                                            {% for income in incomes_report %}
-                                            <tr>
-                                                <td>{{ income.account_number }} | {{ income.account_name }}</td>
-                                                {% for month in income.months %}
-                                                    <td class="text-center">{{ month.balance }}</td>
+                                                {% for outcome in outcomes_report %}
+                                                <tr>
+                                                    <td>{{ outcome.account_number }} | {{ outcome.account_name }}</td>
+                                                    {% for month in outcome.months %}
+                                                        <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                    {% endfor %}
+                                                    <td>{{ outcome.total_general|default:"-" }}</td>
+                                                    <td>{{ outcome.average|default:"-" }}</td>
+                                                </tr>
                                                 {% endfor %}
-                                                <td>{{ income.total_general }}</td>
-                                                <td>{{ income.average }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
+                                            </tbody>
                                         <tfoot class="table-light">
                                             <tr>
-                                                <td>Recettes totales</td>
-                                                {% for month in incomes_months %}
-                                                    <td class="text-center">{{ month.balance }}</td>
+                                                <td>Dépenses totales</td>
+                                                {% for month in outcomes_months %}
+                                                    <td class="text-center">{{ month.balance|default:"-" }}</td>
                                                 {% endfor %}
-                                                    <td>{{ total_general_incomes }}</td>
-                                                    <td>{{ average_incomes }}</td>
+                                                 <td>{{ total_general_outcomes|default:"-" }}</td>
+                                                 <td>{{ average_outcomes|default:"-" }}</td>
                                             </tr>
-                                        </tfoot>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <table class="table table-nowrap">
-                                    <thead class="table-light">
                                             <tr>
-                                                <th scope="col">Rubrique</th>
-                                                <th scope="col" class="text-center">Jan</th>
-                                                <th scope="col" class="text-center">Fév</th>
-                                                <th scope="col" class="text-center">Mar</th>
-                                                <th scope="col" class="text-center">Avr</th>
-                                                <th scope="col" class="text-center">Mai</th>
-                                                <th scope="col" class="text-center">Juin</th>
-                                                <th scope="col" class="text-center">Juil</th>
-                                                <th scope="col" class="text-center">Août</th>
-                                                <th scope="col" class="text-center">Sept</th>
-                                                <th scope="col" class="text-center">Oct</th>
-                                                <th scope="col" class="text-center">Nov</th>
-                                                <th scope="col" class="text-center">Déc</th>
-                                                <th scope="col" class="text-center">Total</th>
-                                                 <th scope="col" class="text-center">Moyenne</th>
-                                            </tr>
-                                    </thead>
-                                    <tbody>
-                                            {% for outcome in outcomes_report %}
-                                            <tr>
-                                                <td>{{ outcome.account_number }} | {{ outcome.account_name }}</td>
-                                                {% for month in outcome.months %}
-                                                    <td class="text-center">{{ month.balance }}</td>
-                                                {% endfor %}
-                                                <td>{{ outcome.total_general }}</td>
-                                                <td>{{ outcome.average }}</td>
-                                            </tr>
-                                            {% endfor %}
-                                        </tbody>
-                                    <tfoot class="table-light">
-                                        <tr>
-                                            <td>Dépenses totales</td>
-                                            {% for month in outcomes_months %}
-                                                <td class="text-center">{{ month.balance }}</td>
-                                            {% endfor %}
-                                             <td>{{ total_general_incomes }}</td>
-                                             <td>{{ average_incomes }}</td>
-                                        </tr>
-                                    </tfoot>
-                                    </table>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <table class="table mb-0">
-                                        <tfoot>
-                                             <tr>
                                                 <td>Flux de trésorerie</td>
-                                                <td class="text-center">0</td>
+                                                 {% for cash in cash_flow %}
+                                                    <td class="text-center">{{ cash|default:"-"  }}</td>
+                                                 {% endfor %}
+                                                <td>{{ cash_flow_total|default:"-" }}</td>
+                                                <td>{{ cash_flow_average|default:"-" }}</td>
                                             </tr>
                                         </tfoot>
-                                    </table>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            </table>
+                            {% else %}
+                                <table class="table border-dark table-">
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <table class="table border-dark table-nowrap">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th scope="col">Rubrique</th>
+                                                    <th scope="col" class="text-center">Montant encaissé</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for income in incomes_report %}
+                                                <tr>
+                                                    <td>{{ income.account_number }} | {{ income.account_name }}</td>
+                                                    {% for month in income.months %}
+                                                        <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                    {% endfor %}
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                                <tr>
+                                                    <td>Recettes totales</td>
+                                                    {% for month in incomes_months %}
+                                                        {% if selected_month.id == month.id %}
+                                                            <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table class="table border-dark table-nowrap">
+                                        <thead class="table-light">
+                                                <tr>
+                                                    <th scope="col">Rubrique</th>
+                                                    <th scope="col" class="text-center">Budget</th>
+                                                    <th scope="col" class="text-center">Dépenses</th>
+                                                    <th scope="col" class="text-center">Ecart</th>
+                                                </tr>
+                                        </thead>
+                                        <tbody>
+                                                {% for outcome in outcomes_report %}
+                                                <tr>
+                                                    <td>{{ outcome.account_number }} | {{ outcome.account_name }}</td>
+                                                    <td>-</td>
+                                                    {% for month in outcome.months %}
+                                                        <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                    {% endfor %}
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        <tfoot class="table-light">
+                                            <tr>
+                                                <td>Dépenses totales</td>
+                                                <td>#</td>
+                                                {% for month in outcomes_months %}
+                                                    {% if selected_month.id == month.id %}
+                                                        <td class="text-center">{{ month.balance|default:"-" }}</td>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2">Flux de trésorerie</td>
+                                                {% for cash in cash_flow %}
+                                                    <td class="text-center">{{ cash|default:"-"  }}</td>
+                                                 {% endfor %}
+                                            </tr>
+                                        </tfoot>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            </table>
+                            {% endif %}
+                        </div>
                     </div>
+
                 </div>
             </div>
             {% block footer %}
@@ -147,7 +259,4 @@
     <script src="{%  static 'js/pages/dashboard-balance.init.js' %}"></script>
     <!-- App js -->
     <script src="{%  static 'js/app.js' %}"></script>
-    <script>
-        window.print()
-    </script>
 {% endblock extra_js %}

@@ -34,7 +34,7 @@
                                                 <div class="d-flex gap-3 mt-4">
                                                     <a href="{% url 'accounting_plan' %}" class="btn btn-primary">Plan comptable </a>
                                                     <a href="{% url 'accounting_budget' %}" class="btn btn-success">Budget </a>
-                                                    <a href="{% url 'print_report' %}" class="btn btn-secondary">Rapport </a>
+                                                     <a href="{% url 'print_report' %}" class="btn btn-secondary">Rapport </a>
                                                 </div>
                                             </div>
                                         </div>
@@ -209,6 +209,8 @@
 
     <!-- Dashboard init -->
     <script src="{%  static 'js/pages/dashboard-balance.init.js' %}"></script>
+        <!-- prismjs plugin -->
+    <script src="{%  static 'libs/prismjs/prism.js' %}"></script>
     <!-- App js -->
     <script src="{%  static 'js/app.js' %}"></script>
 {% endblock extra_js %}
