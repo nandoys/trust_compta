@@ -714,7 +714,7 @@ def print_report(request):
 
                 total_incomes_usd = incomes_usd.aggregate(Sum('amount'))
                 if total_incomes_usd['amount__sum'] is not None:
-                    total_month += incomes_usd['amount__sum']
+                    total_month += total_incomes_usd['amount__sum']
 
                 if len(annote) > 0:
                     total_converted = annote.aggregate(Sum('conversion'))
@@ -778,7 +778,7 @@ def print_report(request):
 
                 total_outcomes_usd = outcomes_usd.aggregate(Sum('amount'))
                 if total_outcomes_usd['amount__sum'] is not None:
-                    total_month += outcomes_usd['amount__sum']
+                    total_month += total_outcomes_usd['amount__sum']
 
                 if len(annote) > 0:
                     total_converted = annote.aggregate(Sum('conversion'))
