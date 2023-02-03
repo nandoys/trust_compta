@@ -68,10 +68,10 @@
                                                         </th>
                                                         <td class="id" style="display:none;"><a href="javascript:void(0);" class="fw-medium link-primary">id</a></td>
                                                         <td>
-                                                            <a href="{% url 'accounting_budget' additional_accounting.id 2022 %}"  class="accounting_number">{{ additional_accounting.account_number }}</a>
+                                                            <a href="{% url 'budget_usage' additional_accounting.id %}"  class="accounting_number">{{ additional_accounting.account_number }}</a>
                                                         </td>
                                                         <td>
-                                                            <a href="{% url 'accounting_budget' additional_accounting.id 2022 %}" class="accounting_name">{{ additional_accounting.account_name }}</a>
+                                                            <a href="{% url 'budget_usage' additional_accounting.id %}" class="accounting_name">{{ additional_accounting.account_name }}</a>
                                                         </td>
                                                         <td class="accounting_desc">{{ additional_accounting.account_description }}</td>
                                                         <td>

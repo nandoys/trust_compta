@@ -526,25 +526,33 @@ def accounting_budget(request):
                     for i in range(1, 13):
                         amount = rows[i + 1]
                         plan_at = datetime.date.replace(datetime.date.today(), fiscal_year.year, i, 1)
-                        budgetize = Budget(accounting=subaccount, plan_at=plan_at, amount=amount)
-                        budgetize.save()
+                        has_budget = Budget.objects.filter(accounting=subaccount, plan_at=plan_at)
+                        if not has_budget.exists():
+                            budgetize = Budget(accounting=subaccount, plan_at=plan_at, amount=amount)
+                            budgetize.save()
+
+                def loop_upload(dataframe: pd.DataFrame):
+                    for data_row in dataframe.values:
+                        plan_account_number = data_row[0]
+
+                        try:
+                            plan_additional_account = Additional.objects.get(account_number=plan_account_number)
+                            save_budget(plan_additional_account, data_row)
+                        except Additional.DoesNotExist:
+                            raise ObjectDoesNotExist("Ce compte n'existe pas")
 
                 if file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                     path = upload_file(file)
 
                     df = pd.read_excel(path)
-                    print(df)
+
+                    loop_upload(df)
+
                 elif file.content_type == 'text/csv':
                     path = upload_file(file)
                     df = pd.read_csv(path, sep=";")
-                    for row in df.values:
-                        account_number = row[0]
 
-                        try:
-                            additional_account = Additional.objects.get(account_number=account_number)
-                            save_budget(additional_account, row)
-                        except Additional.DoesNotExist:
-                            raise ObjectDoesNotExist("Ce compte n'existe pas")
+                    loop_upload(df)
 
                 else:
                     raise RequestAborted()
@@ -622,6 +630,8 @@ def budget_usage(request, pk):
                 'balance': str(budget.amount - spent)
             })
     except Additional.DoesNotExist:
+        return redirect('accounting_budget')
+    except Budget.DoesNotExist:
         return redirect('accounting_budget')
     months_json = json.dumps(months)
     context = {
