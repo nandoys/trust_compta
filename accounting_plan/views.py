@@ -337,7 +337,7 @@ def accounting_plan(request):
 
     if request.method == 'POST':
 
-        if request.FILES.get('filebudget'):
+        if request.FILES.get('fileplan'):
             file = request.FILES['filebudget']
 
             def save_budget(account, row):
@@ -371,12 +371,20 @@ def accounting_plan(request):
             main_accounting = Main.objects.filter(id=request.POST['delete-item'])
             main_accounting.delete()
         else:
-            accounting_item = MainAccountingForm(request.POST)
-            if accounting_item.is_valid():
-                accounting_item.save()
+            if len(request.POST['update-item']) > 0:
+                pk = request.POST['update-item']
+                main_account = Main.objects.get(id=pk)
+                accounting_form = MainAccountingForm(request.POST, instance=main_account)
+                accounting_form.save()
+
+            accounting_form = MainAccountingForm(request.POST)
+            if accounting_form.is_valid():
+                accounting_form.save()
                 messages.success(request, 'Compte ajouté avec succès')
             else:
                 messages.error(request, 'Les valeurs envoyées sont incorrectes')
+
+        return redirect('accounting_plan')
 
     main_accountings = Main.objects.all()
 
@@ -451,10 +459,16 @@ def accounting_main_details(request, pk):
                 additional_accounting = Additional.objects.filter(id=request.POST['delete-item'])
                 additional_accounting.delete()
             else:
-                accounting_item = AdditionalAccountingForm(request.POST)
+                if len(request.POST['update-item']) > 0:
+                    pk = request.POST['update-item']
+                    additional_account = Additional.objects.get(id=pk)
+                    accounting_form = AdditionalAccountingForm(request.POST, instance=additional_account)
+                    accounting_form.save()
 
-                if accounting_item.is_valid():
-                    instance = accounting_item.save(commit=False)
+                accounting_form = AdditionalAccountingForm(request.POST)
+
+                if accounting_form.is_valid():
+                    instance = accounting_form.save(commit=False)
                     instance.account_main = main_accounting
                     instance.save()
                     messages.success(request, 'Compte ajouté avec succès')
@@ -667,6 +681,7 @@ def print_report(request):
         for month in months_of_year():
             if month['id'] == int(request.GET.get('mois')):
                 selected_month = month
+                break
 
     try:
         fiscal_year = FiscalYear.objects.get(id=year_id)
@@ -754,6 +769,8 @@ def print_report(request):
             total_general = 0
             count_outcomes_month_average = 0
 
+            month_budget = 0
+
             for month in outcomes_months:
                 if month_filter:
                     if selected_month['id'] is not month['id']:
@@ -767,6 +784,14 @@ def print_report(request):
                                                           out_at__month=selected_month['id'],
                                                           out_at__year=fiscal_year.year,
                                                           currency__symbol_iso__icontains='cdf')
+
+                    budget = Budget.objects.filter(accounting__account_main=main_outcome_account,
+                                                   plan_at__month=selected_month['id'])
+                    total_budget = budget.aggregate(Sum('amount'))
+
+                    if total_budget['amount__sum'] is not None:
+                        month_budget = total_budget['amount__sum']
+
                 else:
                     outcomes_usd = Outcome.objects.filter(accounting_main=main_outcome_account,
                                                           out_at__month=month['id'],
@@ -795,9 +820,14 @@ def print_report(request):
                     total_month = round(total_month + total_converted['conversion__sum'], 2)
                 month['balance'] += total_month
                 total_general += total_month
+                gap = month_budget - total_month
+                gap_percent = round((total_month / month_budget) * 100, 2) if month_budget > 0 else 0
                 report_months.append({
                     'id': month['id'],
-                    'balance': total_month
+                    'balance': total_month,
+                    'budget': month_budget,
+                    'budget_gap': gap,
+                    'budget_gap_percent': gap_percent
                 })
 
             # check if count equal zero, then reset to 1 to avoid DivideByZero error

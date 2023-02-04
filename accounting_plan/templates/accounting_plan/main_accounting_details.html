@@ -27,11 +27,10 @@
 
                                 <div class="card-body">
                                     <div id="accountingList">
-                                        <div class="row g-4 mb-3">
+                                        <div class="row g-4 mb-3 px-2">
                                             <div class="col-sm-auto">
                                                 <div>
-                                                    <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal" id="create-btn" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i> Ajouter</button>
-                                                    <button class="btn btn-soft-danger" onClick="deleteMultiple()"><i class="ri-delete-bin-2-line"></i></button>
+                                                    <button type="button" class="btn btn-success add-btn" id="add-modal-btn" data-bs-toggle="modal" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i> Ajouter</button>
                                                 </div>
                                             </div>
                                             <div class="col-sm">
@@ -44,15 +43,10 @@
                                             </div>
                                         </div>
 
-                                        <div class="table-responsive table-card mt-3 mb-1">
+                                        <div class="table-responsive table-card mt-3 mb-1  px-4">
                                             <table class="table align-middle table-nowrap" id="accountingPlanTable">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th scope="col" style="width: 50px;">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" id="checkAll" value="option">
-                                                            </div>
-                                                        </th>
                                                         <th class="sort" data-sort="accounting_number">Numéro du compte</th>
                                                         <th class="sort" data-sort="accounting_name">Intitulé du compte</th>
                                                         <th class="sort" data-sort="accounting_desc">Description</th>
@@ -61,11 +55,6 @@
                                                 <tbody class="list form-check-all">
                                                     {% for additional_accounting in additional_accountings %}
                                                     <tr>
-                                                        <th scope="row">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="checkbox" name="chk_child" value="option1">
-                                                            </div>
-                                                        </th>
                                                         <td class="id" style="display:none;"><a href="javascript:void(0);" class="fw-medium link-primary">id</a></td>
                                                         <td>
                                                             <a href="{% url 'budget_usage' additional_accounting.id %}"  class="accounting_number">{{ additional_accounting.account_number }}</a>
@@ -77,10 +66,14 @@
                                                         <td>
                                                             <div class="d-flex gap-2">
                                                                 <div class="edit">
-                                                                    <button class="btn btn-sm btn-success edit-item-btn" data-bs-toggle="modal" data-bs-target="#showModal">Modifier</button>
+                                                                    <button class="btn btn-sm btn-success edit-modal-btn" data-id="{{ additional_accounting.id  }}"
+                                                                            data-name="{{ additional_accounting.account_name }}" data-number="{{ additional_accounting.account_number }}"
+                                                                            data-type="{{ additional_accounting.account_type }}" data-description="{{ additional_accounting.account_description }}"
+                                                                            data-bs-toggle="modal" data-bs-target="#showModal" onclick="update(this)">Modifier</button>
                                                                 </div>
                                                                 <div class="remove">
-                                                                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="{{ additional_accounting.id }}" data-bs-toggle="modal" data-bs-target="#deleteRecordModal">Supprimer</button>
+                                                                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="{{ additional_accounting.id }}" data-bs-toggle="modal"
+                                                                            data-bs-target="#deleteRecordModal" onclick="remove(this)">Supprimer</button>
                                                                 </div>
                                                             </div>
                                                         </td>
@@ -117,11 +110,11 @@
                     </div>
                     <!-- end row -->
 
-                    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-header bg-light p-3">
-                                    <h5 class="modal-title" id="exampleModalLabel"></h5>
+                                    <h5 class="modal-title" id="modalLabel"></h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
                                 </div>
                                 <form method="post">
@@ -139,14 +132,14 @@
                                         {% endfor %}
                                         <div class="mb-3" id="modal-id" style="display: none;">
                                             <label for="id-field" class="form-label">ID</label>
-                                            <input type="text" id="id-field" class="form-control" placeholder="ID" readonly />
+                                            <input type="text" id="id-field" class="form-control" name="update-item" placeholder="ID" readonly />
                                         </div>
                                     </div>
                                     <div class="modal-footer">
                                         <div class="hstack gap-2 justify-content-end">
                                             <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="submit" class="btn btn-success">Ajouter Compte</button>
-                                            <button type="button" class="btn btn-success" id="edit-btn">Mettre à jour</button>
+                                            <button type="submit" class="btn btn-success" id="add-btn">Ajouter Compte</button>
+                                            <button type="submit" class="btn btn-success" id="edit-btn">Mettre à jour</button>
                                         </div>
                                     </div>
                                 </form>
@@ -174,7 +167,7 @@
                                         {% csrf_token %}
                                             <input type="hidden" name="delete-item" id="delete-item">
                                             <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                                            <button type="button" class="btn w-sm btn-danger " id="delete-record">Oui, je veux le supprimer!</button>
+                                            <button type="submit" class="btn w-sm btn-danger " id="delete-record">Oui, je veux le supprimer!</button>
                                         </form>
                                     </div>
                                 </div>

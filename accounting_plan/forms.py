@@ -28,7 +28,7 @@ class MainAccountingForm(ModelForm):
 
             'account_description': TextInput(attrs={'id': 'accounting-desc-field', 'class': 'form-control',
                                                     'placeholder': "Entrez la description du compte",
-                                                    'required': True}),
+                                                    'required': False}),
         }
 
 
@@ -53,7 +53,7 @@ class AdditionalAccountingForm(ModelForm):
 
             'account_description': TextInput(attrs={'id': 'accounting-desc-field', 'class': 'form-control',
                                                     'placeholder': "Entrez la description du compte",
-                                                    'required': True}),
+                                                    'required': False}),
         }
 
 
@@ -66,7 +66,7 @@ class AdjunctAccountingForm(ModelForm):
         }
         widgets = {
             'adjunct_account_name': TextInput(attrs={'id': 'adjunct-accounting-field', 'class': 'form-control',
-                                             'placeholder': 'Entrez le libellé', 'required': True})
+                                             'placeholder': 'Entrez le libellé', 'required': False})
         }
 
 
