@@ -553,7 +553,7 @@ def accounting_budget(request):
                             plan_additional_account = Additional.objects.get(account_number=plan_account_number)
                             save_budget(plan_additional_account, data_row)
                         except Additional.DoesNotExist:
-                            raise ObjectDoesNotExist("Ce compte n'existe pas")
+                            raise ObjectDoesNotExist("Ce compte n'existe pas: {}".format(plan_account_number))
 
                 if file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                     path = upload_file(file)
