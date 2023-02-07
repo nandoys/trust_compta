@@ -1,5 +1,6 @@
 import datetime
 import pandas as pd
+import numpy as np
 import json
 from django.shortcuts import render, redirect
 
@@ -542,6 +543,9 @@ def accounting_budget(request):
                         plan_at = datetime.date.replace(datetime.date.today(), fiscal_year.year, i, 1)
                         has_budget = Budget.objects.filter(accounting=subaccount, plan_at=plan_at)
                         if not has_budget.exists():
+                            ## ToDO verify the type of the amount
+                            if type(amount) == np.nan:
+                                amount = 0
                             budgetize = Budget(accounting=subaccount, plan_at=plan_at, amount=amount)
                             budgetize.save()
 

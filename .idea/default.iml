@@ -26,6 +26,9 @@
     <orderEntry type="library" name="pdfmake" level="application" />
     <orderEntry type="library" name="jszip" level="application" />
   </component>
+  <component name="PyDocumentationSettings">
+    <option name="renderExternalDocumentation" value="true" />
+  </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Jinja2" />
     <option name="TEMPLATE_FOLDERS">
