@@ -826,9 +826,8 @@ def print_report(request):
                 total_general += total_month
                 gap = month_budget - total_month
                 if total_month > month_budget:
-                    gap_calculate = total_month - total_month
+                    gap_calculate = total_month - month_budget
                     gap_percent = round((gap_calculate / month_budget) * 100, 2) if month_budget > 0 else 0
-                    print(gap, gap_percent)
                 else:
                     gap_percent = 0
                 report_months.append({
