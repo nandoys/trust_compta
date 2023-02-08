@@ -50,7 +50,7 @@
                                 </div>
                                 <!--end col-->
                             </div>
-                            <h3 class="text-center">Tableaux {{ selected_month.name }} des recettes et dépenses</h3>
+                            <h3 class="text-center">Tableaux {{ selected_month.name }} des recettes et dépenses (en $ USD)</h3>
                             <!-- Table Nesting -->
                             {% if not is_filter %}
                                 <div class="table-responsive">
@@ -170,7 +170,7 @@
                                                     <thead class="table-light">
                                                         <tr>
                                                             <th scope="col">Rubrique</th>
-                                                            <th scope="col" class="text-center">Montant encaissé</th>
+                                                            <th scope="col" class="text-center">Montant encaissé ($)</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
@@ -202,9 +202,9 @@
                                                 <thead class="table-light">
                                                         <tr>
                                                             <th scope="col">Rubrique</th>
-                                                            <th scope="col" class="text-center">Budget</th>
-                                                            <th scope="col" class="text-center">Dépenses</th>
-                                                            <th scope="col" class="text-center">Ecart</th>
+                                                            <th scope="col" class="text-center">Budget ($)</th>
+                                                            <th scope="col" class="text-center">Dépenses ($)</th>
+                                                            <th scope="col" class="text-center">Ecart ($)</th>
                                                         </tr>
                                                 </thead>
                                                 <tbody>
