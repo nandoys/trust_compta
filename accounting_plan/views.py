@@ -830,7 +830,7 @@ def print_report(request):
                     'id': month['id'],
                     'balance': total_month,
                     'budget': month_budget,
-                    'budget_gap': gap,
+                    'budget_gap': round(gap, 1),
                     'budget_gap_percent': gap_percent
                 })
 
