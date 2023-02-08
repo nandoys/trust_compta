@@ -828,13 +828,14 @@ def print_report(request):
                 if total_month > month_budget:
                     gap_calculate = total_month - total_month
                     gap_percent = round((gap_calculate / month_budget) * 100, 2) if month_budget > 0 else 0
+                    print(gap, gap_percent)
                 else:
                     gap_percent = 0
                 report_months.append({
                     'id': month['id'],
                     'balance': total_month,
                     'budget': month_budget,
-                    'budget_gap': round(gap, 1),
+                    'budget_gap': round(gap, 2),
                     'budget_gap_percent': gap_percent
                 })
 
@@ -890,9 +891,9 @@ def print_report(request):
         if month_filter:
             if selected_month['id'] is not (i + 1):
                 continue
-            cash_flow.append(cash)
+            cash_flow.append(round(cash, 2))
         else:
-            cash_flow.append(cash)
+            cash_flow.append(round(cash, 2))
         cash_flow_total = total_general_incomes - total_general_outcomes
         cash_flow_average = average_incomes - average_outcomes
 
