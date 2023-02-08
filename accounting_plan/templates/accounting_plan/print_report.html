@@ -214,8 +214,13 @@
                                                             {% for month in outcome.months %}
                                                                 <td class="text-center">{{ month.budget|default:"-" }}</td>
                                                                 <td class="text-center">{{ month.balance|default:"-" }}</td>
-                                                                <td class="text-center">{{ month.budget_gap|default:"-" }}
+                                                                {% if month.budget_gap < 0 %}
+                                                                <td class="text-center text-danger">{{ month.budget_gap|default:"-" }}
                                                                     ({{ month.budget_gap_percent }}%)</td>
+                                                                {% else %}
+                                                                    <td class="text-center">{{ month.budget_gap|default:"-" }}
+                                                                    ({{ month.budget_gap_percent }}%)</td>
+                                                                {% endif %}
                                                             {% endfor %}
                                                         </tr>
                                                         {% endfor %}
