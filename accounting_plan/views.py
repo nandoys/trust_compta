@@ -6,7 +6,7 @@ from django.shortcuts import render, redirect, resolve_url
 
 from django.contrib import messages
 from django.db.models import Sum
-from django.db.models.query import F
+from django.db.models.query import F, Q
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import RequestAborted, ObjectDoesNotExist
 
@@ -475,11 +475,14 @@ def accounting_main_details(request, pk):
                     print(instance.id)
                     messages.success(request, 'Compte ajouté avec succès')
                 else:
-                    messages.error(request, 'Les valeurs envoyées sont incorrectes')
+
                     account_number = accounting_form['account_number'].value()
-                    has_account = Additional.objects.filter(account_number=account_number)
+                    account_name = accounting_form['account_name'].value()
+                    has_account = Additional.objects.filter(Q(account_number=account_number) | Q(account_name=account_name))
                     if has_account.exists():
-                        print('le compte {} existe déjà avec ce numéro {}'.format(has_account.get().account_name, account_number))
+                        messages.error(request, 'Le numéro et/ou le nom de compte existent déjà')
+                    else:
+                        messages.error(request, 'Certaines valeurs sont incorrects')
             path = resolve_url(request.path)
             return redirect(path)
         form = AdditionalAccountingForm()

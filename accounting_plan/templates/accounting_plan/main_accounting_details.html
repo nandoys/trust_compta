@@ -44,6 +44,13 @@
                                         </div>
 
                                         <div class="table-responsive table-card mt-3 mb-1  px-4">
+                                            {% if messages %}
+                                                {% for message in messages %}
+                                                     <div class="alert {{ message.tags }}" role="alert">
+                                                        {{ message }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
                                             <table class="table align-middle table-nowrap" id="accountingPlanTable">
                                                 <thead class="table-light">
                                                     <tr>
