@@ -2,7 +2,7 @@ import datetime
 import pandas as pd
 import numpy as np
 import json
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, resolve_url
 
 from django.contrib import messages
 from django.db.models import Sum
@@ -475,7 +475,12 @@ def accounting_main_details(request, pk):
                     messages.success(request, 'Compte ajouté avec succès')
                 else:
                     messages.error(request, 'Les valeurs envoyées sont incorrectes')
-
+                    account_number = accounting_form['account_number'].value()
+                    has_account = Additional.objects.filter(account_number=account_number)
+                    if has_account.exists():
+                        print('le compte {} existe déjà avec ce numéro {}'.format(has_account.get().account_name, account_number))
+            path = resolve_url(request.path)
+            return redirect(path)
         form = AdditionalAccountingForm()
         form.account_main = main_accounting
 
