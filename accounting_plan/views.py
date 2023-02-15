@@ -472,6 +472,7 @@ def accounting_main_details(request, pk):
                     instance = accounting_form.save(commit=False)
                     instance.account_main = main_accounting
                     instance.save()
+                    print(instance.id)
                     messages.success(request, 'Compte ajouté avec succès')
                 else:
                     messages.error(request, 'Les valeurs envoyées sont incorrectes')
