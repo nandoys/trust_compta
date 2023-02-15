@@ -480,7 +480,10 @@ def accounting_main_details(request, pk):
                     account_name = accounting_form['account_name'].value()
                     has_account = Additional.objects.filter(Q(account_number=account_number) | Q(account_name=account_name))
                     if has_account.exists():
-                        messages.error(request, 'Le numéro et/ou le nom de compte existent déjà')
+                        if has_account.get().account_number == account_number:
+                            messages.error(request, 'Le numéro de compte {} existent déjà'.format(account_number))
+                        elif has_account.get().account_name == account_name:
+                            messages.error(request, 'Le nom de compte {} existent déjà'.format(account_name))
                     else:
                         messages.error(request, 'Certaines valeurs sont incorrects')
             path = resolve_url(request.path)
