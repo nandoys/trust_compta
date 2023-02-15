@@ -468,22 +468,25 @@ def accounting_main_details(request, pk):
 
                 accounting_form = AdditionalAccountingForm(request.POST)
 
+                account_number = accounting_form['account_number'].value()
+                account_name = accounting_form['account_name'].value()
+
                 if accounting_form.is_valid():
                     instance = accounting_form.save(commit=False)
                     instance.account_main = main_accounting
                     instance.save()
-                    print(instance.id)
-                    messages.success(request, 'Compte ajouté avec succès')
+
+                    has_account = Additional.objects.filter(Q(account_number=account_number) | Q(account_name=account_name))
+                    if has_account.exists():
+                        messages.success(request, 'Compte ajouté avec succès')
                 else:
 
-                    account_number = accounting_form['account_number'].value()
-                    account_name = accounting_form['account_name'].value()
                     has_account = Additional.objects.filter(Q(account_number=account_number) | Q(account_name=account_name))
                     if has_account.exists():
                         if has_account.get().account_number == account_number:
-                            messages.error(request, 'Le numéro de compte {} existent déjà'.format(account_number))
+                            messages.error(request, 'Le numéro de compte {} existe déjà'.format(account_number))
                         elif has_account.get().account_name == account_name:
-                            messages.error(request, 'Le nom de compte {} existent déjà'.format(account_name))
+                            messages.error(request, 'Le nom de compte {} existe déjà'.format(account_name))
                     else:
                         messages.error(request, 'Certaines valeurs sont incorrects')
             path = resolve_url(request.path)
