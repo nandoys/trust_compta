@@ -477,7 +477,7 @@ def accounting_main_details(request, pk):
                     instance.save()
 
                     has_account = Additional.objects.filter(Q(account_number=account_number) | Q(account_name=account_name))
-                    if has_account.exists():
+                    if not has_account.exists():
                         messages.success(request, 'Compte ajouté avec succès')
                 else:
 
