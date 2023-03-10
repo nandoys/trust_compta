@@ -45,7 +45,7 @@
                                     </div>
                                 </div>
 
-                                <div class="table-responsive table-card  mt-3 mb-1">
+                                <div class="table-responsive table-card  mt-3 mb-1 px-3">
                                     <table class="table table-hover table-nowrap">
                                         <thead class="table-active">
                                             <tr>
@@ -87,7 +87,9 @@
                                                     <a href="{% url 'budget_usage' account.id %}" class="accounting_name">{{ account.account_name }}</a>
                                                 </td>
                                                 {% for budget in account.budgets %}
-                                                    <td class="accounting_budget">{{ budget.amount }}</td>
+                                                    <td class="accounting_budget">
+                                                        <label onclick="update(this)" data-id="{{ budget.id }}">{{ budget.amount }}</label>
+                                                    </td>
                                                 {% endfor %}
                                                     <td class="accounting_total">{{ account.total_budget }}</td>
                                             </tr>
@@ -218,6 +220,8 @@
 
     <!-- File upload js -->
 <script src="{% static 'js/pages/form-file-budget-upload.init.js'%}"></script>
+    <!-- update budget js -->
+<script src="{% static 'js/pages/budget-update.js'%}"></script>
  <!-- App js -->
 <script src="{%  static 'js/app.js' %}"></script>
 {% endblock extra_js %}

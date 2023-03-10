@@ -6,7 +6,7 @@ from django.utils.formats import localize
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from accounting_plan.models import Main, Additional, Adjunct, FiscalYear, Budget
+from accounting_plan.models import Main, Additional, Adjunct, FiscalYear, Budget, Monitoring
 from .forms import OutcomeForm, OutcomeModelForm, IncomeForm, IncomeModelForm
 from .models import Outcome, Income, Currency, CurrencyDailyRate
 from .serializer import IncomeSerializer, OutcomeSerializer
@@ -326,16 +326,25 @@ def accounting_additional(request):
 
 @login_required()
 def accounting_adjunct(request):
-    # year = request.GET.get('fiscal_year')
-    # fiscal_year = FiscalYear.objects.get(year=year)
-
     accounting_additional_id = request.GET.get('accounting_additional_id')
-    accounting_additional = Additional.objects.get(id=accounting_additional_id)
-    accountings_adjunct = Adjunct.objects.filter(account_additional=accounting_additional).all()
-
-    # budget_warn = fiscal_year.budget_set.get(accounting=accounting_additional).warning_at
+    accounting = Additional.objects.get(id=accounting_additional_id)
+    accountings_adjunct = Adjunct.objects.filter(account_additional=accounting).all()
 
     return JsonResponse(list(accountings_adjunct.values('id', 'adjunct_account_name')), safe=False)
+
+
+@login_required()
+def accounting_monitoring(request):
+    year_id = request.session.get('year')
+    year = FiscalYear.objects.get(id=year_id)
+
+    accounting_additional_id = request.GET.get('accounting_additional_id')
+    accounting = Additional.objects.get(id=accounting_additional_id)
+
+    monitor = Monitoring.objects.filter(accounting=accounting, year=year, accounting__account_main__account_type__contains='decaissement')
+
+
+    return JsonResponse(list(monitor.values('id', 'warn_at', 'message')), safe=False)
 
 
 @login_required()

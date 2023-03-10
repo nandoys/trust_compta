@@ -12,6 +12,7 @@ from django.core.exceptions import RequestAborted, ObjectDoesNotExist
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
 
 from utils.files import upload_file
 from utils.calendar import months_of_year
@@ -523,12 +524,14 @@ def accounting_budget(request):
             try:
                 total_budget = 0
                 budgets = Budget.objects.filter(accounting=account, plan_at__year=fiscal_year.year)
+
                 month_budget = list()
                 for month in months:
                     budget = budgets.get(plan_at__month=month['id'])
                     total_budget += budget.amount
                     month['balance'] += budget.amount
                     month_budget.append({
+                        'id': budget.id,
                         'month': month['name'],
                         'amount': budget.amount
                     })
@@ -569,10 +572,11 @@ def accounting_budget(request):
                         plan_account_number = data_row[0]
 
                         try:
-                            plan_additional_account = Additional.objects.get(account_number=plan_account_number)
+                            plan_additional_account = Additional.objects.get(account_number=plan_account_number,
+                                                                             account_main__account_type__contains='decaissement')
                             save_budget(plan_additional_account, data_row)
                         except Additional.DoesNotExist:
-                            raise ObjectDoesNotExist("Ce compte n'existe pas: {}".format(plan_account_number))
+                            raise NotFound("Ce compte n'existe pas ou n'est pas un compte de decaissement: {}".format(plan_account_number))
 
                 if file.content_type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
                     path = upload_file(file)

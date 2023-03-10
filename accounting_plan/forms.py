@@ -91,17 +91,13 @@ class FiscalYearForm(ModelForm):
 class BudgetAccountingForm(ModelForm):
     class Meta:
         model = Budget
-        fields = ['amount', 'warning_at']
+        fields = ['amount']
         labels = {
             'amount': 'Montant',
-            'warning_at': "M'avertir à partir de "
         }
 
         widgets = {
             'amount': NumberInput(attrs={'id': 'amount-field', 'class': 'form-control',
                                          'placeholder': "Entrez le montant",
-                                         'required': True}),
-            'warning_at': NumberInput(attrs={'id': 'warning-field', 'class': 'form-control',
-                                             'placeholder': "Entrez le seuil à surveiller",
-                                             'required': True})
+                                         'required': True})
         }

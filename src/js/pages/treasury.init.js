@@ -150,8 +150,18 @@ document.addEventListener('change',(evt)=>{
             }
        }
 
-        xhttp.open("GET", accounting_adjunct_url+"?accounting_additional_id="+id_accounting+"&fiscal_year="+fiscal_year, true);
+        xhttp.open("GET", accounting_adjunct_url+"?accounting_additional_id="+id_accounting, true);
         xhttp.send();
+
+        const xhttp_monitoring = new XMLHttpRequest();
+
+        xhttp_monitoring.onload = function () {
+            let json_records = JSON.parse(this.responseText);
+            console.log(json_records)
+        }
+
+        xhttp_monitoring.open("GET", "/tresorerie/monitoring?accounting_additional_id="+id_accounting, true);
+        xhttp_monitoring.send();
     }
     if (evt.target.id === "update_main_field"){
         let id_accounting = evt.detail.value
@@ -536,6 +546,14 @@ function deleteTreasory(){
             id.value = getDeleteid
         });
     });
+}
+
+function account_monitoring(){
+    form = document.getElementById('treasury_form')
+    form.addEventListener('submit', (evt) => {
+        evt.preventDefault()
+        console.log('prevented')
+    })
 }
 
 editTreasory()

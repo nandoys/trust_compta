@@ -51,7 +51,6 @@ class Budget(models.Model):
     accounting = models.ForeignKey(Additional, on_delete=models.CASCADE, null=True, blank=True)
     amount = models.IntegerField()
     plan_at = models.DateField(null=True, blank=True)
-    warning_at = models.IntegerField(default=0)
 
     def __str__(self):
         return self.accounting.account_name
@@ -59,4 +58,17 @@ class Budget(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['accounting', 'plan_at'], name='unique_budget'),
+        ]
+
+
+class Monitoring(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
+    accounting = models.ForeignKey(Additional, on_delete=models.CASCADE)
+    warn_at = models.FloatField()
+    year = models.ForeignKey(FiscalYear, on_delete=models.CASCADE)
+    message = models.TextField(max_length=500, null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['accounting', 'year'], name='unique_alert'),
         ]

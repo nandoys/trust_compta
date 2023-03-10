@@ -41,7 +41,6 @@ DEFAULT_APPS = [
 
 ]
 LOCAL_APPS = [
-    "dashboards",
     "layouts",
     "pages",
     "accounting_plan",
