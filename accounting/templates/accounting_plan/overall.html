@@ -1,0 +1,231 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Tableau de bord{% endblock title %}
+{% block extra_css %}
+    <link href="{% static  'libs/swiper/swiper-bundle.min.css' %}" rel="stylesheet" />
+{% endblock extra_css %}
+
+{% block content %}
+            <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pageurl=url pagetitle="Tableau de bord" title=reporting_title  %}
+                    {% endblock pagetitle %}
+                    <div class="row">
+                        <!-- Vertical Variation -->
+                        <div class="btn-group align-items-end d-flex" role="group" aria-label="Période">
+                            <div class="btn-group" role="group">
+                                <button id="btnGroupDrop1" type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Période: {{ reporting_period }}
+                                </button>
+                            
+                                <ul class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                    <li>
+                                        <a class="dropdown-item" href="{% url 'accounting_reporting' 'usd' %}">
+                                            Tout
+                                        </a>
+                                    </li>
+                                    {% for month in months %}
+                                        <li>
+                                            <a class="dropdown-item" href="{% url 'accounting_reporting' 'usd' %}?mois={{ month.id }} ">
+                                                {{ month.name }}
+                                            </a>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card card-height-100">
+                                <div class="card-header align-items-center d-flex">
+                                    <h3 class="card-title mb-0 flex-grow-1">Vos dépenses en {{ currency }}</h3>
+                                    <div class="flex-shrink-0">
+                                        <div class="dropdown card-header-dropdown">
+                                                <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <span class="fw-semibold text-uppercase fs-12">Année: </span><span class="text-muted">{{ current_year }}<i class="mdi mdi-chevron-down ms-1"></i></span>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                </div>
+                                        </div>
+                                    </div>
+                                </div><!-- end card header -->
+                                <div class="card-body">
+                                    {% for report_main in outcome_reports %}
+                                        <div class="accordion" id="report-{{ report_main.acc_number }}">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="heading-{{ report_main.acc_number }}">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_main.acc_number }}" aria-expanded="true" aria-controls="collapse-{{ report_main.acc_number }}">
+                                                        {{ report_main.acc_number }} | {{ report_main.acc_name }} :
+                                                        <h5>
+                                                            <span class="badge badge-outline-secondary badge-label">
+                                                                {{ report_main.balance }} {{ report_main.currency }}
+                                                            </span>
+                                                        </h5>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapse-{{ report_main.acc_number }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ report_main.acc_number }}" data-bs-parent="#report-{{ report_main.acc_number }}">
+                                                    <div class="accordion-body">
+                                                        {% for report_additional in report_main.acc_additionals %}
+                                                            <div class="accordion" id="report-{{ report_additional.acc_number }}">
+                                                                <div class="accordion-item">
+                                                                    <h2 class="accordion-header" id="heading-{{ report_additional.acc_number }}">
+                                                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_additional.acc_number }}" aria-expanded="true" aria-controls="collapse-{{ report_additional.acc_number }}">
+                                                                            {{ report_additional.acc_number }} | {{ report_additional.acc_name }}
+                                                                            <h5>
+                                                                                <span class="badge badge-outline-dark badge-label">
+                                                                                    {{ report_additional.balance }} {{ report_additional.currency }}
+                                                                                </span>
+                                                                            </h5>
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapse-{{ report_additional.acc_number }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ report_additional.acc_number }}" data-bs-parent="#report-{{ report_additional.acc_number }}">
+                                                                        <div class="accordion-body">
+                                                                            {% for report_adjunct in report_additional.acc_adjunct %}
+                                                                                <div class="accordion" id="report-{{ report_adjunct.acc_name }}">
+                                                                                    <div class="accordion-item">
+                                                                                        <h2 class="accordion-header" id="heading-{{ report_adjunct.acc_name }}">
+                                                                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_adjunct.acc_name }}" aria-expanded="true" aria-controls="collapse-{{ report_adjunct.acc_name }}">
+                                                                                                {{ report_adjunct.acc_name }}
+                                                                                                <h5>
+                                                                                                    <span class="badge text-bg-dark badge-label">
+                                                                                                        {{ report_adjunct.balance }} {{ report_adjunct.currency }}
+                                                                                                    </span>
+                                                                                                </h5>
+                                                                                            </button>
+                                                                                        </h2>
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="card-footer bg-soft-secondary">
+                                   <div class="row">
+                                       <div class="col-6">Total</div>
+                                       <div class="col-6" style="text-align: right">{{ total_general_outcomes }}</div>
+                                   </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card">
+                                <div class="card-header align-items-center d-flex">
+                                     <h3 class="card-title mb-0 flex-grow-1">Vos revenus en {{ currency }}</h3>
+                                    <div class="flex-shrink-0">
+                                        <div class="dropdown card-header-dropdown">
+                                                <a class="text-reset dropdown-btn" href="#" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <span class="fw-semibold text-uppercase fs-12">Année: </span><span class="text-muted">{{ current_year }}<i class="mdi mdi-chevron-down ms-1"></i></span>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    {% for report_main in income_reports %}
+                                        <div class="accordion" id="report-{{ report_main.acc_number }}">
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header" id="heading-{{ report_main.acc_number }}">
+                                                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_main.acc_number }}" aria-expanded="true" aria-controls="collapse-{{ report_main.acc_number }}">
+                                                        {{ report_main.acc_number }} | {{ report_main.acc_name }} :
+                                                        <h5>
+                                                            <span class="badge badge-outline-secondary badge-label">
+                                                                {{ report_main.balance }} {{ report_main.currency }}
+                                                            </span>
+                                                        </h5>
+                                                    </button>
+                                                </h2>
+                                                <div id="collapse-{{ report_main.acc_number }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ report_main.acc_number }}" data-bs-parent="#report-{{ report_main.acc_number }}">
+                                                    <div class="accordion-body">
+                                                        {% for report_additional in report_main.acc_additionals %}
+                                                            <div class="accordion" id="report-{{ report_additional.acc_number }}">
+                                                                <div class="accordion-item">
+                                                                    <h2 class="accordion-header" id="heading-{{ report_additional.acc_number }}">
+                                                                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_additional.acc_number }}" aria-expanded="true" aria-controls="collapse-{{ report_additional.acc_number }}">
+                                                                            {{ report_additional.acc_number }} | {{ report_additional.acc_name }}
+                                                                            <h5>
+                                                                                <span class="badge badge-outline-dark badge-label">
+                                                                                    {{ report_additional.balance }} {{ report_additional.currency }}
+                                                                                </span>
+                                                                            </h5>
+                                                                        </button>
+                                                                    </h2>
+                                                                    <div id="collapse-{{ report_additional.acc_number }}" class="accordion-collapse collapse" aria-labelledby="heading-{{ report_additional.acc_number }}" data-bs-parent="#report-{{ report_additional.acc_number }}">
+                                                                        <div class="accordion-body">
+                                                                            {% for report_adjunct in report_additional.acc_adjunct %}
+                                                                                <div class="accordion" id="report-{{ report_adjunct.acc_name }}">
+                                                                                    <div class="accordion-item">
+                                                                                        <h2 class="accordion-header" id="heading-{{ report_adjunct.acc_name }}">
+                                                                                            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ report_adjunct.acc_name }}" aria-expanded="true" aria-controls="collapse-{{ report_adjunct.acc_name }}">
+                                                                                                {{ report_adjunct.acc_name }}
+                                                                                                <h5>
+                                                                                                    <span class="badge text-bg-dark badge-label">
+                                                                                                        {{ report_adjunct.balance }} {{ report_adjunct.currency }}
+                                                                                                    </span>
+                                                                                                </h5>
+                                                                                            </button>
+                                                                                        </h2>
+                                                                                    </div>
+                                                                                </div>
+                                                                            {% endfor %}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="card-footer bg-soft-secondary">
+                                   <div class="row">
+                                       <div class="col-6">Total</div>
+                                       <div class="col-6" style="text-align: right">{{ total_general_incomes }}</div>
+                                   </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+{% block extra_js %}
+    <!-- Swiper Js -->
+    <script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
+
+    <script src="{% static 'js/pages/form-input-spin.init.js' %}"></script>
+
+     <!-- apexcharts -->
+    <script src="{%  static 'libs/apexcharts/dist/apexcharts.min.js' %}"></script>
+
+    <!-- Dashboard init -->
+    <script src="{%  static 'js/pages/dashboard-balance.init.js' %}"></script>
+    <!-- App js -->
+    <script src="{%  static 'js/app.js' %}"></script>
+{% endblock extra_js %}

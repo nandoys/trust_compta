@@ -1,0 +1,97 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Tableau de bord{% endblock title %}
+{% block extra_css %}
+    <link href="{% static  'libs/swiper/swiper-bundle.min.css' %}" rel="stylesheet" />
+     <link rel="stylesheet" href="{% static 'libs/aos/dist/aos.css' %}" />
+{% endblock extra_css %}
+
+{% block content %}
+
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pagetitle="Tableau de bord" title="Tableau de bord" %}
+                    {% endblock pagetitle %}
+                    <!-- end row-->
+                    <div class="row">
+                        {% for month in months %}
+                            {% cycle '' 'text-white' as text_color silent %}
+                        <div class="col-xl-3 col-md-3" data-aos="zoom-in-up">
+
+                        <!-- Ribbon Shape -->
+                            <!-- card -->
+                        <!-- Ribbon Shape -->
+
+                            <div class="card card-animate ribbon-box border shadow-none right {% cycle '' 'bg-info' %}">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1 ribbon ribbon-primary ribbon-shape">
+                                            <p class="text-uppercase fw-semibold {{ text_color }} mb-0">{{ month.name }} {{ fiscal_year|stringformat:"s" }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-grow-1">
+                                            <p class="text-uppercase fw-semibold {{ text_color }} mb-0">SOLDE</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-end justify-content-between mt-4">
+                                        <div class="col-6">
+                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4 {{ text_color }}">
+                                                <span class="counter-value" data-target="{{ month.balance.cdf|stringformat:"s" }}">0</span> CDF
+                                            </h4>
+                                            {% for curr in currencies %}
+                                            <a href="{%  url 'treasury_checkout' '200' curr.symbol fiscal_year month.id %}" class="text-decoration-underline {{ text_color }} space-right2">Recettes {{ curr.symbol }}</a>
+                                            {% endfor %}
+                                        </div>
+                                         <div>
+                                            <h4 class="fs-22 fw-semibold ff-secondary mb-4 {% cycle '' 'text-white' %}">
+                                                <span class="counter-value" data-target="{{ month.balance.usd|stringformat:"s" }}">0</span> USD
+                                            </h4>
+                                            {% for curr in currencies %}
+                                             <a href="{%  url 'treasury_outcomes' curr.symbol month.id %}" class="text-decoration-underline {{ text_color }} space-right2">Dépenses {{ curr.symbol }}</a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div><!-- end card body -->
+                            </div><!-- end card -->
+                        </div><!-- end col -->
+                        {% endfor %}
+                    </div> <!-- end row-->
+                </div>
+                <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+
+{% block extra_js %}
+    <!-- Swiper Js -->
+    <script src="{% static 'libs/swiper/swiper-bundle.min.js' %}"></script>
+
+    <script src="{% static 'js/pages/form-input-spin.init.js' %}"></script>
+
+    <script src="{% static 'libs/card/dist/card.js' %}"></script>
+
+    <!-- Widget init -->
+    <script src="{% static 'js/pages/widgets.init.js' %}"></script>
+
+        <!-- aos js -->
+    <script src="{% static 'libs/aos/dist/aos.js' %}"></script>
+    <!-- prismjs plugin -->
+    <script src="{% static 'libs/prismjs/prism.js' %}"></script>
+    <!-- animation init -->
+    <script src="{% static 'js/pages/animation-aos.init.js' %}"></script>
+
+{% endblock extra_js %}

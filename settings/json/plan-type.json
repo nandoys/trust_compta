@@ -1,0 +1,7 @@
+[
+  {"category": "actif", "sub_categories": ["immobilisation incorporelle", "immobilisation corporelle",
+                                                     "immobilisation financière", "Actif circulant"]},
+  {"category": "passif", "sub_categories": ["capitaux propres", "Dettes"]},
+  {"category": "Charge", "sub_categories": ["Charges d'exploitation", "Charges financières", "Charges exceptionnelles"]},
+  {"category": "produit", "sub_categories": ["Produits d'exploitation", "Produits financier", "Produits exceptionnels"]}
+]

@@ -1,0 +1,211 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Plan comptable{% endblock title %}
+{% block extra_css %}
+    <!-- Sweet Alert css-->
+    <link href="{% static 'libs/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
+{% endblock extra_css %}
+
+{% block content %}
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <div class="page-content">
+                <div class="container-fluid">
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pageurl="/comptabilite/plan-comptable/" pagetitle="Plan comptable" title=main_accounting %}
+                    {% endblock pagetitle %}
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="card-title mb-0">Compte {{ main_accounting.account_number }} | {{ main_accounting }}</h4>
+                                </div><!-- end card header -->
+
+                                <div class="card-body">
+                                    <div id="accountingList">
+                                        <div class="row g-4 mb-3 px-2">
+                                            <div class="col-sm-auto">
+                                                <div>
+                                                    <button type="button" class="btn btn-success add-btn" id="add-modal-btn" data-bs-toggle="modal" data-bs-target="#showModal"><i class="ri-add-line align-bottom me-1"></i> Ajouter</button>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm">
+                                                <div class="d-flex justify-content-sm-end">
+                                                    <div class="search-box ms-2">
+                                                        <input type="text" class="form-control search" placeholder="Recherche...">
+                                                        <i class="ri-search-line search-icon"></i>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="table-responsive table-card mt-3 mb-1  px-4">
+                                            {% if messages %}
+                                                {% for message in messages %}
+                                                     <div class="alert {{ message.tags }}" role="alert">
+                                                        {{ message }}
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                            <table class="table align-middle table-nowrap" id="accountingPlanTable">
+                                                <thead class="table-light">
+                                                    <tr>
+                                                        <th class="sort" data-sort="accounting_number">Numéro du compte</th>
+                                                        <th class="sort" data-sort="accounting_name">Intitulé du compte</th>
+                                                        <th class="sort" data-sort="accounting_desc">Description</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="list form-check-all">
+                                                    {% for additional_accounting in additional_accountings %}
+                                                    <tr>
+                                                        <td class="id" style="display:none;"><a href="javascript:void(0);" class="fw-medium link-primary">id</a></td>
+                                                        <td>
+                                                            <a href="{% url 'budget_usage' additional_accounting.id %}"  class="accounting_number">{{ additional_accounting.account_number }}</a>
+                                                        </td>
+                                                        <td>
+                                                            <a href="{% url 'budget_usage' additional_accounting.id %}" class="accounting_name">{{ additional_accounting.account_name }}</a>
+                                                        </td>
+                                                        <td class="accounting_desc">{{ additional_accounting.account_description }}</td>
+                                                        <td>
+                                                            <div class="d-flex gap-2">
+                                                                <div class="edit">
+                                                                    <button class="btn btn-sm btn-success edit-modal-btn" data-id="{{ additional_accounting.id  }}"
+                                                                            data-name="{{ additional_accounting.account_name }}" data-number="{{ additional_accounting.account_number }}"
+                                                                            data-type="{{ additional_accounting.account_type }}" data-description="{{ additional_accounting.account_description }}"
+                                                                            data-bs-toggle="modal" data-bs-target="#showModal" onclick="update(this)">Modifier</button>
+                                                                </div>
+                                                                <div class="remove">
+                                                                    <button class="btn btn-sm btn-danger remove-item-btn" data-id="{{ additional_accounting.id }}" data-bs-toggle="modal"
+                                                                            data-bs-target="#deleteRecordModal" onclick="remove(this)">Supprimer</button>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                            <div class="noresult" style="display: none">
+                                                <div class="text-center">
+                                                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#121331,secondary:#08a88a" style="width:75px;height:75px"></lord-icon>
+                                                    <h5 class="mt-2">Désolé! Aucun résultat trouvé</h5>
+                                                    <p class="text-muted mb-0">Nous n'avons trouvé aucune correspondace pour votre recherche.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end">
+                                            <div class="pagination-wrap hstack gap-2">
+                                                <a class="page-item pagination-prev disabled" href="#">
+                                                    Précédent
+                                                </a>
+                                                <ul class="pagination listjs-pagination mb-0"></ul>
+                                                <a class="page-item pagination-next" href="#">
+                                                    Suivant
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div><!-- end card -->
+                            </div>
+                            <!-- end col -->
+                        </div>
+                        <!-- end col -->
+                    </div>
+                    <!-- end row -->
+
+                    <div class="modal fade" id="showModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-light p-3">
+                                    <h5 class="modal-title" id="modalLabel"></h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-modal"></button>
+                                </div>
+                                <form method="post">
+                                    <div class="modal-body">
+                                        {% csrf_token %}
+                                        {% for field in form %}
+                                            {% if field.name == 'id' %}
+                                                <div class="mb-3" id="modal-id" style="display: none;">
+                                            {% else %}
+                                                <div class="mb-3">
+                                            {% endif %}
+                                            <label for="{{ field.name }}" class="form-label">{{ field.label }}</label>
+                                            {{ field }}
+                                        </div>
+                                        {% endfor %}
+                                        <div class="mb-3" id="modal-id" style="display: none;">
+                                            <label for="id-field" class="form-label">ID</label>
+                                            <input type="text" id="id-field" class="form-control" name="update-item" placeholder="ID" readonly />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <div class="hstack gap-2 justify-content-end">
+                                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="btn btn-success" id="add-btn">Ajouter Compte</button>
+                                            <button type="submit" class="btn btn-success" id="edit-btn">Mettre à jour</button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal -->
+                    <div class="modal fade zoomIn" id="deleteRecordModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="btn-close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mt-2 text-center">
+                                        <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
+                                        <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                                            <h4>Êtes -vous sûr ?</h4>
+                                            <p class="text-muted mx-4 mb-0">Êtes -vous sûr de vouloir retirer ceci du plan comptable ?</p>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                                        <form method="post">
+                                        {% csrf_token %}
+                                            <input type="hidden" name="delete-item" id="delete-item">
+                                            <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Fermer</button>
+                                            <button type="submit" class="btn w-sm btn-danger " id="delete-record">Oui, je veux le supprimer!</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--end modal -->
+                </div>
+                <!-- container-fluid -->
+            </div>
+            <!-- End Page-content -->
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+
+
+{% block extra_js %}
+
+    <!-- prismjs plugin -->
+<script src="{% static 'libs/prismjs/prism.js' %}"></script>
+<script src="{% static 'libs/list.js/dist/list.min.js' %}"></script>
+<script src="{% static 'libs/list.pagination.js/dist/list.pagination.min.js' %}"></script>
+
+<!-- listjs init -->
+<script src="{% static 'js/pages/accounting_plan_js.init.js' %}"></script>
+
+<!-- Sweet Alerts js -->
+
+<script src="{% static 'libs/sweetalert2/dist/sweetalert2.min.js' %}"></script>
+
+{% endblock extra_js %}

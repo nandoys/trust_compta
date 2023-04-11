@@ -1,0 +1,208 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Plan comptable{% endblock title %}
+{% block extra_css %}
+    <!-- Sweet Alert css-->
+    <link href="{% static 'libs/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
+    <!-- Filepond css -->
+    <link rel="stylesheet" href="{% static 'libs/filepond/dist/filepond.min.css'%}" type="text/css" />
+    <link rel="stylesheet" href="{% static 'libs/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css'%}">
+{% endblock extra_css %}
+
+{% block content %}
+        <!-- ============================================================== -->
+        <!-- Start right Content here -->
+        <!-- ============================================================== -->
+        <div class="main-content">
+
+            <v-app class="page-content" id="app">
+                <div class="container-fluid">
+                    {% block header %}
+                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol current_flag=current_checkout current_year=fiscal_year %}
+                    {% endblock header %}
+                    {% block pagetitle %}
+                    {% include "partials/page-title.html" with pageurl=url pagetitle="Tableau de bord" title="Plan comptable" %}
+                    {% endblock pagetitle %}
+
+                     <v-row class="d-flex">
+                        <v-col cols="12">
+                            <v-data-table
+                                :headers="headers"
+                                :loading="loading"
+                                loading-text="Chargemnt... Veuillez attendre"
+                                :items="comptes"
+                                :items-per-page="10"
+                                :search="search"
+                                class="elevation-1"
+                                locale="fr-FR"
+                                no-data-text="Vous n'avez aucun compte principal dans votre plan"
+                                no-results-text="Aucun résultat n'a été trouvé pour votre recherche"
+                                :footer-props="{
+                                    itemsPerPageText: 'Affichage par page'
+                                }"
+                            >
+                                <template v-slot:top>
+                                    <v-toolbar flat>
+                                        <v-toolbar-title>Comptes principaux</v-toolbar-title>
+
+                                        <v-divider
+                                          class="mx-4"
+                                          inset
+                                          vertical
+                                        ></v-divider>
+
+                                        <v-text-field
+                                            v-model="search"
+                                            append-icon="mdi-magnify"
+                                            label="Recherche"
+                                            single-line
+                                            hide-details
+                                        ></v-text-field>
+                                        <v-spacer></v-spacer>
+
+                                        <v-dialog v-model="dialog" persistent max-width="600px" fullscreen>
+                                            <template v-slot:activator="{ on, attrs }">
+                                                    <v-btn color="green darken-2" dark  class="mb-2" v-bind="attrs" v-on="on">
+                                                      Nouveau compte
+                                                    </v-btn>
+                                            </template>
+                                            <v-card>
+                                                <v-card-title>
+                                                  <span class="text-h5">${ formTitle }</span>
+                                                </v-card-title>
+                                                <v-card-text>
+                                                    <v-container>
+                                                        <v-row>
+                                                          <v-col cols="12" sm="12" md="12">
+                                                            <v-text-field
+                                                                v-model="editedItem.number"
+                                                                outlined
+                                                                label="Numéro de compte"
+                                                                dense
+                                                            ></v-text-field>
+                                                          </v-col>
+                                                          <v-col cols="12" sm="12" md="12">
+                                                            <v-text-field
+                                                                v-model="editedItem.name"
+                                                                outlined
+                                                                label="Intitulé de compte"
+                                                                dense
+                                                            ></v-text-field>
+                                                          </v-col>
+                                                          <v-col cols="12" sm="12" md="12">
+                                                            <v-select
+                                                              v-model="editedItem.classification"
+                                                              outlined
+                                                              :items="classifications"
+                                                              label="Classification du compte"
+                                                              dense
+                                                            ></v-select>
+                                                          </v-col>
+                                                          <v-col cols="12" sm="12" md="12">
+                                                            <v-select
+                                                              v-model="editedItem.operation"
+                                                              outlined
+                                                              :items="operations"
+                                                              label="Opération sur le compte"
+                                                              dense
+                                                            ></v-select>
+                                                          </v-col>
+                                                          <v-col cols="12" sm="12" md="12">
+                                                            <v-textarea
+                                                              v-model="editedItem.description"
+                                                              outlined
+                                                              name="input-7-4"
+                                                              label="Description"
+                                                            ></v-textarea>
+                                                          </v-col>
+                                                        </v-row>
+                                                    </v-container>
+                                                </v-card-text>
+                                                <v-card-actions>
+                                                  <v-spacer></v-spacer>
+                                                  <v-btn
+                                                    color="blue darken-1"
+                                                    text
+                                                    @click="dialog = false"
+                                                  >
+                                                    Fermer
+                                                  </v-btn>
+                                                  <v-btn
+                                                    color="blue darken-1"
+                                                    text
+                                                    @click="save"
+                                                  >
+                                                    Enregistrer
+                                                  </v-btn>
+                                                </v-card-actions>
+                                            </v-card>
+                                        </v-dialog>
+                                        <v-dialog v-model="dialogDelete" max-width="500px">
+                                          <v-card>
+                                            <v-card-title class="text-h5">Avertissement!</v-card-title>
+                                            <v-card-text>Êtes-vous sûr de vouloir supprimer ce compte?
+                                                Toutes les opérations associées avec ce compte seront également supprimées et ne pourront plus être récupérées.</v-card-text>
+                                            <v-card-actions>
+                                              <v-spacer></v-spacer>
+                                              <v-btn color="blue darken-1" text @click="closeDelete">Annuller</v-btn>
+                                              <v-btn color="red darken-1" text @click="deleteItemConfirm">OK</v-btn>
+                                              <v-spacer></v-spacer>
+                                            </v-card-actions>
+                                          </v-card>
+                                        </v-dialog>
+                                    </v-toolbar>
+                                </template>
+                                <template v-slot:item.actions="{ item }">
+                                    <v-icon
+                                        small
+                                        class="mr-2"
+                                        @click="editItem(item)"
+                                    >
+                                        mdi-pencil
+                                    </v-icon>
+                                    <v-icon
+                                        small
+                                        @click="deleteItem(item)"
+                                    >
+                                        mdi-delete
+                                    </v-icon>
+                                </template>
+                            </v-data-table>
+                            <v-snackbar
+                              v-model="snackbar"
+                              :multi-line="multiLine"
+                              :timeout="timeout"
+                              :color="snackcolor"
+                            >
+                              ${ snacktext }
+
+                              <template v-slot:action="{ attrs }">
+                                <v-btn
+                                  color="white"
+                                  text
+                                  v-bind="attrs"
+                                  @click="snackbar = false"
+                                >
+                                  Fermer
+                                </v-btn>
+                              </template>
+                            </v-snackbar>
+                        </v-col>
+                     </v-row>
+                </div>
+                <!-- container-fluid -->
+            </v-app>
+            <!-- End Page-content -->
+            {% block footer %}
+            {% include "partials/footer.html" %}
+            {% endblock footer %}
+        </div>
+        <!-- end main content-->
+{% endblock content %}
+
+
+{% block extra_js %}
+
+ <!-- Accounting Plan vuejs -->
+<script src="{%  static 'js/pages/vue-accounting-plan.js' %}"></script>
+{% endblock extra_js %}

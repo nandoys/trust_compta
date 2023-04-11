@@ -1,0 +1,71 @@
+{% load static %}
+{% block header %}
+       <v-app-bar app clipped-left color="blue darken-4" dark dense scroll-target="#scrolling-techniques">
+           <v-menu
+              v-model="moduleMenu"
+              :close-on-content-click="false"
+              :nudge-width="300"
+              transition="slide-x-transition"
+              offset-y
+            >
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon large v-bind="attrs" v-on="on">
+                        <v-icon>mdi-dots-grid</v-icon>
+                    </v-btn>
+                </template>
+                <v-card>
+                    <v-list>
+                        <v-list-item>
+                            <v-list-item-avatar>
+                              <img
+                                src=""
+                                alt="John"
+                              >
+                            </v-list-item-avatar>
+
+                            <v-list-item-content>
+                              <v-list-item-title>John Leider</v-list-item-title>
+                              <v-list-item-subtitle>Founder of Vuetify</v-list-item-subtitle>
+                            </v-list-item-content>
+                        </v-list-item>
+                    </v-list>
+                </v-card>
+            </v-menu>
+           <v-img
+              max-height="55"
+              max-width="100"
+              min-width="100"
+              position="left"
+              class="ma-0"
+              src="{%  static 'images/logo-trust-light.png' %}"
+            ></v-img>
+           <v-spacer></v-spacer>
+           <v-menu
+            bottom
+            open-on-hover="true"
+            left
+            offset-y
+           >
+               <template v-slot:activator="{ on, attrs }">
+                   <v-btn
+                        text
+                        class="align-self-center mr-4"
+                        v-bind="attrs"
+                        v-on="on"
+                   >
+                        Compte
+                        <v-icon right>
+                          mdi-menu-down
+                        </v-icon>
+                   </v-btn>
+               </template>
+               <card elevation="0">
+                   <v-list>
+                       <v-list-item>
+                           <v-list-item-title>Some</v-list-item-title>
+                       </v-list-item>
+                   </v-list>
+               </card>
+           </v-menu>
+       </v-app-bar>
+{% endblock header %}

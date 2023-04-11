@@ -1,0 +1,194 @@
+<v-dialog v-model="income.dialogEntry" max-width="900px" persistent>
+    <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          color="primary"
+          dark
+          class="mb-2"
+          v-bind="attrs"
+          v-on="on"
+          small
+        >
+          Nouveau
+        </v-btn>
+    </template>
+    <v-card>
+        <v-card-title>
+          <span class="text-h5">Ajouter une transaction</span>
+        </v-card-title>
+        <v-card-text>
+            <v-container>
+                 <v-form
+                   ref="formIncome"
+                   lazy-validation
+                >
+                    <v-row>
+                        <v-col cols="5">
+                            <!-- Datefield, slip field and label field  -->
+                            <v-row ref="dateOperation">
+                                 <v-menu
+                                        ref="income.datemenu"
+                                        v-model="income.menu"
+                                        :close-on-content-click="false"
+                                        :nudge-right="40"
+                                        transition="scale-transition"
+                                        offset-y
+                                        min-width="auto"
+                                    >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field
+                                                v-model="computedDateIncomesFormatted"
+                                                :rules="rules.date"
+                                                label="Date de l'opération"
+                                                readonly
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                dense
+                                            ></v-text-field>
+                                        </template>
+                                        <v-date-picker
+                                            v-model="income.editedItem.dateOperation"
+                                            no-title
+                                            @input="income.menu = false"
+                                            first-day-of-week="1"
+                                            locale="fr-fr"
+                                            :show-current="income.editedItem.dateOperation"
+                                        ></v-date-picker>
+                                    </v-menu>
+                            </v-row>
+                            <v-row ref="partner">
+                                 <v-select
+                                  v-model="income.editedItem.partner"
+                                  hide-selected="true"
+                                  clearable
+                                  :items="income.partners"
+                                  item-text="label"
+                                  item-value="id"
+                                  :loading="income.partnerLoading"
+                                  label="Partenaire"
+                                  dense
+                                  ref="partner"
+                                >
+                                    <template v-slot:prepend-item>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-text-field v-model="income.searchPartner" :autofocus="true" :label="partnerLabel"
+                                                              :placeholder="partnerPlaceholder" @input="searchIncomesPartners" :clearable="true">
+                                                </v-text-field>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                     <template v-slot:item="{ item, on, attrs }">
+                                        <v-list-item v-bind="attrs" v-on="on">
+                                            <v-list-item-content>
+                                                ${ item.label }
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                     <template v-slot:no-data="">
+                                         <v-card elevation="0">
+                                             <v-card-text>Aucun partenaire trouvé</v-card-text>
+                                             <v-card-actions>
+                                                 <v-btn text x-small @click="savePartner">Créer</v-btn>
+                                                 <v-btn text x-small @click="savePartnerAndEdit">Créer & éditer</v-btn>
+                                             </v-card-actions>
+                                         </v-card>
+                                     </template>
+                                </v-select>
+                            </v-row>
+                            <v-row ref="reference">
+                                <v-text-field
+                                    v-model="income.editedItem.reference"
+                                    :rules="rules.reference"
+                                    label="Référence"
+                                    dense
+                                ></v-text-field>
+                            </v-row>
+                            <v-row ref="label">
+                                <v-text-field
+                                    v-model="income.editedItem.label"
+                                    :rules="rules.label"
+                                    label="Libellé"
+                                    dense
+                                ></v-text-field>
+                            </v-row>
+                        </v-col>
+                        <v-spacer></v-spacer>
+                        <v-col cols="5">
+                             <!-- Journal-->
+                            <v-row>
+                                <v-select
+                                  v-model="income.editedItem.debitAccount"
+                                  hide-selected="true"
+                                  :rules="rules.account"
+                                  :items="income.debitAccounts"
+                                  item-text="label"
+                                  item-value="id"
+                                  :loading="income.debitLoading"
+                                  label="Journal"
+                                  no-data-text="Aucun journal n'a été trouvé"
+                                  dense
+                                >
+                                    <template v-slot:prepend-item>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
+                                                </v-text-field>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                </v-select>
+                            </v-row>
+                            <v-row ref="currency">
+                                <v-select
+                                      v-model="income.editedItem.currency"
+                                      hide-selected="true"
+                                      :rules="rules.currency"
+                                      :items="income.currencies"
+                                      item-text="label"
+                                      item-value="id"
+                                      :loading="income.currencyOperationLoading"
+                                      label="Devise de l'opération"
+                                      no-data-text="Aucune devise n'a été trouvée"
+                                      dense
+                                    >
+                                        <template v-slot:prepend-item>
+                                            <v-list-item>
+                                                <v-list-item-content>
+                                                    <v-text-field v-model="income.searchCurrency" :autofocus="false" placeholder="Rechercher devise" @input="searchIncomesCurrencies">
+                                                    </v-text-field>
+                                                </v-list-item-content>
+                                            </v-list-item>
+                                        </template>
+                                    </v-select>
+                            </v-row>
+                            <v-row ref="dailyRate" v-if="income.isForeigncurrencyOperation">
+                                <v-text-field
+                                    v-model="income.editedItem.rate"
+                                    :rules="rules.rate"
+                                    label="Taux de change"
+                                    dense
+                                ></v-text-field>
+                            </v-row>
+                            <v-row ref="amount">
+                                <v-text-field
+                                    v-model="income.editedItem.amountDebit"
+                                    :rules="rules.amount"
+                                    :label="symbolCurrency"
+                                    dense
+                                    @input="thousandSeparator"
+                                >
+                                </v-text-field>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-container>
+        </v-card-text>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="closeDialogEntry">Annuler</v-btn>
+            <v-btn text @click="saveAndClose">Enregistrer & Quitter</v-btn>
+            <v-btn text @click="saveAndContinue">Enregistrer & Continuer</v-btn>
+        </v-card-actions>
+    </v-card>
+</v-dialog>

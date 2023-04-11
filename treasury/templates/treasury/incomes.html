@@ -1,0 +1,241 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Revenus{% endblock title %}
+{% block extra_css %}
+
+{% endblock extra_css %}
+
+{% block content %}
+        <v-app id="app" >
+            {% block header %}
+                 {% include "partials/topbar.html" %}
+            {% endblock header %}
+            {% include 'treasury/statements.html' %}
+            <v-main>
+                <v-sheet
+                  id="scrolling-techniques"
+                  class="overflow-y-auto"
+                  max-height="600"
+                >
+                    <v-container>
+                    <!-- end page title -->
+
+                         <v-tabs v-model="tab">
+                                <v-tabs-slider></v-tabs-slider>
+                                <v-tab key="incomes">
+                                    Opération d'entrée
+                                </v-tab>
+                                <v-tab key="outcomes">
+                                     Opération de sortie
+                                </v-tab>
+                         </v-tabs>
+
+                        <v-tabs-items v-model="tab">
+                            <!-- tab of incomes -->
+                            <v-tab-item key="incomes">
+                                <v-row>
+                                    <v-col cols="4" class="pa-1">
+                                        <v-card>
+                                            <v-card-title>Balance de la Caisse</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                    <v-col cols="4" class="pa-1">
+                                        <v-card>
+                                            <v-card-title>Balance du mois</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                    <v-col cols="4" class="pa-1">
+                                        <v-card>
+                                            <v-card-title>Balance du jour</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                                <v-row class="d-flex p-4">
+                                    <v-col cols="12">
+                                        <v-data-table
+                                            :headers="income.headers"
+                                            :loading="income.loading"
+                                            loading-text="Chargement... Veuillez attendre"
+                                            :items="income.entries"
+                                            locale="fr-FR"
+                                            no-data-text="Vous n'avez aucune écriture pour ce relevé"
+                                            no-results-text="Aucun résultat n'a été trouvé pour votre recherche"
+                                            hide-default-footer
+                                            dense
+                                        ></v-data-table>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <v-tabs v-model="tabLettering">
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Facture existante</div>
+                                                </template>
+                                            </v-tab>
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Lettrage manuelle</div>
+                                                </template>
+                                            </v-tab>
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Variation stock</div>
+                                                </template>
+                                            </v-tab>
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Transfert interne</div>
+                                                </template>
+                                            </v-tab>
+                                        </v-tabs>
+                                        <v-tabs-items v-model="tabLettering">
+                                            <v-tab-item key="bill">
+                                                 {% include 'treasury/bills.html' %}
+                                            </v-tab-item>
+                                            <v-tab-item key="manual">
+                                                <v-row>
+                                                    <v-col cols="4" class="py-3">
+                                                        <v-select
+                                                          v-model="income.editedItem.partner"
+                                                          hide-selected="true"
+                                                          clearable
+                                                          :items="income.partners"
+                                                          item-text="label"
+                                                          item-value="id"
+                                                          :loading="income.partnerLoading"
+                                                          label="Partenaire"
+                                                          dense
+                                                          ref="partner"
+                                                        >
+                                                            <template v-slot:prepend-item>
+                                                                <v-list-item>
+                                                                    <v-list-item-content>
+                                                                        <v-text-field v-model="income.searchPartner" :autofocus="true" :label="partnerLabel"
+                                                                                      :placeholder="partnerPlaceholder" @input="searchIncomesPartners" :clearable="true">
+                                                                        </v-text-field>
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                             <template v-slot:item="{ item, on, attrs }">
+                                                                <v-list-item v-bind="attrs" v-on="on">
+                                                                    <v-list-item-content>
+                                                                        ${ item.label }
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                             <template v-slot:no-data="">
+                                                                 <v-card elevation="0">
+                                                                     <v-card-text>Aucun partenaire trouvé</v-card-text>
+                                                                     <v-card-actions>
+                                                                         <v-btn text x-small @click="savePartner">Créer</v-btn>
+                                                                         <v-btn text x-small @click="savePartnerAndEdit">Créer & éditer</v-btn>
+                                                                     </v-card-actions>
+                                                                 </v-card>
+                                                             </template>
+                                                        </v-select>
+                                                        <v-select
+                                  v-model="income.editedItem.debitAccount"
+                                  hide-selected="true"
+                                  :rules="rules.account"
+                                  :items="income.debitAccounts"
+                                  item-text="label"
+                                  item-value="id"
+                                  :loading="income.debitLoading"
+                                  label="Journal"
+                                  no-data-text="Aucun journal n'a été trouvé"
+                                  dense
+                                >
+                                    <template v-slot:prepend-item>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
+                                                </v-text-field>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                </v-select>
+                                                        <v-select
+                                                          v-model="income.editedItem.debitAccount"
+                                                          hide-selected="true"
+                                                          :rules="rules.account"
+                                                          :items="income.debitAccounts"
+                                                          item-text="label"
+                                                          item-value="id"
+                                                          :loading="income.debitLoading"
+                                                          label="Taxe"
+                                                          no-data-text="Aucun journal n'a été trouvé"
+                                                          dense
+                                                        >
+                                                            <template v-slot:prepend-item>
+                                                                <v-list-item>
+                                                                    <v-list-item-content>
+                                                                        <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
+                                                                        </v-text-field>
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                        </v-select>
+                                                    </v-col>
+                                                    <v-col cols="4" class="px-5">
+                                                        <v-text-field
+                                                            v-model="income.editedItem.label"
+                                                            :rules="rules.label"
+                                                            label="Libellé"
+                                                            dense
+                                                        ></v-text-field>
+
+                                                        <v-text-field
+                                                            v-model="income.editedItem.amountDebit"
+                                                            :rules="rules.amount"
+                                                            :label="symbolCurrency"
+                                                            dense
+                                                            @input="thousandSeparator"
+                                                        >
+                                                        </v-text-field>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-tab-item>
+                                            <v-tab-item key="intern">
+                                                <h1>Transfert interne</h1>
+                                            </v-tab-item>
+                                        </v-tabs-items>
+                                    </v-col>
+                                </v-row>
+                            </v-tab-item>
+
+                            <!-- tab of outcomes -->
+                            <v-tab-item key="outcomes">
+
+                            </v-tab-item>
+
+                            <v-snackbar
+                              v-model="snackbar"
+                              :multi-line="multiLine"
+                              :timeout="timeout"
+                              :color="snackcolor"
+                            >${ snacktext }
+
+                              <template v-slot:action="{ attrs }">
+                                <v-btn
+                                  color="white"
+                                  text
+                                  v-bind="attrs"
+                                  @click="snackbar = false"
+                                >
+                                  Fermer
+                                </v-btn>
+                              </template>
+                            </v-snackbar>
+                        </v-tabs-items>
+
+                    </v-container>
+                </v-sheet>
+            </v-main>
+        </v-app>
+{% endblock content %}
+
+{% block extra_js %}
+     <!-- incomes Plan vuejs -->
+
+    <script src="{%  static 'js/pages/vue-treasury.js' %}"></script>
+
+{% endblock extra_js %}
