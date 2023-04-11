@@ -19,7 +19,7 @@
             <div class="page-content">
                 <div class="container-fluid">
                     {% block header %}
-                    {% include "partials/topbar.html" with url_name='treasury_outcomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout selected_month=selected_month current_year=fiscal_year %}
+                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol current_flag=current_checkout selected_month=selected_month current_year=fiscal_year %}
                     {% endblock header %}
 
 

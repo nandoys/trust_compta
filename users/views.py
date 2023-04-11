@@ -1,14 +1,26 @@
+import datetime
+
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate, logout
+from django.utils import timezone
 from django.urls import resolve, reverse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.db.utils import IntegrityError
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.utils.translation import gettext_lazy as _
+
+from rest_framework import status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.exceptions import NotFound, ValidationError as InvalidError, AuthenticationFailed
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 from .forms import LoginForm
-from accounting_plan.models import FiscalYear, Additional, Monitoring
+from .serializers import UserSerializer
+from accounting.models import FiscalYear, Additional, Monitoring
 
 
 # Create your views here.
@@ -70,6 +82,40 @@ def login_view(request):
         'form': login_form
     }
     return render(request, "account/login.html", context)
+
+
+@api_view(['POST'])
+def login_api(request):
+    try:
+        username = request.data['username']
+        password = request.data['password']
+
+        user = authenticate(request, username=username, password=password)
+
+        if user is None:
+            return Response({'message': _("Nom d'utilisateur et/ou mot de passe incorrect!")},
+                status=status.HTTP_404_NOT_FOUND)
+        user.last_login = datetime.datetime.now(tz=timezone.utc)
+        user.save()
+
+        serializer = UserSerializer(user)
+        refresh = RefreshToken.for_user(user)
+        token = {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }
+
+        request.session.setdefault('refresh_token', token['refresh'])
+
+        response = Response()
+        response.data = {'access_token': token['access'], 'user': serializer.data}
+        return response
+    except KeyError as e:
+        return Response({'message': _(
+            "Quelque chose s'est mal passé! Veuillez réessayer ou contacter le fournisseur de ce logiciel")},
+                        status=status.HTTP_404_NOT_FOUND)
+    except User.DoesNotExist:
+        return Response({'message': _("Cet utilisateur n'a pas été trouvé!")}, status=status.HTTP_404_NOT_FOUND)
 
 
 def logout_view(request):

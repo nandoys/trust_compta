@@ -1,11 +1,33 @@
-/*
-Template Name: Velzon - Admin & Dashboard Template
-Author: Themesbrand
-Version: 2.0.0
-Website: https://Themesbrand.com/
-Contact: Themesbrand@gmail.com
-File: Common Plugins Js File
-*/
+axios.defaults.baseURL = 'http://localhost:80/';
+
+// extract value of sessionid from cookies
+
+const cookies = document.cookie.split('; ')
+
+Array.from(cookies).forEach(cookie => {
+  if(cookie.startsWith('access_token=')){
+    const access_token = cookie.split('=')
+    axios.defaults.headers.common['Authorization'] = `Trust ${ access_token[1] }`
+  }
+})
+
+//
+
+
+const currencyStore = Pinia.defineStore('currency', {
+  state() {
+    return {
+      currency_asset: 243
+    }
+  },
+  actions: {
+    increment() {
+      this.currency_asset++
+    }
+  }
+})
+
+Vue.use(Pinia.PiniaVuePlugin)
 
 //Common plugins
 if(document.querySelectorAll("[toast-list]") || document.querySelectorAll('[data-choices]') || document.querySelectorAll("[data-provider]")){ 

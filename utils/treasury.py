@@ -1,4 +1,4 @@
-from accounting_plan.models import Additional
+from accounting.models import Additional
 from treasury.models import Income, Outcome
 
 

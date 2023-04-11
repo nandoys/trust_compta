@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('tableau-de-bord', views.index, name="treasury_index"),
-    path('<str:symbol>/revenus/<int:month>', views.incomes, name="treasury_incomes"),
+    path('caisse/<str:module_id>/<str:symbol>/<int:month>/<int:year>', views.checkout, name="treasury_checkout"),
     path('<str:symbol>/depenses/<int:month>', views.outcomes, name="treasury_outcomes"),
     path('additioinal/tags', views.accounting_additional, name="accounting_additional_input"),
     path('adjunct/tags', views.accounting_adjunct, name="accounting_adjunct_input"),

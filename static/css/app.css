@@ -450,11 +450,11 @@ File: Main Css File
 }
 
 .fullscreen-enable [data-toggle=fullscreen] .bx-fullscreen::before {
-  content: "\eacb";
+  content: "";
 }
 
 [data-layout-mode=dark] .light-dark-mode .bx-moon::before {
-  content: "\ec34";
+  content: "";
 }
 
 [data-topbar=dark] #page-topbar {
@@ -771,7 +771,7 @@ File: Main Css File
 }
 .navbar-menu .navbar-nav .nav-link[data-bs-toggle=collapse]:after {
   display: block;
-  content: "\f0142";
+  content: "󰅂";
   font-family: "Material Design Icons";
   margin-left: auto;
   -webkit-transition: -webkit-transform 0.2s;
@@ -999,7 +999,7 @@ File: Main Css File
   display: none;
 }
 [data-layout=vertical][data-sidebar-size=sm-hover] .navbar-menu .btn-vertical-sm-hover i.ri-record-circle-line:before {
-  content: "\eb7d";
+  content: "";
 }
 [data-layout=vertical][data-sidebar-size=sm-hover] .navbar-menu .navbar-nav .badge {
   display: none;
@@ -1420,7 +1420,7 @@ File: Main Css File
 }
 @media (min-width: 768px) {
   [data-layout=vertical][data-layout-style=detached][data-sidebar-size=sm] #layout-wrapper,
-  [data-layout=vertical][data-layout-style=detached][data-sidebar-size=sm] .main-content {
+[data-layout=vertical][data-layout-style=detached][data-sidebar-size=sm] .main-content {
     min-height: 1400px;
   }
 }
@@ -1635,7 +1635,7 @@ File: Main Css File
 }
 @media (min-width: 1024.1px) {
   [data-layout=horizontal] .layout-width,
-  [data-layout=horizontal] .container-fluid {
+[data-layout=horizontal] .container-fluid {
     max-width: 90%;
     margin: 0 auto;
   }
@@ -2095,13 +2095,13 @@ File: Main Css File
     margin-left: 0;
   }
   [data-layout=twocolumn] .twocolumn-panel #page-topbar,
-  [data-layout=twocolumn] .twocolumn-panel .footer {
+[data-layout=twocolumn] .twocolumn-panel .footer {
     left: 0;
   }
 }
 @media (max-width: 767.98px) {
   [data-layout=twocolumn] #page-topbar,
-  [data-layout=twocolumn] .footer {
+[data-layout=twocolumn] .footer {
     left: 70px;
   }
 }
@@ -2110,7 +2110,7 @@ File: Main Css File
     margin-left: 0;
   }
   [data-layout=twocolumn] #page-topbar,
-  [data-layout=twocolumn] .footer {
+[data-layout=twocolumn] .footer {
     left: 0;
   }
 }
@@ -2152,8 +2152,8 @@ File: Main Css File
 }
 @media (min-width: 768px) {
   [data-layout-width=boxed][data-sidebar-size=sm-hover] #page-topbar,
-  [data-layout-width=boxed][data-sidebar-size=sm-hover] .footer, [data-layout-width=boxed][data-sidebar-size=sm] #page-topbar,
-  [data-layout-width=boxed][data-sidebar-size=sm] .footer {
+[data-layout-width=boxed][data-sidebar-size=sm-hover] .footer, [data-layout-width=boxed][data-sidebar-size=sm] #page-topbar,
+[data-layout-width=boxed][data-sidebar-size=sm] .footer {
     left: 70px !important;
   }
 }
@@ -2164,8 +2164,8 @@ File: Main Css File
 }
 @media (min-width: 768px) {
   [data-layout-width=boxed][data-sidebar-size=sm-hover-active] #page-topbar,
-  [data-layout-width=boxed][data-sidebar-size=sm-hover-active] .footer, [data-layout-width=boxed][data-sidebar-size=lg] #page-topbar,
-  [data-layout-width=boxed][data-sidebar-size=lg] .footer {
+[data-layout-width=boxed][data-sidebar-size=sm-hover-active] .footer, [data-layout-width=boxed][data-sidebar-size=lg] #page-topbar,
+[data-layout-width=boxed][data-sidebar-size=lg] .footer {
     left: 250px !important;
   }
 }
@@ -2175,7 +2175,7 @@ File: Main Css File
 }
 @media (min-width: 768px) {
   [data-layout-width=boxed][data-sidebar-size=md] #page-topbar,
-  [data-layout-width=boxed][data-sidebar-size=md] .footer {
+[data-layout-width=boxed][data-sidebar-size=md] .footer {
     left: 180px !important;
   }
 }
@@ -2222,13 +2222,13 @@ File: Main Css File
 
 @media (min-width: 992px) {
   [data-layout-position=scrollable] #page-topbar,
-  [data-layout-position=scrollable] .navbar-menu {
+[data-layout-position=scrollable] .navbar-menu {
     position: absolute;
   }
 }
 @media (min-width: 992px) {
   [data-layout-position=scrollable][data-layout=horizontal] #page-topbar,
-  [data-layout-position=scrollable][data-layout=horizontal] .topnav {
+[data-layout-position=scrollable][data-layout=horizontal] .topnav {
     position: absolute;
   }
 }
@@ -2478,28 +2478,28 @@ File: Main Css File
 .custom-accordionwithicon .accordion-button::after {
   background-image: none !important;
   font-family: "Material Design Icons";
-  content: "\f0142";
+  content: "󰅂";
   font-size: 1.1rem;
   vertical-align: middle;
   line-height: 0.8;
 }
 .custom-accordionwithicon .accordion-button:not(.collapsed)::after {
   background-image: none !important;
-  content: "\f0140";
+  content: "󰅀";
   margin-right: -3px;
 }
 
 .custom-accordionwithicon-plus .accordion-button::after {
   background-image: none !important;
   font-family: "Material Design Icons";
-  content: "\f0415";
+  content: "󰐕";
   font-size: 1.1rem;
   vertical-align: middle;
   line-height: 0.8;
 }
 .custom-accordionwithicon-plus .accordion-button:not(.collapsed)::after {
   background-image: none !important;
-  content: "\f0374";
+  content: "󰍴";
   margin-right: -3px;
 }
 
@@ -3233,7 +3233,7 @@ code {
   [data-layout=horizontal] .layout-rightside, [data-layout-style=detached] .layout-rightside {
     margin-top: calc(28px - 1.5rem);
     margin-right: 0;
-    height: calc(100% - (1.5rem / 5));
+    height: calc(100% - calc(1.5rem / 5));
   }
 }
 
@@ -3264,7 +3264,7 @@ code {
   color: #f7b84b;
 }
 .favourite-btn.active .ri-star-fill:before {
-  content: "\f186";
+  content: "";
 }
 
 .card-logo-light {
@@ -3625,7 +3625,7 @@ code {
   background-color: rgba(64, 81, 137, 0.5);
 }
 .img-switch .card-radio .form-check-input:checked + .form-check-label::after {
-  content: "\eb80";
+  content: "";
   font-family: "remixicon";
   position: absolute;
   top: 50%;
@@ -3640,7 +3640,7 @@ code {
   border-color: #405189 !important;
 }
 [data-bs-target="#collapseBgGradient"].active::before {
-  content: "\eb80";
+  content: "";
   font-family: remixicon;
   position: absolute;
   top: 2px;
@@ -3664,32 +3664,36 @@ code {
 
 @media print {
   .vertical-menu,
-  .right-bar,
-  .page-title-box,
-  .navbar-header,
-  .app-menu,
-  .footer,
-  #back-to-top {
+.right-bar,
+.page-title-box,
+.navbar-header,
+.app-menu,
+.footer,
+#back-to-top {
     display: none !important;
   }
+
   .card-body,
-  .main-content,
-  .right-bar,
-  .page-content,
-  body {
+.main-content,
+.right-bar,
+.page-content,
+body {
     padding: 0;
     margin: 0;
   }
+
   .card {
     border: 0;
     -webkit-box-shadow: none !important;
             box-shadow: none !important;
   }
+
   .invoice-details .d-sm-flex {
     display: -webkit-box !important;
     display: -ms-flexbox !important;
     display: flex !important;
   }
+
   .address.col-sm-6 {
     -webkit-box-flex: 0 !important;
         -ms-flex: 0 0 auto !important;
@@ -4458,11 +4462,11 @@ strong {
 
 @media (min-width: 1200px) {
   .container,
-  .container-lg,
-  .container-md,
-  .container-sm,
-  .container-xl,
-  .container-xxl {
+.container-lg,
+.container-md,
+.container-sm,
+.container-xl,
+.container-xxl {
     max-width: 1140px;
   }
 }
@@ -4877,7 +4881,7 @@ strong {
 }
 .alert-dismissible .btn-close::after {
   background: transparent !important;
-  content: "\f0156" !important;
+  content: "󰅖" !important;
   font-size: 18px;
   line-height: 15px;
   font-family: "Material Design Icons" !important;
@@ -6000,7 +6004,7 @@ a {
   margin-left: 0.255em;
   font-size: 15px;
   line-height: 15px;
-  content: "\f0140";
+  content: "󰅀";
   font-family: "Material Design Icons";
 }
 
@@ -6063,9 +6067,11 @@ a {
   .dropdown-menu-xl {
     width: 420px;
   }
+
   .dropdown-menu-lg {
     width: 320px;
   }
+
   .dropdown-menu-md {
     width: 240px;
   }
@@ -6725,7 +6731,7 @@ a {
   color: #0ab39c;
 }
 .vertical-navs-step .nav .nav-link.active .step-icon:before, .vertical-navs-step .nav .nav-link.done .step-icon:before {
-  content: "\eb80";
+  content: "";
 }
 .vertical-navs-step .nav .nav-link.active {
   border-color: #405189;
@@ -6941,7 +6947,7 @@ a {
   position: relative;
 }
 .table .sort::before {
-  content: "\f035d";
+  content: "󰍝";
   position: absolute;
   right: 0.5rem;
   top: 18px;
@@ -6951,7 +6957,7 @@ a {
 .table .sort::after {
   position: absolute;
   right: 0.5rem;
-  content: "\f0360";
+  content: "󰍠";
   font-family: "Material Design Icons";
   font-size: 0.8rem;
   top: 12px;
@@ -7743,7 +7749,7 @@ a {
   background-image: none;
 }
 .form-check-outline .form-check-input:checked[type=checkbox]::before {
-  content: "\f012c";
+  content: "󰄬";
   font-family: "Material Design Icons";
   top: -2px;
   position: absolute;
@@ -7807,7 +7813,7 @@ a {
   background-image: none;
 }
 .form-radio-outline .form-check-input:checked[type=radio]::before {
-  content: "\f0765";
+  content: "󰝥";
   font-family: "Material Design Icons";
   top: 0px;
   position: absolute;
@@ -7923,7 +7929,7 @@ a {
   background-image: none;
 }
 .form-switch-custom .form-check-input::before {
-  content: "\f0765";
+  content: "󰝥";
   font-family: "Material Design Icons";
   top: -9px;
   position: absolute;
@@ -8001,7 +8007,7 @@ a {
   border-color: #405189 !important;
 }
 .card-radio .form-check-input:checked + .form-check-label:before {
-  content: "\eb80";
+  content: "";
   font-family: "remixicon";
   position: absolute;
   top: 2px;
@@ -8213,12 +8219,16 @@ a {
           box-sizing: border-box !important;
   position: relative;
   display: block;
-  height: 100%; /* Required for horizontal native scrollbar to not appear if parent is taller than natural height */
+  height: 100%;
+  /* Required for horizontal native scrollbar to not appear if parent is taller than natural height */
   width: auto;
   visibility: visible;
-  overflow: auto; /* Scroll on this element otherwise element can't have a padding applied properly */
-  max-width: 100%; /* Not required for horizontal scroll to trigger */
-  max-height: 100%; /* Needed for vertical scroll to trigger */
+  overflow: auto;
+  /* Scroll on this element otherwise element can't have a padding applied properly */
+  max-width: 100%;
+  /* Not required for horizontal scroll to trigger */
+  max-height: 100%;
+  /* Needed for vertical scroll to trigger */
   scrollbar-width: none;
   padding: 0px !important;
 }
@@ -8469,7 +8479,7 @@ code[class*=language-] ::selection {
 
 @media print {
   code[class*=language-],
-  pre[class*=language-] {
+pre[class*=language-] {
     text-shadow: none;
   }
 }
@@ -8533,7 +8543,7 @@ pre[class*=language-] {
 .style .token.string {
   color: #9a6e3a;
   /* This background color was intended by the author of this theme. */
-  background: hsla(0deg, 0%, 100%, 0.5);
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .token.atrule,
@@ -9157,7 +9167,7 @@ div.code-toolbar > .toolbar button:hover {
 
 .shepherd-arrow,
 .shepherd-arrow:before {
-  content: "\ea75";
+  content: "";
   font-family: "remixicon";
   font-size: 24px;
   z-index: 1;
@@ -9192,11 +9202,11 @@ div.code-toolbar > .toolbar button:hover {
 }
 
 .swiper-button-prev::after {
-  content: "\ea64" !important;
+  content: "" !important;
 }
 
 .swiper-button-next::after {
-  content: "\ea6e" !important;
+  content: "" !important;
 }
 
 .swiper-pagination-bullet {
@@ -9287,7 +9297,7 @@ div.code-toolbar > .toolbar button:hover {
   position: relative;
 }
 .multi-wrapper::before {
-  content: "\ea61";
+  content: "";
   position: absolute;
   font-family: "remixicon";
   left: 50%;
@@ -9924,7 +9934,7 @@ th.gridjs-th-sort:focus, th.gridjs-th-sort:hover {
   float: left;
 }
 .gridjs-search::before {
-  content: "\f0d1";
+  content: "";
   font-family: "remixicon";
   position: absolute;
   top: 50%;
@@ -10227,6 +10237,7 @@ button.gridjs-sort-asc, button.gridjs-sort-desc {
     -webkit-transform: translateX(50%);
             transform: translateX(50%);
   }
+
   #chart-quarter {
     -webkit-transform: translateX(-50%);
             transform: translateX(-50%);
@@ -10421,8 +10432,8 @@ button.gridjs-sort-asc, button.gridjs-sort-desc {
 }
 @media (max-width: 767.98px) {
   .fc .fc-toolbar .fc-left,
-  .fc .fc-toolbar .fc-right,
-  .fc .fc-toolbar .fc-center {
+.fc .fc-toolbar .fc-right,
+.fc .fc-toolbar .fc-center {
     float: none;
     display: block;
     text-align: center;
@@ -10624,11 +10635,11 @@ button.gridjs-sort-asc, button.gridjs-sort-desc {
 }
 
 .fc-prev-button::before {
-  content: "\ea64";
+  content: "";
 }
 
 .fc-next-button::before {
-  content: "\ea6e";
+  content: "";
 }
 
 .fc-toolbar-chunk .btn-group {
@@ -10940,7 +10951,7 @@ table.dataTable > thead .sorting_asc:before,
 table.dataTable > thead .sorting_desc:before,
 table.dataTable > thead .sorting_asc_disabled:before,
 table.dataTable > thead .sorting_desc_disabled:before {
-  content: "\f0360";
+  content: "󰍠";
   position: absolute;
   right: 0.5rem;
   top: 12px;
@@ -10953,7 +10964,7 @@ table.dataTable > thead .sorting_asc:after,
 table.dataTable > thead .sorting_desc:after,
 table.dataTable > thead .sorting_asc_disabled:after,
 table.dataTable > thead .sorting_desc_disabled:after {
-  content: "\f035d";
+  content: "󰍝";
   position: absolute;
   right: 0.5rem;
   top: 18px;
@@ -11340,11 +11351,12 @@ div.dataTables_scrollFoot > .dataTables_scrollFootInner > table {
 
 @media screen and (max-width: 767px) {
   div.dataTables_wrapper div.dataTables_length,
-  div.dataTables_wrapper div.dataTables_filter,
-  div.dataTables_wrapper div.dataTables_info,
-  div.dataTables_wrapper div.dataTables_paginate {
+div.dataTables_wrapper div.dataTables_filter,
+div.dataTables_wrapper div.dataTables_info,
+div.dataTables_wrapper div.dataTables_paginate {
     text-align: center;
   }
+
   div.dataTables_wrapper div.dataTables_paginate ul.pagination {
     -webkit-box-pack: center !important;
         -ms-flex-pack: center !important;
@@ -12242,6 +12254,7 @@ div.dt-button-collection.columns.dtb-b1 .dt-button {
   div.dt-button-collection.columns > :last-child {
     width: 406px;
   }
+
   div.dt-button-collection.columns.dtb-b3 .dt-button {
     -webkit-box-flex: 0;
         -ms-flex: 0 1 32%;
@@ -12626,7 +12639,7 @@ button.dt-btn-split-drop-button:hover {
   display: none;
 }
 .choices[data-type*=select-one]:after {
-  content: "\f0140";
+  content: "󰅀";
   position: absolute;
   border: 0;
   border-color: #212529 transparent transparent;
@@ -13739,7 +13752,7 @@ span.flatpickr-weekday {
 
 [data-option-flag-name]::before,
 [data-option-flag-img-name]::before {
-  content: "\f0140";
+  content: "󰅀";
   font-family: "Material Design Icons";
   position: absolute;
   right: 0.9rem;
@@ -13806,7 +13819,7 @@ span.flatpickr-weekday {
 }
 
 .auth-pass-inputgroup input[type=text] + .btn .ri-eye-fill:before {
-  content: "\ecb6";
+  content: "";
 }
 
 .particles-js-canvas-el {
@@ -14122,6 +14135,7 @@ span.flatpickr-weekday {
     left: 112px;
     bottom: 180px;
   }
+
   .timeline-item {
     width: 100%;
     padding-left: 165px;
@@ -14395,14 +14409,14 @@ span.flatpickr-weekday {
   right: 0;
 }
 .horizontal-timeline .swiper-button-next::after {
-  content: "\ea6e";
+  content: "";
   font-family: remixicon;
 }
 .horizontal-timeline .swiper-button-prev {
   left: 0;
 }
 .horizontal-timeline .swiper-button-prev::after {
-  content: "\ea64";
+  content: "";
   font-family: remixicon;
 }
 
@@ -15066,11 +15080,11 @@ span.flatpickr-weekday {
     padding-top: 10px;
   }
   .hori-sitemap > ul li .second-list,
-  .hori-sitemap > ul li .sub-list {
+.hori-sitemap > ul li .sub-list {
     position: relative;
   }
   .hori-sitemap > ul li .second-list:before,
-  .hori-sitemap > ul li .sub-list:before {
+.hori-sitemap > ul li .sub-list:before {
     content: "";
     height: calc(100% - 14px);
     border-right: 2px dashed var(--vz-border-color);
@@ -16553,6 +16567,7 @@ span.flatpickr-weekday {
     -webkit-transform: translateX(100%);
             transform: translateX(100%);
   }
+
   .email-detail-show .email-detail-content {
     -webkit-transform: none;
             transform: none;
@@ -17003,7 +17018,7 @@ span.flatpickr-weekday {
   position: relative;
 }
 .file-manager-menu li .sub-menu li::before {
-  content: "\f0374";
+  content: "󰍴";
   position: absolute;
   left: 0px;
   font-family: Material Design Icons;
@@ -17111,6 +17126,7 @@ span.flatpickr-weekday {
     -webkit-transform: translateX(100%);
             transform: translateX(100%);
   }
+
   .file-detail-show .file-manager-detail-content {
     -webkit-transform: none;
             transform: none;

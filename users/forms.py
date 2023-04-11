@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.translation import gettext_lazy as _
 
-from accounting_plan.models import FiscalYear
+from accounting.models import FiscalYear
 
 
 class EmailAwarePasswordResetTokenGenerator(PasswordResetTokenGenerator):

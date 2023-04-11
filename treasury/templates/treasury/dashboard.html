@@ -47,7 +47,7 @@
                                                 <span class="counter-value" data-target="{{ month.balance.cdf|stringformat:"s" }}">0</span> CDF
                                             </h4>
                                             {% for curr in currencies %}
-                                            <a href="{%  url 'treasury_incomes' curr.symbol_iso month.id %}" class="text-decoration-underline {{ text_color }} space-right2">Recettes {{ curr.symbol_iso }}</a>
+                                            <a href="{%  url 'treasury_checkout' '200' curr.symbol fiscal_year month.id %}" class="text-decoration-underline {{ text_color }} space-right2">Recettes {{ curr.symbol }}</a>
                                             {% endfor %}
                                         </div>
                                          <div>
@@ -55,7 +55,7 @@
                                                 <span class="counter-value" data-target="{{ month.balance.usd|stringformat:"s" }}">0</span> USD
                                             </h4>
                                             {% for curr in currencies %}
-                                             <a href="{%  url 'treasury_outcomes' curr.symbol_iso month.id %}" class="text-decoration-underline {{ text_color }} space-right2">Dépenses {{ curr.symbol_iso }}</a>
+                                             <a href="{%  url 'treasury_outcomes' curr.symbol month.id %}" class="text-decoration-underline {{ text_color }} space-right2">Dépenses {{ curr.symbol }}</a>
                                             {% endfor %}
                                         </div>
                                     </div>

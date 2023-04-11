@@ -1,0 +1,72 @@
+<v-navigation-drawer app permanent absolute clipped width="320" ref="drawer">
+    <v-list-item>
+    <v-list-item-content>
+      <v-list-item-title>
+          {% include "treasury/form/cash-statement.html" %}
+      </v-list-item-title>
+    </v-list-item-content>
+    </v-list-item>
+
+    <v-list-item-group
+      v-model="income.selectedStatement"
+      color="primary"
+    >
+        <v-data-iterator
+          :items="income.statements"
+          item-key="id"
+          :items-per-page.sync="income.itemsPerPage"
+          :page.sync="income.page"
+          :search="income.search"
+          no-results-text="Aucun résultat trouvé"
+          no-data-text="Aucune transaction existante"
+          hide-default-footer
+        >
+            <template v-slot:header>
+                <v-row>
+                    <v-col cols="12">
+                        <v-text-field
+                            v-model="income.search"
+                            clearable
+                            flat
+                            hide-details
+                            prepend-inner-icon="mdi-magnify"
+                            label="Rechercher..."
+                        ></v-text-field>
+                    </v-col>
+                    <v-col cols="6">
+                        <v-btn elevation="0" text x-small class="pa-0">
+                            <v-icon  @click="formerPage">mdi-chevron-left</v-icon> précédent
+                        </v-btn>
+                    </v-col>
+
+                    <v-col cols="6">
+                        <v-btn elevation="0" text x-small class="mr-8">
+                            suivant <v-icon  @click="nextPage">mdi-chevron-right</v-icon>
+                        </v-btn>
+                    </v-col>
+                </v-row>
+            </template>
+            <template v-slot:default="{ items, isExpanded, expand }">
+                <v-list-item  v-for="item in items" :key="item.text" @click="getAccountingEntries">
+                  <v-list-item-content>
+                      <v-list-item-title v-text="item.dateTransaction"></v-list-item-title>
+                      <v-list-item-subtitle class="text--primary" v-text="item.label"></v-list-item-subtitle>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                      <v-list-item-action-text>${item.currencyName}</v-list-item-action-text>
+                      ${item.amount}
+                  </v-list-item-action>
+                </v-list-item>
+            </template>
+            <template v-slot:footer="">
+                  <v-row>
+                    <v-col>
+                        Navigation:
+                        <v-icon v-ripple @click="formerPage">mdi-chevron-left</v-icon>
+                        <v-icon v-ripple @click="nextPage">mdi-chevron-right</v-icon>
+                    </v-col>
+                </v-row>
+            </template>
+        </v-data-iterator>
+    </v-list-item-group>
+</v-navigation-drawer>

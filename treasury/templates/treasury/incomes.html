@@ -2,219 +2,240 @@
 {% load static %}
 {% block title %}Revenus{% endblock title %}
 {% block extra_css %}
-    <!-- Sweet Alert css-->
-        <!-- Dragula css -->
-    <link rel="stylesheet" href="{% static 'libs/dragula/dist/dragula.min.css' %}" />
-    <link href="{% static 'libs/sweetalert2/dist/sweetalert2.min.css' %}" rel="stylesheet" type="text/css" />
 
 {% endblock extra_css %}
 
 {% block content %}
-
-        <!-- ============================================================== -->
-        <!-- Start right Content here -->
-        <!-- ============================================================== -->
-        <div class="main-content">
-
-            <div class="page-content">
-                <div class="container-fluid">
-                    {% block header %}
-                    {% include "partials/topbar.html" with url_name='treasury_incomes' checkouts=currencies current_currency=currency.symbol_iso current_flag=current_checkout selected_month=selected_month current_year=fiscal_year %}
-                    {% endblock header %}
-                    {% block pagetitle %}
-                    {% include "partials/page-title.html" with pageurl="/tresorerie/tableau-de-bord" pagetitle="Trésorerie" title="Recettes" selected_month=selected_month in_year=fiscal_year %}
-                    {% endblock pagetitle %}
-
+        <v-app id="app" >
+            {% block header %}
+                 {% include "partials/topbar.html" %}
+            {% endblock header %}
+            {% include 'treasury/statements.html' %}
+            <v-main>
+                <v-sheet
+                  id="scrolling-techniques"
+                  class="overflow-y-auto"
+                  max-height="600"
+                >
+                    <v-container>
                     <!-- end page title -->
 
-                     <div class="chat-wrapper d-lg-flex gap-1 mx-n4 mt-n4 p-1">
-                        <div class="col-xl-3 col-md-3 col-lg-3 card" style="overflow: auto;height: 570px">
-                            <div class="p-4 d-flex flex-column">
-                                <div class="px-4 mx-n4" style="height: calc(100vh - 468px);">
+                         <v-tabs v-model="tab">
+                                <v-tabs-slider></v-tabs-slider>
+                                <v-tab key="incomes">
+                                    Opération d'entrée
+                                </v-tab>
+                                <v-tab key="outcomes">
+                                     Opération de sortie
+                                </v-tab>
+                         </v-tabs>
 
-                                    {% if messages %}
-                                    {% for message in messages %}
-                                         <div class="alert {{ message.tags }}" role="alert">
-                                            {{ message }}
-                                        </div>
-                                    {% endfor %}
-                                    {% endif %}
-                                    <form method="post"  data-year="{{ fiscal_year }}" data-url-adjunct="{% url 'accounting_adjunct_input' %}" data-url-accounting-additional="{% url 'accounting_additional_input' %}" id="treasury_form">
-                                        {% csrf_token %}
-                                        {% for field in income_form %}
-                                        <div class="mb-4">
-                                            <label for="{{ field.name }}" class="form-label">{{ field.label }}</label>
-                                            {{ field }}
-                                        </div>
-                                        {% if field.name == 'accounting_main' %}
-                                            <div class="mb-4" id="accounting-additional-div"></div>
-                                            <div class="mb-4" id="accounting-adjunct-div"></div>
-                                        {% endif %}
-                                        {% endfor %}
-                                        <div class="hstack gap-2 justify-content-end">
-                                            <button type="submit" class="btn btn-primary" id="addNewProject">Ajouter</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div><!--end side content-->
-                        <div class="col-xl-9 col-md-9 col-lg-9 card">
-                            <div class="hstack mb-4 card-header">
-                                <h5 class="fw-semibold flex-grow-1 mb-0 card-title">Caisse {{ currency.name }} |  Balance Caisse: {{ balance }} {{ currency.symbol_iso }}</h5>
-                            </div>
+                        <v-tabs-items v-model="tab">
+                            <!-- tab of incomes -->
+                            <v-tab-item key="incomes">
+                                <v-row>
+                                    <v-col cols="4" class="pa-1">
+                                        <v-card>
+                                            <v-card-title>Balance de la Caisse</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                    <v-col cols="4" class="pa-1">
+                                        <v-card>
+                                            <v-card-title>Balance du mois</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                    <v-col cols="4" class="pa-1">
+                                        <v-card>
+                                            <v-card-title>Balance du jour</v-card-title>
+                                        </v-card>
+                                    </v-col>
+                                </v-row>
+                                <v-row class="d-flex p-4">
+                                    <v-col cols="12">
+                                        <v-data-table
+                                            :headers="income.headers"
+                                            :loading="income.loading"
+                                            loading-text="Chargement... Veuillez attendre"
+                                            :items="income.entries"
+                                            locale="fr-FR"
+                                            no-data-text="Vous n'avez aucune écriture pour ce relevé"
+                                            no-results-text="Aucun résultat n'a été trouvé pour votre recherche"
+                                            hide-default-footer
+                                            dense
+                                        ></v-data-table>
+                                    </v-col>
+                                    <v-col cols="12">
+                                        <v-tabs v-model="tabLettering">
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Facture existante</div>
+                                                </template>
+                                            </v-tab>
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Lettrage manuelle</div>
+                                                </template>
+                                            </v-tab>
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Variation stock</div>
+                                                </template>
+                                            </v-tab>
+                                            <v-tab>
+                                                <template v-slot:default>
+                                                    <div class="text-caption">Transfert interne</div>
+                                                </template>
+                                            </v-tab>
+                                        </v-tabs>
+                                        <v-tabs-items v-model="tabLettering">
+                                            <v-tab-item key="bill">
+                                                 {% include 'treasury/bills.html' %}
+                                            </v-tab-item>
+                                            <v-tab-item key="manual">
+                                                <v-row>
+                                                    <v-col cols="4" class="py-3">
+                                                        <v-select
+                                                          v-model="income.editedItem.partner"
+                                                          hide-selected="true"
+                                                          clearable
+                                                          :items="income.partners"
+                                                          item-text="label"
+                                                          item-value="id"
+                                                          :loading="income.partnerLoading"
+                                                          label="Partenaire"
+                                                          dense
+                                                          ref="partner"
+                                                        >
+                                                            <template v-slot:prepend-item>
+                                                                <v-list-item>
+                                                                    <v-list-item-content>
+                                                                        <v-text-field v-model="income.searchPartner" :autofocus="true" :label="partnerLabel"
+                                                                                      :placeholder="partnerPlaceholder" @input="searchIncomesPartners" :clearable="true">
+                                                                        </v-text-field>
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                             <template v-slot:item="{ item, on, attrs }">
+                                                                <v-list-item v-bind="attrs" v-on="on">
+                                                                    <v-list-item-content>
+                                                                        ${ item.label }
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                             <template v-slot:no-data="">
+                                                                 <v-card elevation="0">
+                                                                     <v-card-text>Aucun partenaire trouvé</v-card-text>
+                                                                     <v-card-actions>
+                                                                         <v-btn text x-small @click="savePartner">Créer</v-btn>
+                                                                         <v-btn text x-small @click="savePartnerAndEdit">Créer & éditer</v-btn>
+                                                                     </v-card-actions>
+                                                                 </v-card>
+                                                             </template>
+                                                        </v-select>
+                                                        <v-select
+                                  v-model="income.editedItem.debitAccount"
+                                  hide-selected="true"
+                                  :rules="rules.account"
+                                  :items="income.debitAccounts"
+                                  item-text="label"
+                                  item-value="id"
+                                  :loading="income.debitLoading"
+                                  label="Journal"
+                                  no-data-text="Aucun journal n'a été trouvé"
+                                  dense
+                                >
+                                    <template v-slot:prepend-item>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
+                                                </v-text-field>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                </v-select>
+                                                        <v-select
+                                                          v-model="income.editedItem.debitAccount"
+                                                          hide-selected="true"
+                                                          :rules="rules.account"
+                                                          :items="income.debitAccounts"
+                                                          item-text="label"
+                                                          item-value="id"
+                                                          :loading="income.debitLoading"
+                                                          label="Taxe"
+                                                          no-data-text="Aucun journal n'a été trouvé"
+                                                          dense
+                                                        >
+                                                            <template v-slot:prepend-item>
+                                                                <v-list-item>
+                                                                    <v-list-item-content>
+                                                                        <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
+                                                                        </v-text-field>
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                        </v-select>
+                                                    </v-col>
+                                                    <v-col cols="4" class="px-5">
+                                                        <v-text-field
+                                                            v-model="income.editedItem.label"
+                                                            :rules="rules.label"
+                                                            label="Libellé"
+                                                            dense
+                                                        ></v-text-field>
 
-                           <div class="px-4 card-body" id="">
-                               <div class="table-responsive">
-                                        <table class="table table-hover table-light table-bordered table-nowrap" style="width:100%" data-treasury-type="encaissement" data-api-url="/tresorerie/income/" id="treasury_table">
-                                            <thead class="table-active">
-                                                <tr>
-                                                    <th scope="col">Date de l'opération</th>
-                                                    <th scope="col">Compte</th>
-                                                    <th scope="col">Détail</th>
-                                                    <th scope="col"># Bordereau</th>
-                                                    <th scope="col">Montant</th>
-                                                    <th scope="col">Action</th>
-                                                </tr>
-                                            </thead>
+                                                        <v-text-field
+                                                            v-model="income.editedItem.amountDebit"
+                                                            :rules="rules.amount"
+                                                            :label="symbolCurrency"
+                                                            dense
+                                                            @input="thousandSeparator"
+                                                        >
+                                                        </v-text-field>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-tab-item>
+                                            <v-tab-item key="intern">
+                                                <h1>Transfert interne</h1>
+                                            </v-tab-item>
+                                        </v-tabs-items>
+                                    </v-col>
+                                </v-row>
+                            </v-tab-item>
 
-                                            <tbody id="budget-list">
-                                                {% for income in incomes|dictsortreversed:"in_at" %}
-                                                <tr>
-                                                    <td>{{ income.in_at }}</td>
-                                                    <td>{{ income.accounting_main }}</td>
-                                                    <td>{{ income.more|default:"-" }}</td>
-                                                    <td><span class="badge bg-danger text-uppercase">{{ income.slip_number }}</span></td>
-                                                     <td>{{ income.amount }}</td>
-                                                    <td>
-                                                        <div class="hstack gap-2">
-                                                            <button class="btn btn-sm btn-soft-danger remove-list" data-bs-toggle="modal" data-bs-target="#deleteIncome" data-remove-id="{{ income.id }}">
-                                                                <i class="ri-delete-bin-5-fill align-bottom"></i>
-                                                            </button>
-                                                            <button class="btn btn-sm btn-soft-info edit-list" data-bs-toggle="modal" data-bs-target="#updateIncome" data-edit-id="{{ income.id }}">
-                                                                    <i class="ri-pencil-fill align-bottom"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                                {% empty %}
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                               <div class="py-4 mt-4 text-center" id="noresult" style="display: none;">
-                                    <lord-icon src="https://cdn.lordicon.com/msoeawqm.json" trigger="loop" colors="primary:#405189,secondary:#0ab39c" style="width:72px;height:72px"></lord-icon>
-                                    <h5 class="mt-4">Désolé! Aucun Résultat Trouvé</h5>
-                               </div>
-                            </div>
+                            <!-- tab of outcomes -->
+                            <v-tab-item key="outcomes">
 
-                        </div>
-                    </div>
-                </div>
-                <!-- container-fluid -->
-            </div>
-            <!-- End Page-content -->
-            {% block footer %}
-            {% include "partials/footer.html" %}
-            {% endblock footer %}
-        </div>
-        <!-- end main content-->
+                            </v-tab-item>
 
-        <!-- Modal -->
-    <div class="modal fade" id="updateIncome" tabindex="-1" aria-labelledby="updateIncomeLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-header p-3 bg-soft-success">
-                    <h5 class="modal-title" id="updateIncomeLabel">Modifier Opération</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" id="createTaskBtn-close" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="task-error-msg" class="alert alert-danger py-2"></div>
-                    <form autocomplete="off" method="post" id="update-form">
-                        {% csrf_token %}
-                        <input type="hidden" id="edit_record_id" name="edit_record_id" class="form-control">
-                        <div class="mb-3 position-relative" id="update_main_div" data-api-url="{% url 'api_get_accounting_main_by_type' 'encaissement' %}">
-                            <label for="update_main_input" class="form-label">Compte principal</label>
-                        </div>
-                        <div class="row g-4 mb-3">
-                            <div class="col-lg-6" id="update_additional_div"></div>
-                            <!--end col-->
-                            <div class="col-lg-6" id="update_adjunct_div"> </div>
-                            <!--end col-->
-                        </div>
-                        <div class="mb-3">
-                            <label for="slip_number_input" class="form-label">Numéro bordereau</label>
-                            <input type="text" id="slip_number_input" name="slip_number" class="form-control" placeholder="Entrez le numéro de bordereau">
-                        </div>
-                        <div class="mb-3">
-                            <label for="amount_input" class="form-label">Montant</label>
-                            <input type="text" id="amount_input" name="amount" class="form-control" placeholder="Entrez un montant">
-                        </div>
-                        <div class="mb-4">
-                            <label for="done_at_input" class="form-label">Date de l'opération</label>
-                            <input type="date" id="done_at_input" name="in_at" class="form-control" placeholder="Entrez la date de l'opération">
-                        </div>
+                            <v-snackbar
+                              v-model="snackbar"
+                              :multi-line="multiLine"
+                              :timeout="timeout"
+                              :color="snackcolor"
+                            >${ snacktext }
 
-                        <div class="mb-4">
-                            <label for="description_input" class="form-label">Description</label>
-                            <input type="text" id="description_input" name="more" class="form-control" placeholder="Entrez une description">
-                        </div>
+                              <template v-slot:action="{ attrs }">
+                                <v-btn
+                                  color="white"
+                                  text
+                                  v-bind="attrs"
+                                  @click="snackbar = false"
+                                >
+                                  Fermer
+                                </v-btn>
+                              </template>
+                            </v-snackbar>
+                        </v-tabs-items>
 
-                        <div class="hstack gap-2 justify-content-end">
-                            <button type="button" class="btn btn-ghost-success" data-bs-dismiss="modal"><i class="ri-close-fill align-bottom"></i> Fermr</button>
-                            <button type="submit" class="btn btn-primary" id="addNewTodo">Modifier</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--end create taks-->
-
-    <!-- removeFileItemModal -->
-    <div id="deleteIncome" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" id="close-removetodomodal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mt-2 text-center">
-                        <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f7b84b,secondary:#f06548" style="width:100px;height:100px"></lord-icon>
-                        <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                            <h4>Êtes-vous sûr?</h4>
-                            <p class="text-muted mx-4 mb-0">Êtes-vous sûr de vouloir supprimer cette recette ?</p>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
-                        <form method="post">
-                            {% csrf_token %}
-                            <input type="hidden" id="remove_record_id" name="remove_record_id" class="form-control">
-                            <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Fermer</button>
-                            <button type="submit" class="btn w-sm btn-danger" id="remove-income">Oui, Je suis sûr!</button>
-                        </form>
-                    </div>
-                </div>
-            </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
-    <!--end delete modal -->
-
+                    </v-container>
+                </v-sheet>
+            </v-main>
+        </v-app>
 {% endblock content %}
 
 {% block extra_js %}
-        <!--datatable js-->
-    <script src="{%  static 'js/jquery-3.6.0.js' %}"></script>
-    <script src="{%  static 'js/jquery.dataTables.js' %}"></script>
-    <script src="{%  static 'js/dataTables.bootstrap5.js' %}"></script>
-    <script src="{%  static 'js/dataTables.responsive.js' %}"></script>
-    <script src="{%  static 'js/dataTables.buttons.js' %}"></script>
-    <script src="{%  static 'js/buttons.print.js' %}"></script>
-    <script src="{%  static 'js/buttons.html5.js' %}"></script>
-    <script src="{%  static 'js/vfs_fonts.js' %}"></script>
-    <script src="{%  static 'js/pdfmake.js' %}"></script>
-    <script src="{%  static 'js/jszip.js' %}"></script>
+     <!-- incomes Plan vuejs -->
 
-    <script src="{% static 'js/pages/treasury.init.js' %}"></script>
-    <script src="{% static 'js/pages/datatables.treasury.js' %}"></script>
+    <script src="{%  static 'js/pages/vue-treasury.js' %}"></script>
 
 {% endblock extra_js %}
