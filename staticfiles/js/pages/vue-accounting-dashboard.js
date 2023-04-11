@@ -1,1 +1,0 @@
-const app=new Vue({el:"#app",delimiters:["${","}"],vuetify:new Vuetify,data(){},watch:{},methods:{},computed:{}});
