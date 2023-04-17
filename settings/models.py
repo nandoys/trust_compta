@@ -7,9 +7,12 @@ class Journal(MP_Node):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=255, unique=True)
     account = models.ForeignKey('accounting.Plan', on_delete=models.CASCADE)
-    type_journal = models.ForeignKey('JournalType', on_delete=models.SET_NULL, null=True)
-    currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True)
+    type_journal = models.ForeignKey('JournalType', on_delete=models.SET_NULL, null=True, related_name='type_journal')
+    currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True, blank=True)
     is_active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.name
 
     class Meta:
         constraints = [
@@ -20,3 +23,6 @@ class Journal(MP_Node):
 class JournalType(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     label = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.label

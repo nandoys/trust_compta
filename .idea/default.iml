@@ -26,6 +26,7 @@
     <orderEntry type="library" name="pdfmake" level="application" />
     <orderEntry type="library" name="jszip" level="application" />
     <orderEntry type="library" name="@mdi/font" level="application" />
+    <orderEntry type="library" name="babel-polyfill" level="application" />
   </component>
   <component name="PyDocumentationSettings">
     <option name="renderExternalDocumentation" value="true" />

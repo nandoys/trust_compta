@@ -35,6 +35,7 @@
     "sass-loader": "^13.2.1"
   },
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "@ckeditor/ckeditor5-build-classic": "^31.0.0",
     "@simonwep/pickr": "^1.8.2",
     "@tarekraafat/autocomplete.js": "^10.2.6",

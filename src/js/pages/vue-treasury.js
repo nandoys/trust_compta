@@ -32,6 +32,7 @@ const app = new Vue({
           },
           { text: 'Compte', value: 'account' },
           { text: 'Libellé', value: 'label' },
+          { text: 'Montant en devise', value: 'amountForeign' },
           { text: 'Debit', value: 'debit' },
           { text: 'Crédit', value: 'credit', sortable: false },
         ],
@@ -104,7 +105,7 @@ const app = new Vue({
           { text: 'Partenaire', value: 'partner' },
           { text: 'Libellé', value: 'label' },
           { text: 'Pièce comptable', value: 'reference', sortable: false },
-          { text: 'Montant en devises', value: 'amountForeignCurrency' },
+          { text: 'Montant en devises', value: 'amountForeign' },
           { text: 'Montant', value: 'amount' },
         ],
           loading: false
@@ -168,6 +169,19 @@ const app = new Vue({
         deep: true,
       },
 
+      income: {
+        handler (v, old) {
+          const entries = v.entries.slice(1)
+          Array.from(entries).forEach(entry => {
+            const index = this.customer.bills.findIndex(bill => bill.id === entry.id)
+            if (index > -1) {
+              this.customer.bills[index].amountCalculated = this.customer.bills[index].amount - entry.credit
+            }
+          })
+        },
+        deep: true,
+      },
+
       dialogIncomes (val) {
         val || this.close()
       },
@@ -175,7 +189,68 @@ const app = new Vue({
         val || this.closeDelete()
       },
 
+      watchSelectedBill(val, old) {
+        let bill_new = Array.from(val)
+        let bill_old = Array.from(old)
 
+        if (bill_new.length === 0){
+
+          if (bill_old.length === 1) {
+
+             //reset the bill amount
+            const item = this.income.entries[1]
+            const index = this.customer.bills.findIndex(found => found.id === item.id)
+            this.customer.bills[index].amountCalculated = this.customer.bills[index].amount
+
+            // remove the entry when the bill is no longer selected
+            this.income.entries.splice(1, 1)
+
+            //remove header of bill table
+            const indexBill = this.customer.headers.findIndex(header => header.value === 'amountCalculated')
+            this.customer.headers.splice(indexBill, 1)
+          } else if (bill_old.length > 1) {
+
+             bill_old.forEach(bill => {
+
+              const entry_found = this.income.entries.findIndex(entry => entry.id === bill.id)
+              if (entry_found > 0) {
+                //reset the bill amount
+                const item = this.income.entries[entry_found]
+                const index = this.customer.bills.findIndex(found => found.id === item.id)
+                this.customer.bills[index].amountCalculated = this.customer.bills[index].amount
+
+                // remove the entry when the bill is no longer selected
+                this.income.entries.splice(entry_found, 1)
+              }
+
+            })
+
+            //remove header of bill table
+            const indexBill = this.customer.headers.findIndex(header => header.value === 'amountCalculated')
+            this.customer.headers.splice(indexBill, 1)
+
+          }
+        }
+        else if (bill_new.length < bill_old.length && bill_new.length >= 1){
+          bill_old.forEach(bill => {
+
+            const bill_found = bill_new.find(bill_found => bill_found.id === bill.id)
+            // if no bill was found it should be delete from entries
+            if (!bill_found) {
+              const entry_found = this.income.entries.findIndex(entry => entry.id === bill.id)
+               //reset the bill amount
+              const item = this.income.entries[entry_found]
+              const index = this.customer.bills.findIndex(found => found.id === item.id)
+              this.customer.bills[index].amountCalculated = this.customer.bills[index].amount
+
+              // remove the entry when the bill is no longer selected
+              this.income.entries.splice(entry_found, 1)
+            }
+          })
+        }
+
+
+      }
 
     },
 
@@ -211,15 +286,21 @@ const app = new Vue({
       getUrlData(){
         const parse = window.location.pathname.split('/')
         this.moduleName = parse[2]
-        this.moduleId= parse[3]
-        this.currentCurrency = parse[4]
-        this.currentMonth = parse[5]
-        this.currentYear = parse[6]
+      },
+
+      getModule(){
+
+        this.apiCall('get', `/api/settings/journal?type=${this.moduleName}`).then(res => {
+          const data = res.data
+          this.moduleId = data['id']
+          this.getStatements()
+          this.getDebitAccounts()
+        })
       },
 
       getStatements() {
         this.income.statementsLoading = true
-        this.apiCall('get', `/api/treasury/statements/get`).then(res => {
+        this.apiCall('get', `/api/treasury/statements/get?journal=${this.moduleId}`).then(res => {
           let data = res.data
           let jsonData = []
           Array.from(data).forEach(item => {
@@ -235,13 +316,15 @@ const app = new Vue({
               accountId: item.account_id,
               accountNumber: item.account__account_number,
               accountName: item.account__account_name,
-              amount: item.amount.toLocaleString(),
+              amount: item.amount !== null ? item.amount : '',
               rate: item.rate
             })
           })
           this.income.statements = jsonData
           this.income.statementsCopy = [...this.income.statements]
           this.income.statementsLoading = false
+        }).catch(err => {
+
         })
 
       },
@@ -367,19 +450,21 @@ const app = new Vue({
       getBills(){
           this.customer.loading = true
 
-          this.apiCall('get', `/api/billing/customer/bills/get`).then(res => {
+          this.apiCall('get', `/api/billing/customer/bills/get?journal=${this.moduleId}`).then(res => {
             const data = res.data
             let jsonData = []
             Array.from(data).forEach(item => {
               jsonData.push({
-                'id': item.bill.id,
-                'dateOperation': this.formatDate(item.bill.bill_at),
-                'account': `${item.bill.account.account_number} ${item.bill.account.account_name}`,
-                'partner': item.bill.partner,
-                'label': item.bill.label,
-                'reference': item.bill.reference,
-                'amountForeignCurrency': item.bill.amountForeignCurrency,
-                'amount': item.bill.amount
+                id: item.id,
+                dateOperation: this.formatDate(item.bill_at),
+                account: `${item.account__account_number} ${item.account__account_name}`,
+                partner: item.partner__name,
+                label: item.label,
+                reference: item.reference,
+                amountForeign: item.amount_foreign,
+                amountForeignCalculated: item.amount_foreign,
+                amount: item.amount,
+                amountCalculated: item.amount,
               })
             })
             this.customer.bills = jsonData
@@ -450,6 +535,7 @@ const app = new Vue({
         const now  = (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)
         const [year, month, day] = now.split('-')
 
+        /*
         const selectedYear = this.currentYear
         const selectedMonth = `${this.currentMonth}`.length === 1 ? `0${this.currentMonth}` : this.currentMonth
 
@@ -462,6 +548,7 @@ const app = new Vue({
           this.minDate = `${selectedYear}-${selectedMonth}-01`
           this.maxDate = `${selectedYear}-${selectedMonth}-31`
         }
+        */
       },
 
       apiCall (method, uri, data) {
@@ -704,17 +791,20 @@ const app = new Vue({
             const data = res.data
             let jsonData = []
             Array.from(data).forEach(item => {
+
               jsonData.push({
                 id: item.id,
                 dateTransaction: this.formatDate(item.date_at),
                 account: `${item.account__account_number} ${item.account__account_name}`,
                 label: item.label,
-                debit: item.debit.toLocaleString(),
+                amountForeign: item.amount_foreign !== null ? item.amount_foreign : '',
+                debit: item.debit !== null ? item.debit : '',
                 credit: '',
                 is_verified: item.is_verified
               })
             })
             this.income.entries = jsonData
+            this.customer.selectedBill = []
             this.income.loading = false
             this.getBills()
           })
@@ -724,31 +814,54 @@ const app = new Vue({
       getBillAccountingEntry(){
         let entries = []
         Array.from(this.customer.selectedBill).forEach(item => {
-          this.apiCall('get', `/api/billing/customer/bill/${item.id}/accounting/entries/get`).then(res => {
-            const data = res.data
-            Array.from(data).forEach(item => {
-              const found = this.income.entries.find(entry => entry.id === item.id)
-              if(!found){
-                this.income.entries.push({
-                id: item.id,
-                dateTransaction: this.formatDate(item.date_at),
-                account: ``,
-                label: item.label,
-                debit: '',
-                credit: item.credit.toLocaleString(),
-                is_verified: item.is_verified
+          const found = this.income.entries.find(entry => entry.id === item.id)
+
+          if(!found){
+            const incomeDebitAmount = this.income.entries[0].debit
+            let amountCalculated
+
+            if (incomeDebitAmount > item.amount){
+              amountCalculated = item.amount
+            } else if(incomeDebitAmount < item.amount) {
+              amountCalculated = incomeDebitAmount
+            }
+
+            const found = this.customer.headers.find(header => header.value === 'amountCalculated')
+
+            if (!found){
+              this.customer.headers.push({
+                text: "Reste à payer",
+                align: 'start',
+                sortable: true,
+                value: 'amountCalculated',
               })
-              }
+            }
+
+            this.income.entries.push({
+              id: item.id,
+              dateTransaction: item.dateOperation,
+              account: `${item.account}`,
+              label: item.label,
+              debit: '',
+              credit: amountCalculated !== null ? amountCalculated : '',
             })
-          })
+          }
 
         })
         if (this.income.entries.length > 1){
           Array.from(this.customer.selectedBill).forEach(item => {
-            console.log(item)
+
           })
         }
-         console.log(item)
+
+      },
+
+      watchSelectedBill(){
+        return this.customer.selectedBill
+      },
+
+      watchIncomeEntry(){
+        return this.income.entries.slice(1)
       },
 
       partnerPlaceholder () {
@@ -796,11 +909,10 @@ const app = new Vue({
     created () {
       this.getUrlData()
       this.getCurrency()
+      this.getModule()
       this.setOperationDate()
       this.getCreditAccounts()
-      this.getDebitAccounts()
       this.getPartners()
-      this.getStatements()
     },
 
     mounted() {

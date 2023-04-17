@@ -85,7 +85,7 @@ class Plan(MP_Node):
     account_number = models.CharField(max_length=50)
     account_name = models.CharField(max_length=500)
     category = models.ForeignKey('PlanCategory', on_delete=models.SET_NULL, null=True)
-    currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True, default=None)
+    currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True, default=None, blank=True)
     allow_lettering = models.BooleanField(default=False)
     load_from = models.CharField(max_length=10, choices=file_type, null=True, blank=True)
     manager = PlanManager()
@@ -163,9 +163,10 @@ class Monitoring(models.Model):
 class Document(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     reference = models.CharField(max_length=255)
-    label = models.CharField(max_length=255, null=True)
+    label = models.CharField(max_length=255, null=True, blank=True)
     account = models.ForeignKey(Plan, on_delete=models.CASCADE)
-    partner = models.ForeignKey('billing.Partner', on_delete=models.SET_NULL, null=True)
+    partner = models.ForeignKey('billing.Partner', on_delete=models.SET_NULL, null=True, blank=True)
+    can_edit = models.BooleanField(default=True)
 
     class Meta:
         abstract = True
@@ -176,9 +177,13 @@ class Tax(models.Model):
     name = models.CharField(max_length=255)
     account = models.ForeignKey(Plan, on_delete=models.SET_NULL, null=True)
     amount = models.FloatField()
-    calculation = models.ForeignKey('TaxCalculation', on_delete=models.SET_NULL, null=True)
+    currency = models.ForeignKey('treasury.Currency', on_delete=models.CASCADE, null=True, blank=True)
+    is_fixed = models.BooleanField()
+    type_journal = models.ForeignKey('settings.JournalType', on_delete=models.SET_NULL, null=True, related_name='tax_journal_type')
 
+    def __str__(self):
+        return self.name
 
-class TaxCalculation(models.Model):
-    id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
-    name = models.CharField(max_length=255)
+    class Meta:
+        verbose_name_plural = 'Taxes'
+

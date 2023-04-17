@@ -15,13 +15,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework import status
 
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import InvalidToken
 
 from accounting.models import Main, Additional, Adjunct, FiscalYear, Budget, Monitoring, Plan
 from billing.models import Partner
-from settings.models import Journal
+from settings.models import Journal, JournalType
 from utils.token import set_auth_token
 
 from .forms import OutcomeForm, OutcomeModelForm, IncomeForm, IncomeModelForm
@@ -91,128 +90,27 @@ def index(request):
 
 
 @login_required()
-def checkout(request, symbol, year, month, module_id):
+def journals(request, journal):
+    try:
+        journal_type = JournalType.objects.get(label__iexact=journal)
+    except JournalType.DoesNotExist:
+        return redirect('treasury_index')
     year_id = request.session.get('year')
 
     token = request.COOKIES.get('access_token')
 
-    modules = Journal.objects.all()
-    try:
-        fiscal_year = FiscalYear.objects.get(id=year_id)
-    except FiscalYear.DoesNotExist:
-        return redirect('account_logout')
-    selected_month = dict()
-
-    for m in months:
-        if m.get('id') == month:
-            selected_month = m
-
-    currency = Currency.objects.get(symbol=symbol)
-
-    incomes_total = Income.objects.filter(currency=currency).all()
-    outcomes_total = Outcome.objects.filter(currency=currency).all()
-
-    incomes_obj = Income.objects.filter(currency=currency, in_at__month=selected_month.get('id'),
-                                        in_at__year=fiscal_year.year).all()
-
-    total_checkout_income = incomes_total.aggregate(Sum('amount'))
-    balance_income = 0
-
-    total_checkout_outcome = outcomes_total.aggregate(Sum('amount'))
-    balance_outcome = 0
-
-    if total_checkout_income['amount__sum'] is not None:
-        balance_income = total_checkout_income['amount__sum']
-
-    if total_checkout_outcome['amount__sum'] is not None:
-        balance_outcome = total_checkout_outcome['amount__sum']
-
-    balance = balance_income - balance_outcome
-
-    if request.method == 'POST':
-
-        if request.POST.get('edit_record_id'):
-            pk = request.POST['edit_record_id']
-
-            income_data = Income.objects.get(id=pk)
-            form = IncomeModelForm(request.POST, instance=income_data)
-
-            if form.is_valid():
-                income = form.save(commit=False)
-                income.slip_number = request.POST['slip_number']
-                income.more = request.POST['more']
-                form.save()
-                messages.success(request,
-                                 'Recette pour le compte [{}] du [{}] a été modifiée avec succès. Montant: [{}] [{}]'.format(
-                                     income.accounting_main, localize(income_data.in_at, use_l10n=True), income.amount,
-                                     income.currency.symbol))
-            path = resolve_url(request.path)
-            return redirect(path)
-
-        if request.POST.get('remove_record_id'):
-            pk = request.POST['remove_record_id']
-            income_data = Income.objects.get(id=pk)
-
-            try:
-                income_data.delete()
-                messages.success(request,
-                                 'Recette pour le compte [{}] du [{}] / [{}]  a été supprimée avec succès. Montant: [{}] [{}]'.format(
-                                     income_data.accounting_main, localize(income_data.in_at, use_l10n=True),
-                                     income_data.more, income_data.amount, income_data.currency.symbol))
-                path = resolve_url(request.path)
-                return redirect(path)
-            except:
-                pass
-
-        form = IncomeModelForm(request.POST)
-
-        if form.is_valid():
-            income = form.save(commit=False)
-            income.currency = currency
-            income.slip_number = request.POST['slip_number']
-            income.more = request.POST['more']
-
-            has_accounting_additional = request.POST.get('accounting_additional', None)
-            has_accounting_ajunct = request.POST.get('accounting_adjunct', None)
-
-            if has_accounting_additional is not None:
-                account_additional = Additional.objects.get(id=request.POST['accounting_additional'])
-                income.accounting_additional = account_additional
-
-            if has_accounting_ajunct is not None:
-                account_adjunct = Adjunct.objects.get(id=request.POST['accounting_adjunct'])
-                income.accounting_adjunct = account_adjunct
-
-            if currency.is_local:
-                daily_rate = CurrencyDailyRate.objects.get(to_currency=currency, in_use=True)
-                income.daily_rate = daily_rate
-            try:
-                income.save()
-                messages.success(request,
-                                 'Recette pour le compte [{}] a été enregistrée avec succès. Montant: [{}] [{}]'.format(
-                                     income.accounting_main, income.amount, income.currency.symbol))
-            except IntegrityError as error:
-                if "slip_number" in error.__str__():
-                    messages.error(request, 'Ce numéro de bordereau [{}] existe déjà'.format(income.slip_number))
-
-            path = resolve_url(request.path)
-            return redirect(path)
-
-    income_form = IncomeForm()
-
     context = {
-        'fiscal_year': fiscal_year,
-        'income_form': income_form,
-        'currencies': currencies,
-        'currency': currency,
-        'current_checkout': 'images/flags/' + currency.country_code + '.svg',
-        'modules': modules,
-        'selected_month': selected_month,
-        'incomes': incomes_obj,
-        'total_checkout': total_checkout_income,
-        'balance': balance
     }
-    response = render(request, 'treasury/incomes.html', context)
+    if journal_type.label == 'Banque':
+        response = render(request, 'treasury/incomes.html', context)
+    elif journal_type.label == 'Caisse':
+        response = render(request, 'treasury/incomes.html', context)
+    elif journal_type.label == 'Client':
+        response = render(request, 'billing/customer.html', context)
+    elif journal_type.label == 'Fournisseur':
+        response = render(request, 'billing/supplier.html', context)
+    elif journal_type.label == 'Divers':
+        response = render(request, 'treasury/incomes.html', context)
 
     # verify if there is no token and create one
     if not token:
@@ -231,12 +129,12 @@ def checkout(request, symbol, year, month, module_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_get_incomes(request):
-
     statement_id = request.GET.get('statementId')
     entries = AccountingEntry.objects.filter(ref_statement__id=statement_id).all()
 
     return Response(
-        entries.values('id', 'account__account_number', 'account__account_name', 'date_at', 'label', 'debit', 'credit', 'is_verified'))
+        entries.values('id', 'account__account_number', 'account__account_name', 'date_at', 'label', 'debit', 'credit',
+                       'is_verified', 'currency__is_local', 'rate', 'amount_foreign'))
 
 
 @api_view(['POST'])
@@ -249,20 +147,28 @@ def api_save_statement(request):
         partner = Partner.objects.get(id=data['partner']) if data['partner'] != '' else None
         label = data['label']
         account = data['account']
-        currency = data['currency']
+        currency = Currency.objects.get(id=data['currency'])
         rate = data['rate'] if data['rate'] != '' else 1
-        amount = data['amount']
+        amount = float(data['amount'])
 
         statement = Statement(transaction_at=transaction_date, partner=partner, reference=data['reference'],
                               label=label,
-                              account_id=account, currency_id=currency, rate=rate, amount=amount)
+                              account_id=account, currency=currency, rate=rate, amount=amount)
 
         statement.save()
 
         # add accounting entry for the statement
-        accounting_entry = AccountingEntry(account_id=account, currency_id=currency, rate=rate, ref_statement=statement,
-                                           label=label, partner=partner, date_at=transaction_date, debit=amount,
-                                           credit=0, done_by=user)
+        if currency.is_local:
+            converted_amount = amount
+            amount_foreign = None
+        else:
+            converted_amount = amount * rate
+            amount_foreign = amount
+
+        accounting_entry = AccountingEntry(account_id=account, currency=currency, rate=rate, ref_statement=statement,
+                                           label=label, partner=partner, date_at=transaction_date,
+                                           debit=converted_amount,
+                                           credit=0, amount_foreign=amount_foreign, done_by=user)
 
         accounting_entry.save()
 
@@ -277,7 +183,10 @@ def api_save_statement(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def api_get_statements(request):
-    statements = Statement.objects.all()
+    journal_id = request.GET.get('journal')
+    journal = Journal.objects.get(id=journal_id)
+
+    statements = Statement.objects.filter(account__path__startswith=journal.account.path).all()
     return Response(statements.values('id', 'label', 'reference', 'transaction_at', 'currency__name', 'currency_id',
                                       'currency__symbol', 'amount', 'rate', 'account__account_number',
                                       'account__account_name',

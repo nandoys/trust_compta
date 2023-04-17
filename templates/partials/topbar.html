@@ -16,18 +16,33 @@
                 <v-card>
                     <v-list>
                         <v-list-item>
-                            <v-list-item-avatar>
-                              <img
-                                src=""
-                                alt="John"
-                              >
-                            </v-list-item-avatar>
-
                             <v-list-item-content>
-                              <v-list-item-title>John Leider</v-list-item-title>
-                              <v-list-item-subtitle>Founder of Vuetify</v-list-item-subtitle>
+                                <v-list-item-title>Trésorerie</v-list-item-title>
+                                <v-col cols="4" class="ma-0">
+                                    <v-btn block height="100" href="{% url 'treasury_journals' 'banque' %}">Banque</v-btn>
+                                </v-col>
+                                <v-col cols="4" class="ma-0">
+                                    <v-btn block height="100" href="{% url 'treasury_journals' 'caisse' %}">Caisse</v-btn>
+                                </v-col>
+                                <v-col cols="4" class="ma-0">
+                                    <v-btn block height="100" :link="true" href="{% url 'treasury_journals' 'client' %}">Client</v-btn>
+                                </v-col>
+                                <v-col cols="4" class="ma-0">
+                                    <v-btn block height="100" :link="true" href="{% url 'treasury_journals' 'fournisseur' %}">Fournisseur</v-btn>
+                                </v-col>
+                                <v-col cols="4" class="ma-0">
+                                    <v-btn block height="100" href="{% url 'treasury_journals' 'divers' %}">Divers</v-btn>
+                                </v-col>
                             </v-list-item-content>
                         </v-list-item>
+                        <v-list-item-group>
+                            <v-list-item>
+                                <v-list-item-title>Tous les modules</v-list-item-title>
+                                <v-list-item-action>
+                                    <v-icon>mdi-arrow-right</v-icon>
+                                </v-list-item-action>
+                            </v-list-item>
+                        </v-list-item-group>
                     </v-list>
                 </v-card>
             </v-menu>

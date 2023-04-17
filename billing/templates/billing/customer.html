@@ -1,0 +1,244 @@
+{% extends "partials/base.html" %}
+{% load static %}
+{% block title %}Revenus{% endblock title %}
+{% block extra_css %}
+
+{% endblock extra_css %}
+
+{% block content %}
+        <<v-app id="app" >
+            {% block header %}
+                 {% include "partials/topbar.html" %}
+            {% endblock header %}
+            {% include 'billing/bills.html' %}
+            <v-main>
+                <v-sheet
+                  id="scrolling-techniques"
+                  class="overflow-y-auto"
+                  max-height="600"
+                >
+                    <v-container>
+                    <!-- end page title -->
+                        <v-row>
+                            <v-col cols="4" class="pa-1">
+                                <v-card>
+                                    <v-card-title>Facture impayé</v-card-title>
+                                </v-card>
+                            </v-col>
+                            <v-col cols="4" class="pa-1">
+                                <v-card>
+                                    <v-card-title>Facture en retard</v-card-title>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                        <v-row class="d-flex p-4">
+                            <v-col cols="12">
+                                <v-data-table
+                                    :headers="bill.headers"
+                                    :loading="bill.loading"
+                                    loading-text="Chargement... Veuillez attendre"
+                                    :items="bill.entries"
+                                    locale="fr-FR"
+                                    no-data-text="Vous n'avez aucune écriture pour cette facture"
+                                    no-results-text="Aucun résultat n'a été trouvé pour votre recherche"
+                                    hide-default-footer
+                                    dense
+                                >
+                                    <template v-slot:top="{ items }">
+                                        <v-card elevation="0" v-if="bill.selectedBill >=0 && bill.bills.length > 0">
+
+                                            <v-card-text>
+                                                <v-row>
+                                                    <v-col cols="6" class="text-subtitle-1">
+                                                        <div>Nom du client: ${ bill.bills[bill.selectedBill].partner }</div>
+                                                        <div>Référence: ${ bill.bills[bill.selectedBill].reference }</div>
+                                                        <div class="text-subtitle-1"> Date de facturation: ${ bill.bills[bill.selectedBill].bill_at }</div>
+                                                        <div class="text-subtitle-1"> Date d'échéance: ${ bill.bills[bill.selectedBill].deadline_at }</div>
+                                                    </v-col>
+                                                    <v-col cols="6" align-self="start">
+                                                        <div class="text-subtitle-1">
+                                                            Montant HT: ${ total_amount.toFixed(2) }
+                                                            ${ bill.bills[bill.selectedBill].currency_name }
+                                                        </div>
+                                                        <div class="text-subtitle-1">
+                                                            Taxes: ${ total_taxes.toFixed(2) }
+                                                            ${ bill.bills[bill.selectedBill].currency_name }
+                                                        </div>
+                                                        <div class="text-subtitle-1">
+                                                            Montant TTC: ${ bill.bills[bill.selectedBill].amount }
+                                                            ${ bill.bills[bill.selectedBill].currency_name }
+                                                        </div>
+                                                        <div class="text-subtitle-1"> Journal: ${ bill.bills[bill.selectedBill].account }</div>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-card-text>
+                                        </v-card>
+                                    </template>
+                                    <template v-slot:item.amount_foreign="props">
+                                        <div v-if="props.item.amount_foreign != ''">${ props.item.amount_foreign }</div>
+                                    </template>
+                                    <template v-slot:item.debit="props">
+                                        <div v-if="props.item.debit != ''">${ props.item.debit }</div>
+                                    </template>
+                                    <template v-slot:item.credit="props">
+                                        <div v-if="props.item.credit != ''">${ props.item.credit }</div>
+                                    </template>
+                                    <template v-slot:footer.page-text="{ pageStart, pageStop, itemsLength}">
+                                        <div class="text-caption">${pageStart} - ${pageStop} sur ${itemsLength}</div>
+                                    </template>
+                                </v-data-table>
+                            </v-col>
+                            <v-col cols="12">
+                                <v-tabs v-model="tabLettering">
+                                    <v-tab>
+                                        <template v-slot:default>
+                                            <div class="text-caption">Lignes de facture</div>
+                                        </template>
+                                    </v-tab>
+                                    <v-tab>
+                                        <template v-slot:default>
+                                            <div class="text-caption">Variation stock</div>
+                                        </template>
+                                    </v-tab>
+                                </v-tabs>
+                                <v-tabs-items v-model="tabLettering">
+                                    <v-tab-item key="lines">
+                                         {% include 'billing/bill-lines.html' %}
+                                    </v-tab-item>
+                                    <v-tab-item key="stock">
+                                        <v-row>
+                                            <v-col cols="4" class="py-3">
+                                                <v-select
+                                                  v-model="bill.editedItem.partner"
+                                                  hide-selected="true"
+                                                  clearable
+                                                  :items="bill.partners"
+                                                  item-text="label"
+                                                  item-value="id"
+                                                  :loading="bill.partnerLoading"
+                                                  label="Partenaire"
+                                                  dense
+                                                  ref="partner"
+                                                >
+                                                    <template v-slot:prepend-item>
+                                                        <v-list-item>
+                                                            <v-list-item-content>
+                                                                <v-text-field v-model="bill.searchPartner" :autofocus="true" :label="partnerLabel"
+                                                                              :placeholder="partnerPlaceholder" @input="searchIncomesPartners" :clearable="true">
+                                                                </v-text-field>
+                                                            </v-list-item-content>
+                                                        </v-list-item>
+                                                    </template>
+                                                     <template v-slot:item="{ item, on, attrs }">
+                                                        <v-list-item v-bind="attrs" v-on="on">
+                                                            <v-list-item-content>
+                                                                ${ item.label }
+                                                            </v-list-item-content>
+                                                        </v-list-item>
+                                                    </template>
+                                                     <template v-slot:no-data="">
+                                                         <v-card elevation="0">
+                                                             <v-card-text>Aucun partenaire trouvé</v-card-text>
+                                                             <v-card-actions>
+                                                                 <v-btn text x-small @click="savePartner">Créer</v-btn>
+                                                                 <v-btn text x-small @click="savePartnerAndEdit">Créer & éditer</v-btn>
+                                                             </v-card-actions>
+                                                         </v-card>
+                                                     </template>
+                                                </v-select>
+                                                <v-select
+                                                  v-model="bill.editedItem.debitAccount"
+                                                  hide-selected="true"
+                                                  :rules="rules.account"
+                                                  :items="bill.debitAccounts"
+                                                  item-text="label"
+                                                  item-value="id"
+                                                  :loading="bill.debitLoading"
+                                                  label="Journal"
+                                                  no-data-text="Aucun journal n'a été trouvé"
+                                                  dense
+                                                >
+                                                    <template v-slot:prepend-item>
+                                                        <v-list-item>
+                                                            <v-list-item-content>
+                                                                <v-text-field v-model="bill.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="bill.searchDebitAccounts">
+                                                                </v-text-field>
+                                                            </v-list-item-content>
+                                                        </v-list-item>
+                                                    </template>
+                                                </v-select>
+                                                <v-select
+                                                  v-model="bill.editedItem.debitAccount"
+                                                  hide-selected="true"
+                                                  :rules="rules.account"
+                                                  :items="bill.debitAccounts"
+                                                  item-text="label"
+                                                  item-value="id"
+                                                  :loading="bill.debitLoading"
+                                                  label="Taxe"
+                                                  no-data-text="Aucun journal n'a été trouvé"
+                                                  dense
+                                                >
+                                                    <template v-slot:prepend-item>
+                                                        <v-list-item>
+                                                            <v-list-item-content>
+                                                                <v-text-field v-model="bill.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="bill.searchDebitAccounts">
+                                                                </v-text-field>
+                                                            </v-list-item-content>
+                                                        </v-list-item>
+                                                    </template>
+                                                </v-select>
+                                            </v-col>
+                                            <v-col cols="4" class="px-5">
+                                                <v-text-field
+                                                    v-model="bill.editedItem.label"
+                                                    :rules="rules.label"
+                                                    label="Libellé"
+                                                    dense
+                                                ></v-text-field>
+
+                                                <v-text-field
+                                                    v-model="bill.editedItem.amountDebit"
+                                                    :rules="rules.amount"
+                                                    :label="symbolCurrency"
+                                                    dense
+                                                    @input="thousandSeparator"
+                                                >
+                                                </v-text-field>
+                                            </v-col>
+                                        </v-row>
+                                    </v-tab-item>
+
+                                    <v-snackbar
+                                      v-model="snackbar"
+                                      :multi-line="multiLine"
+                                      :timeout="timeout"
+                                      :color="snackcolor"
+                                    >${ snacktext }
+
+                                      <template v-slot:action="{ attrs }">
+                                        <v-btn
+                                          color="white"
+                                          text
+                                          v-bind="attrs"
+                                          @click="snackbar = false"
+                                        >
+                                          Fermer
+                                        </v-btn>
+                                      </template>
+                                    </v-snackbar>
+                                </v-tabs-items>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-sheet>
+            </v-main>
+        </v-app>>
+{% endblock content %}
+
+{% block extra_js %}
+     <!-- bills Plan vuejs -->
+
+    <script src="{%  static 'js/pages/vue-customer-billing.js' %}"></script>
+
+{% endblock extra_js %}

@@ -1,0 +1,107 @@
+<v-data-table
+    :headers="lines.headers"
+    :loading="lines.loading"
+    items-per-page="5"
+    loading-text="Chargement... Veuillez attendre"
+    :items="lines.items"
+    locale="fr-FR"
+    no-results-text="Aucun résultat n'a été trouvé pour votre recherche"
+    dense
+    :footer-props="{
+        itemsPerPageAllText:'Tout',
+        itemsPerPageText: 'Afficher'
+    }"
+>
+    <template v-slot:no-data>
+        <v-row>
+            <v-btn text x-small @click="addLinesItem">Ajouter ligne</v-btn>
+        </v-row>
+    </template>
+    <template v-slot:item.label="{ index }">
+        <v-text-field dense v-model="lines.items[index].label"></v-text-field>
+    </template>
+    <template v-slot:item.account="{ index }">
+        <v-select
+          v-model="lines.items[index].account"
+          hide-selected="true"
+          :items="bill.creditAccounts"
+          item-text="label"
+          item-value="id"
+          :loading="bill.partnerLoading"
+          dense
+        >
+            <template v-slot:prepend-item>
+                <v-list-item>
+                    <v-list-item-content>
+                        <v-text-field v-model="bill.searchPartner" :autofocus="true" :label="partnerLabel"
+                                      :placeholder="partnerPlaceholder" @input="searchIncomesPartners" :clearable="true">
+                        </v-text-field>
+                    </v-list-item-content>
+                </v-list-item>
+            </template>
+             <template v-slot:item="{ item, on, attrs }">
+                <v-list-item v-bind="attrs" v-on="on">
+                    <v-list-item-content>
+                        ${ item.label }
+                    </v-list-item-content>
+                </v-list-item>
+            </template>
+             <template v-slot:no-data="">
+                 <v-card elevation="0">
+                     <v-card-text>Aucun compte trouvé</v-card-text>
+                     <v-card-actions>
+                         <v-btn text x-small @click="waitUpdate">Créer</v-btn>
+                     </v-card-actions>
+                 </v-card>
+             </template>
+        </v-select>
+    </template>
+    <template v-slot:item.quantity="{ index }">
+        <v-text-field dense v-model="lines.items[index].quantity" :rules="rules.quantity"></v-text-field>
+    </template>
+    <template v-slot:item.price="{ index }">
+        <v-text-field dense v-model="lines.items[index].price" :rules="rules.price"></v-text-field>
+    </template>
+    <template v-slot:item.taxes="{ index }">
+        <v-select
+            v-model="lines.items[index].taxes"
+            :items="taxes"
+            :menu-props="{ bottom: true, offsetY: true, offsetOverflow: true }"
+            item-text="name"
+            item-value="id"
+            multiple
+            dense
+          >
+            <template v-slot:no-data="">
+                 <v-card elevation="0">
+                     <v-card-text>Aucune taxe trouvé</v-card-text>
+                     <v-card-actions>
+                         <v-btn text x-small @click="waitUpdate">Créer</v-btn>
+                     </v-card-actions>
+                 </v-card>
+             </template>
+            <template v-slot:selection="{ item, index}">
+                <v-chip small>${ item.name}</v-chip>
+            </template>
+        </v-select>
+    </template>
+
+    <template v-slot:item.actions="{ index, item }" v-if="lines.items.length > 0">
+        <v-icon
+            small
+            @click="deleteItem(index, item)"
+          >
+            mdi-delete
+          </v-icon>
+    </template>
+
+    <template v-slot:body.append v-if="lines.items.length > 0">
+        <v-row class="pl-5 pt-5 mb-5">
+            <v-btn text x-small @click="addLinesItem">Ajouter ligne</v-btn>
+        </v-row>
+    </template>
+
+    <template v-slot:footer.page-text="{ pageStart, pageStop, itemsLength}">
+        <div class="text-caption">${pageStart} - ${pageStop} sur ${itemsLength}</div>
+    </template>
+</v-data-table>

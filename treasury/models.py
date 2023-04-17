@@ -33,6 +33,12 @@ class CurrencyDailyRate(models.Model):
         db_table = 'currency_daily_rate'
 
 
+class CurrencyDiffrenceRate(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
+    account = models.ForeignKey('accounting.Plan', on_delete=models.CASCADE, related_name='account_currency_difference_rate')
+    diff_category = models.ForeignKey('accounting.PlanCategory', on_delete=models.CASCADE, related_name='currency_difference_category')
+
+
 class Outcome(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE, null=True)
@@ -63,17 +69,21 @@ class Income(models.Model):
 
 class AccountingEntry(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
-    account = models.ForeignKey('accounting.Plan', on_delete=models.CASCADE)
-    currency = models.ForeignKey('Currency', on_delete=models.CASCADE)
+    account = models.ForeignKey('accounting.Plan', on_delete=models.CASCADE, related_name='account_entry')
+    currency = models.ForeignKey('Currency', on_delete=models.CASCADE, related_name='currency_entry')
     rate = models.IntegerField(default=1)
-    ref_statement = models.ForeignKey('Statement', on_delete=models.CASCADE, null=True, blank=True)
-    ref_billing_customer = models.ForeignKey('billing.CustomerBill', on_delete=models.CASCADE, null=True, blank=True)
-    ref_billing_supplier = models.ForeignKey('billing.SupplierBill', on_delete=models.CASCADE, null=True, blank=True)
+    ref_statement = models.ForeignKey('Statement', on_delete=models.CASCADE, null=True, blank=True, related_name='ref_statement_entry')
+    ref_billing_customer = models.ForeignKey('billing.CustomerBill', on_delete=models.CASCADE, null=True, blank=True,
+                                             related_name='ref_billing_customer_entry')
+    ref_billing_supplier = models.ForeignKey('billing.SupplierBill', on_delete=models.CASCADE, null=True, blank=True,
+                                             related_name='ref_billing_supplier_entry')
+    ref_bill_line = models.ForeignKey('billing.BillLine', on_delete=models.CASCADE, null=True, related_name='ref_bill_line_entry')
     label = models.CharField(max_length=255, null=True, blank=True)
-    partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True, blank=True)
+    partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True, blank=True, related_name='partner_entry')
     date_at = models.DateField()
-    debit = models.FloatField(blank=True)
-    credit = models.FloatField(blank=True)
+    amount_foreign = models.FloatField(blank=True, null=True)
+    debit = models.FloatField(blank=True, null=True)
+    credit = models.FloatField(blank=True, null=True)
     write_at = models.DateTimeField(auto_now=True)
     done_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     is_verified = models.BooleanField(default=False)
@@ -111,6 +121,3 @@ class Statement(Document):
     amount = models.FloatField()
     currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True)
     rate = models.IntegerField()
-
-
-

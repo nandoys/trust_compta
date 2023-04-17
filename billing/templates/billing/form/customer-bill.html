@@ -1,0 +1,209 @@
+<v-dialog v-model="bill.dialogEntry" max-width="900px" persistent>
+    <template v-slot:activator="{ on, attrs }">
+        <v-btn
+          color="primary"
+          dark
+          class="mb-2"
+          v-bind="attrs"
+          v-on="on"
+          small
+        >
+          Nouvelle
+        </v-btn>
+    </template>
+    <v-card>
+        <v-card-title>
+          <span class="text-h5">Nouvelle facturation d'un client </span>
+        </v-card-title>
+        <v-card-text>
+            <v-container>
+                 <v-form
+                   ref="formBill"
+                   lazy-validation
+                >
+                    <v-row>
+                        <v-col cols="5">
+                            <!-- Datefield, slip field and label field  -->
+                            <v-row ref="dateBilling">
+                                 <v-menu
+                                        ref="bill.dateBillmenu"
+                                        v-model="bill.menuBill"
+                                        :close-on-content-click="false"
+                                        :nudge-right="40"
+                                        transition="scale-transition"
+                                        offset-y
+                                        min-width="auto"
+                                    >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field
+                                                v-model="computedDateBillFormatted"
+                                                :rules="rules.date"
+                                                label="Date facturation"
+                                                readonly
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                dense
+                                            ></v-text-field>
+                                        </template>
+                                        <v-date-picker
+                                            v-model="bill.editedItem.dateBill"
+                                            no-title
+                                            @input="bill.menu = false"
+                                            first-day-of-week="1"
+                                            locale="fr-fr"
+                                            :show-current="bill.editedItem.dateBill"
+                                        ></v-date-picker>
+                                    </v-menu>
+                            </v-row>
+                            <v-row ref="dateDeadline" v-if="bill.editedItem.dateBill">
+                                 <v-menu
+                                        ref="bill.dateDeadlinemenu"
+                                        v-model="bill.menuDeadline"
+                                        :close-on-content-click="false"
+                                        :nudge-right="40"
+                                        transition="scale-transition"
+                                        offset-y
+                                        min-width="auto"
+                                    >
+                                        <template v-slot:activator="{ on, attrs }">
+                                            <v-text-field
+                                                v-model="computedDateDeadlineFormatted"
+                                                :rules="rules.date"
+                                                label="Date échéance"
+                                                readonly
+                                                v-bind="attrs"
+                                                v-on="on"
+                                                dense
+                                            ></v-text-field>
+                                        </template>
+                                        <v-date-picker
+                                            v-model="bill.editedItem.dateDeadline"
+                                            no-title
+                                            @input="bill.menu = false"
+                                            first-day-of-week="1"
+                                            locale="fr-fr"
+                                            :min="bill.editedItem.dateBill"
+                                            :show-current="bill.editedItem.dateDeadline"
+                                        ></v-date-picker>
+                                    </v-menu>
+                            </v-row>
+                            <v-row ref="partner">
+                                 <v-select
+                                  v-model="bill.editedItem.partner"
+                                  hide-selected="true"
+                                  clearable
+                                  :items="bill.partners"
+                                  item-text="label"
+                                  item-value="id"
+                                  :loading="bill.partnerLoading"
+                                  label="Partenaire"
+                                  dense
+                                  ref="partner"
+                                >
+                                    <template v-slot:prepend-item>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-text-field v-model="bill.searchPartner" :autofocus="true" :label="partnerLabel"
+                                                              :placeholder="partnerPlaceholder" @input="searchIncomesPartners" :clearable="true">
+                                                </v-text-field>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                     <template v-slot:item="{ item, on, attrs }">
+                                        <v-list-item v-bind="attrs" v-on="on">
+                                            <v-list-item-content>
+                                                ${ item.label }
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                     <template v-slot:no-data="">
+                                         <v-card elevation="0">
+                                             <v-card-text>Aucun partenaire trouvé</v-card-text>
+                                             <v-card-actions>
+                                                 <v-btn text x-small @click="savePartner">Créer</v-btn>
+                                                 <v-btn text x-small @click="savePartnerAndEdit">Créer & éditer</v-btn>
+                                             </v-card-actions>
+                                         </v-card>
+                                     </template>
+                                </v-select>
+                            </v-row>
+                            <v-row ref="reference">
+                                <v-text-field
+                                    v-model="bill.editedItem.reference"
+                                    :rules="rules.reference"
+                                    label="Référence"
+                                    hint="Référence de paiement à définir lors de l'écriture comptable"
+                                    dense
+                                ></v-text-field>
+                            </v-row>
+                        </v-col>
+                        <v-spacer></v-spacer>
+                        <v-col cols="5">
+                             <!-- Journal-->
+                            <v-row>
+                                <v-select
+                                  v-model="bill.editedItem.debitAccount"
+                                  hide-selected="true"
+                                  :rules="rules.account"
+                                  :items="bill.debitAccounts"
+                                  item-text="label"
+                                  item-value="id"
+                                  :loading="bill.debitLoading"
+                                  label="Journal"
+                                  no-data-text="Aucun journal n'a été trouvé"
+                                  dense
+                                >
+                                    <template v-slot:prepend-item>
+                                        <v-list-item>
+                                            <v-list-item-content>
+                                                <v-text-field v-model="bill.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="bill.searchDebitAccounts">
+                                                </v-text-field>
+                                            </v-list-item-content>
+                                        </v-list-item>
+                                    </template>
+                                </v-select>
+                            </v-row>
+                            <v-row ref="currency">
+                                <v-select
+                                      v-model="bill.editedItem.currency"
+                                      hide-selected="true"
+                                      :rules="rules.currency"
+                                      :items="bill.currencies"
+                                      item-text="label"
+                                      item-value="id"
+                                      :loading="bill.currencyOperationLoading"
+                                      label="Devise de la facture"
+                                      no-data-text="Aucune devise n'a été trouvée"
+                                      dense
+                                    >
+                                        <template v-slot:prepend-item>
+                                            <v-list-item>
+                                                <v-list-item-content>
+                                                    <v-text-field v-model="bill.searchCurrency" :autofocus="false" placeholder="Rechercher devise" @input="searchIncomesCurrencies">
+                                                    </v-text-field>
+                                                </v-list-item-content>
+                                            </v-list-item>
+                                        </template>
+                                    </v-select>
+                            </v-row>
+                            <v-row ref="dailyRate" v-if="bill.isForeigncurrencyOperation">
+                                <v-text-field
+                                    v-model="bill.editedItem.rate"
+                                    :rules="rules.rate"
+                                    label="Taux de change"
+                                    dense
+                                ></v-text-field>
+                            </v-row>
+                        </v-col>
+                    </v-row>
+                </v-form>
+            </v-container>
+        </v-card-text>
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn text @click="closeDialogEntry">Annuler</v-btn>
+            <v-btn text @click="saveAndClose">Enregistrer & Quitter</v-btn>
+            <v-btn text @click="saveAndContinue">Enregistrer & Continuer</v-btn>
+        </v-card-actions>
+    </v-card>
+</v-dialog>

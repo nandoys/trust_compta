@@ -15,6 +15,8 @@ from django.utils.datastructures import MultiValueDictKeyError
 
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound, NotAcceptable, ValidationError
 from rest_framework import status
 
@@ -23,7 +25,7 @@ from utils.calendar import months_of_year
 from utils.treasury import outcomes_with_subaccount
 from settings.models import Journal
 
-from .models import Main, Additional, FiscalYear, Budget, Plan, PlanCategory
+from .models import Main, Additional, FiscalYear, Budget, Plan, PlanCategory, Tax
 from .forms import MainAccountingForm, AdditionalAccountingForm, BudgetAccountingForm
 from .serializer import MainSerializer, AdditionalSerializer, PlanSerializer
 
@@ -941,84 +943,6 @@ def print_report(request):
 
 ## Below is all views concerning apis
 
-
-@login_required()
-@api_view(['GET'])
-def api_get_main_account(request):
-    main_accountings = Main.objects.all().order_by('account_number')
-    serializer = MainSerializer(main_accountings, many=True)
-    return Response(serializer.data)
-
-
-@login_required()
-@api_view(['GET'])
-def api_get_main_account_debit(request):
-    main_accountings = Main.objects.filter(can_debit=True).all().order_by('account_number')
-    serializer = MainSerializer(main_accountings, many=True)
-    return Response(serializer.data)
-
-
-@login_required()
-@api_view(['POST'])
-def api_save_main_account(request):
-    account_main = request.data
-    serializer = MainSerializer(data=account_main)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({'message': _("Le compte a été ajouté avec succès")}, status=status.HTTP_200_OK)
-    else:
-        return Response({'message': _("Quelque chose s'est mal passé")}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@login_required()
-@api_view(['POST'])
-def api_update_main_account(request):
-    account_id = request.data['id']
-    account_main = Main.objects.get(id=account_id)
-    serializer = MainSerializer(account_main, data=request.data, partial=True)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({'message': _("La modification a été effectuée avec succès")}, status=status.HTTP_200_OK)
-    else:
-        return Response({'message': _("Quelque chose s'est mal passé")}, status=status.HTTP_400_BAD_REQUEST)
-
-
-@login_required()
-@api_view(['POST'])
-def api_delete_main_account(request):
-    account_id = request.data['id']
-    account_main = Main.objects.get(id=account_id)
-    account_main.delete()
-    return Response({'message': _("Le compte a été supprimé avec succès")}, status=status.HTTP_200_OK)
-
-
-@login_required()
-@api_view(['GET'])
-def api_get_subaccount_filter_main(request, account_id):
-    main_accountings = Additional.objects.filter(account_main__id=account_id).all().order_by('account_number')
-    serializer = AdditionalSerializer(main_accountings, many=True)
-
-    return Response(serializer.data)
-
-
-@login_required()
-@api_view(['GET'])
-def api_get_subaccount_debit_filter_main(request, account_id):
-    main_accountings = Additional.objects.filter(account_main__id=account_id,
-                                                 account_main__can_debit=True).all().order_by('account_number')
-    serializer = AdditionalSerializer(main_accountings, many=True)
-
-    return Response(serializer.data)
-
-
-@api_view(['GET'])
-def api_get_accounting_main_by_type(request, account_type):
-    main = Main.objects.filter(account_type=account_type).all()
-    serializer = MainSerializer(main, many=True)
-
-    return Response(serializer.data)
-
-
 @api_view(['GET'])
 @login_required()
 def api_get_plans(request):
@@ -1050,7 +974,7 @@ def api_get_accounts_by_category(request):
         accounts = Plan.objects.filter(category__in=filters).all()
 
         return Response(accounts.values('id', 'account_number', 'account_name', 'category__name',
-                                        'currency__name', 'allow_lettering'))
+                                        'currency__name', 'allow_lettering', 'depth'))
     except Plan.DoesNotExist as e:
         context = {
             'message': _("Aucun plan comptable n'existe")
@@ -1318,3 +1242,17 @@ def api_load_ohada(request):
     except DataError as e:
         return Response(_("Quelque chose s'est mal passé! {}".format(e.__str__())),
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+## api taxes
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def api_get_taxes(request):
+    journal_id = request.GET.get('journal')
+    journal = Journal.objects.get(id=journal_id)
+
+    taxes = Tax.objects.filter(type_journal=journal.type_journal).all()
+    response = Response(
+        taxes.values('id', 'name', 'account_id', 'account__account_number', 'account__account_name', 'amount',
+                     'currency__is_local', 'currency_id', 'currency__name', 'currency__symbol', 'is_fixed'))
+    return response

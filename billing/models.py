@@ -19,11 +19,12 @@ class CustomerBill(Document):
     bill_at = models.DateField()
     deadline_at = models.DateField()
     currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True)
-    entry = models.ManyToManyField('BillEntry', related_name='customer_bill_entry')
-    amount = models.FloatField()
-    amount_foreign_currency = models.FloatField(null=True)
+    bill_lines = models.ManyToManyField('BillLine', related_name='customer_bill_lines', blank=True)
+    amount = models.FloatField(null=True, blank=True)
+    amount_foreign = models.FloatField(null=True, blank=True)
     rate = models.IntegerField(default=1)
     is_lettered = models.BooleanField(default=False)
+    is_paid = models.BooleanField(default=False)
 
 
 class SupplierBill(Document):
@@ -34,14 +35,14 @@ class SupplierBill(Document):
     accounting_date = models.DateField()
     deadline_at = models.DateField()
     currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True)
-    entry = models.ManyToManyField('BillEntry', related_name='supplier_bill_entry')
+    bill_lines = models.ManyToManyField('BillLine', related_name='supplier_bill_lines',  blank=True)
     amount = models.FloatField()
-    amount_foreign_currency = models.FloatField(null=True)
+    amount_foreign = models.FloatField(null=True)
     rate = models.IntegerField(default=1)
     is_lettered = models.BooleanField(default=False)
 
 
-class BillEntry(models.Model):
+class BillLine(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     label = models.CharField(max_length=255, null=True)
     account = models.ForeignKey('accounting.Plan', on_delete=models.SET_NULL, null=True)
@@ -57,7 +58,7 @@ class CustomerBillPayment(models.Model):
     ref_bill = models.ForeignKey('billing.CustomerBill', on_delete=models.CASCADE)
     paid_at = models.DateField()
     amount = models.FloatField()
-    amount_foreign_currency = models.FloatField(null=True)
+    amount_foreign = models.FloatField(null=True)
     rate = models.IntegerField(default=1)
     currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True)
 
@@ -69,6 +70,6 @@ class SupplierBillPayment(models.Model):
     ref_bill = models.ForeignKey('billing.SupplierBill', on_delete=models.CASCADE)
     paid_at = models.DateField()
     amount = models.FloatField()
-    amount_foreign_currency = models.FloatField(null=True)
+    amount_foreign = models.FloatField(null=True)
     rate = models.IntegerField(default=1)
     currency = models.ForeignKey('treasury.Currency', on_delete=models.SET_NULL, null=True)

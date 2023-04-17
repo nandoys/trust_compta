@@ -62,7 +62,31 @@
                                             no-results-text="Aucun résultat n'a été trouvé pour votre recherche"
                                             hide-default-footer
                                             dense
-                                        ></v-data-table>
+                                        >
+                                            <template v-slot:item.credit="props">
+                                                <v-edit-dialog
+                                                  :return-value.sync="props.item.credit"
+                                                  @save=""
+                                                  @cancel=""
+                                                  @open=""
+                                                  @close=""
+                                                >
+                                                    <div>${ props.item.credit }</div>
+                                                    <template v-slot:input v-if="props.index > 0">
+                                                        <div class="mt-4 text-subtitle-2">
+                                                          Modifier montant au crédit
+                                                        </div>
+                                                        <v-text-field
+                                                          v-model="props.item.credit"
+                                                          label="Edit"
+                                                          single-line
+                                                          counter
+                                                          autofocus
+                                                        ></v-text-field>
+                                                  </template>
+                                                </v-edit-dialog>
+                                            </template>
+                                        </v-data-table>
                                     </v-col>
                                     <v-col cols="12">
                                         <v-tabs v-model="tabLettering">
@@ -133,26 +157,26 @@
                                                              </template>
                                                         </v-select>
                                                         <v-select
-                                  v-model="income.editedItem.debitAccount"
-                                  hide-selected="true"
-                                  :rules="rules.account"
-                                  :items="income.debitAccounts"
-                                  item-text="label"
-                                  item-value="id"
-                                  :loading="income.debitLoading"
-                                  label="Journal"
-                                  no-data-text="Aucun journal n'a été trouvé"
-                                  dense
-                                >
-                                    <template v-slot:prepend-item>
-                                        <v-list-item>
-                                            <v-list-item-content>
-                                                <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
-                                                </v-text-field>
-                                            </v-list-item-content>
-                                        </v-list-item>
-                                    </template>
-                                </v-select>
+                                                          v-model="income.editedItem.debitAccount"
+                                                          hide-selected="true"
+                                                          :rules="rules.account"
+                                                          :items="income.debitAccounts"
+                                                          item-text="label"
+                                                          item-value="id"
+                                                          :loading="income.debitLoading"
+                                                          label="Journal"
+                                                          no-data-text="Aucun journal n'a été trouvé"
+                                                          dense
+                                                        >
+                                                            <template v-slot:prepend-item>
+                                                                <v-list-item>
+                                                                    <v-list-item-content>
+                                                                        <v-text-field v-model="income.searchDebit" :autofocus="false" placeholder="Rechercher journal" @input="income.searchDebitAccounts">
+                                                                        </v-text-field>
+                                                                    </v-list-item-content>
+                                                                </v-list-item>
+                                                            </template>
+                                                        </v-select>
                                                         <v-select
                                                           v-model="income.editedItem.debitAccount"
                                                           hide-selected="true"

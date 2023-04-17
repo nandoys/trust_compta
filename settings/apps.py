@@ -7,7 +7,7 @@ class SettingsConfig(AppConfig):
 
     def ready(self):
         from accounting.models import PlanCategory, Plan, Main, FiscalYear
-        from treasury.models import Currency, CurrencyDailyRate
+        from treasury.models import Currency, CurrencyDailyRate, CurrencyDiffrenceRate
 
         from .models import Journal
 
@@ -16,7 +16,7 @@ class SettingsConfig(AppConfig):
         groups = [
             {'category': 'actif', 'sub_categories': ['immobilisation incorporelle', 'immobilisation corporelle',
                                                      'immobilisation financière', 'actif circulant']},
-            {'category': 'passif', 'sub_categories': ['capitaux propres', 'dettes']},
+            {'category': 'passif', 'sub_categories': ['capitaux propres', 'dettes', 'passif circulant']},
             {'category': 'charge',
              'sub_categories': ["charges d'exploitation", "charges financières", "charges exceptionnelles"]},
             {'category': 'produit',
@@ -79,6 +79,50 @@ class SettingsConfig(AppConfig):
                 Currency(country_code=item['country_code'], name=item['name'], symbol=item['symbol'],
                          is_local=item['is_local']).save()
 
+        # create currency exchange différence rate
+
+        if not CurrencyDiffrenceRate.objects.all().exists():
+            categories = PlanCategory.objects.filter(name__in=['actif', 'passif']).all()
+
+            account = {
+                'actif': {
+                    'root': {'number': '478', 'name': 'Écarts de conversion - actif'},
+                    'children': [
+                        {'number': '4781', 'name': 'Diminution des créances'},
+                        {'number': '4782', 'name': 'Augmentation des dettes'},
+                        {'number': '4788', 'name': 'Différences compensées par couverture de change'},
+                    ],
+                },
+                'passif': {
+                    'root': {'number': '479', 'name': 'Écarts de conversion - passif'},
+                    'children': [
+                        {'number': '4791', 'name': 'Diminution des créances'},
+                        {'number': '4792', 'name': 'Augmentation des dettes'},
+                        {'number': '4798', 'name': 'Différences compensées par couverture de change'},
+                    ],
+                },
+            }
+
+            for category in categories:
+                if category.name == 'actif':
+                    category = PlanCategory.objects.get(name='actif circulant')
+                    root = Plan.add_root(account_number=account['actif']['root']['number'],
+                                         account_name=account['actif']['root']['name'], category=category)
+
+                    for child in account['actif']['children']:
+                        root.add_child(account_number=child['number'], account_name=child['name'], category=category)
+
+                    CurrencyDiffrenceRate(account=root, diff_category=category).save()
+                elif category.name == 'passif':
+                    category = PlanCategory.objects.get(name='passif circulant')
+                    root = Plan.add_root(account_number=account['passif']['root']['number'], category=category,
+                                         account_name=account['passif']['root']['name'])
+
+                    for child in account['passif']['children']:
+                        root.add_child(account_number=child['number'], account_name=child['name'], category=category)
+
+                    CurrencyDiffrenceRate(account=root, diff_category=category).save()
+
         # set modules default accounting
         journals = [
             {'name': 'Banque', 'account_number': 56},
@@ -102,7 +146,7 @@ class SettingsConfig(AppConfig):
                 categories = PlanCategory.objects.all()
                 actif_circulant = categories.get(name="actif circulant")
                 Plan.add_root(account_name=journal['name'], account_number=journal['account_number'],
-                                        category=actif_circulant)
+                              category=actif_circulant)
 
                 if not Journal.objects.filter(name=journal['name']).exists():
                     Journal.add_root(name=journal['name'], account=plan.get())

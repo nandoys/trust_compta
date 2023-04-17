@@ -40,6 +40,7 @@
 
     {% block javascript %}
     <!-- JAVASCRIPT -->
+    <script src="{% static 'js/plugins/babel-polyfill.js' %}"></script>
     <script src="{% static 'libs/vue/dist/vue.min.js'%}"></script>
     <script src="{% static 'libs/axios/dist/axios.min.js'%}"></script>
     <script src="{% static 'libs/vuetify/dist/vuetify.min.js'%}"></script>
@@ -50,9 +51,6 @@
 
     {% block extra_js %}
     {% endblock extra_js %}
-
-    <!-- App js -->
-    <script src="{% static 'js/app.js'%}"></script>
     {% endblock javascript %}
 
 </body>
