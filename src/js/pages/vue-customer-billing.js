@@ -222,17 +222,44 @@ const app = new Vue({
                 const found_index = item.taxes.indexOf(selected_tax)
 
                 // calculate the tax amount
-                if (found_tax && found_tax.is_fixed){
-                  console.log(found_tax)
-                  tax_amount += found_tax.amount
-                  item.taxes_amount[found_index] = {calculated: found_tax.amount, tax_ref: selected_tax}
+                if (found_tax){
 
-                } else if (found_tax && !found_tax.is_fixed){
-                  tax_amount += found_tax.amount / 100
-                  // this bind to watch any changes when the user select a tax
-                  item.taxes_amount[found_index] = {calculated: total * (found_tax.amount / 100), tax_ref: selected_tax}
+                  switch (found_tax.is_fixed) {
+                    case true:
+                      switch (found_tax.currency.is_local) {
+                        case true:
+                          switch (selected_bill.currency_is_local) {
+                            case true:
+                              tax_amount += found_tax.amount
+                              break
+                            case false:
+                              tax_amount += found_tax.amount / selected_bill.rate
+                          }
+                          break
+                        case false:
+                          switch (selected_bill.currency_is_local) {
+                            case true:
+                              tax_amount += found_tax.amount * selected_bill.rate
+                              break
+                            case false:
+                              tax_amount += found_tax.amount
+                          }
+                          break
+                      }
+
+                      item.taxes_amount[found_index] = {calculated: found_tax.amount, tax_ref: selected_tax}
+                      break
+                    case false:
+                      if (item.price > 0) {
+                        tax_amount += item.price * (found_tax.amount / 100)
+                      }
+
+                      // this bind to watch any changes when the user select a tax
+                      item.taxes_amount[found_index] = {calculated: total * (found_tax.amount / 100), tax_ref: selected_tax}
+
+                      break
+                  }
                 }
-
                 //add tax to accounting entry if not existing yet
                 if(found_tax) {
                   const  found_entry = this.bill.entries.find(entry => entry.account_id === found_tax.account_id &&
@@ -298,15 +325,12 @@ const app = new Vue({
 
               })
 
-              // here we want to check in old data if item taxes no longer exist in the new items to recalculate
-
-              // here we calculate the total price
-              const total_taxes = (total * tax_amount)
-              //console.log(tax_amount, total)
-
               this.total_amount += total
-              item.priceWithTax = total + total_taxes
-              this.total_taxes += total_taxes
+
+
+              item.priceWithTax = total + tax_amount
+              console.log(total, tax_amount, item.priceWithTax)
+              this.total_taxes += tax_amount
 
               selected_bill.amount += item.priceWithTax
             }

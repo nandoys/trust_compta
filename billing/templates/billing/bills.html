@@ -48,6 +48,9 @@
             </template>
             <template v-slot:default="{ items, isExpanded, expand }">
                 <v-list-item  v-for="item in items" :key="item.text" @click="getBillLines">
+                  <v-list-item-icon>
+                      <v-icon>mdi-file-document</v-icon>
+                  </v-list-item-icon>
                   <v-list-item-content>
                       <v-list-item-title v-text="item.partner"></v-list-item-title>
                       <v-list-item-subtitle class="text--primary" v-text="item.bill_at"></v-list-item-subtitle>
