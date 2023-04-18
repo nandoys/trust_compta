@@ -17,7 +17,7 @@
                   class="overflow-y-auto"
                   max-height="600"
                 >
-                    <v-container>
+                    <v-container  v-if=" selectedBill !== undefined">
                     <!-- end page title -->
                         <v-row>
                             <v-col cols="4" class="pa-1">
@@ -46,7 +46,6 @@
                                 >
                                     <template v-slot:top="{ items }">
                                         <v-card elevation="0" v-if="bill.selectedBill >=0 && bill.bills.length > 0">
-
                                             <v-card-text>
                                                 <v-row>
                                                     <v-col cols="6" class="text-subtitle-1">
@@ -228,6 +227,13 @@
                                       </template>
                                     </v-snackbar>
                                 </v-tabs-items>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <v-container v-else>
+                        <v-row >
+                            <v-col cols="12" class="d-flex flex-column justify-center align-center">
+                                <h1>Some</h1>
                             </v-col>
                         </v-row>
                     </v-container>
