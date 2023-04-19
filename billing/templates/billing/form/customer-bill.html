@@ -186,7 +186,7 @@
                                         </template>
                                     </v-select>
                             </v-row>
-                            <v-row ref="dailyRate" v-if="bill.isForeigncurrencyOperation">
+                            <v-row ref="dailyRate">
                                 <v-text-field
                                     v-model="bill.editedItem.rate"
                                     :rules="rules.rate"

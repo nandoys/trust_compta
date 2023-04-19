@@ -48,7 +48,13 @@ class BillLine(models.Model):
     account = models.ForeignKey('accounting.Plan', on_delete=models.SET_NULL, null=True)
     quantity = models.IntegerField()
     price = models.FloatField()
-    tax = models.ForeignKey('accounting.Tax', on_delete=models.SET_NULL, null=True)
+
+
+class BillLineTax(models.Model):
+    id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
+    tax = models.ForeignKey('accounting.Tax', on_delete=models.CASCADE)
+    tax_amount = models.FloatField()
+    bill_line = models.ForeignKey('BillLine', on_delete=models.CASCADE)
 
 
 class CustomerBillPayment(models.Model):

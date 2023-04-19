@@ -6,12 +6,12 @@
 {% endblock extra_css %}
 
 {% block content %}
-        <<v-app id="app" >
+        <<v-app id="app">
             {% block header %}
                  {% include "partials/topbar.html" %}
             {% endblock header %}
             {% include 'billing/bills.html' %}
-            <v-main>
+            <v-main v-resize="onResize">
                 <v-sheet
                   id="scrolling-techniques"
                   class="overflow-y-auto"
@@ -20,16 +20,7 @@
                     <v-container  v-if=" selectedBill !== undefined">
                     <!-- end page title -->
                         <v-row>
-                            <v-col cols="4" class="pa-1">
-                                <v-card>
-                                    <v-card-title>Facture impayé</v-card-title>
-                                </v-card>
-                            </v-col>
-                            <v-col cols="4" class="pa-1">
-                                <v-card>
-                                    <v-card-title>Facture en retard</v-card-title>
-                                </v-card>
-                            </v-col>
+                            {% include 'billing/tab-menus.html' %}
                         </v-row>
                         <v-row class="d-flex p-4">
                             <v-col cols="12">
@@ -47,6 +38,11 @@
                                     <template v-slot:top="{ items }">
                                         <v-card elevation="0" v-if="bill.selectedBill >=0 && bill.bills.length > 0">
                                             <v-card-text>
+                                                <v-row justify="end">
+                                                    <v-btn elevation="2" :disabled="disableValidate" small rounded text tile outlined color="primary" @click="saveBillEntries">
+                                                        Valider <v-icon>mdi-check</v-icon>
+                                                    </v-btn>
+                                                </v-row>
                                                 <v-row>
                                                     <v-col cols="6" class="text-subtitle-1">
                                                         <div>Nom du client: ${ bill.bills[bill.selectedBill].partner }</div>
@@ -56,15 +52,15 @@
                                                     </v-col>
                                                     <v-col cols="6" align-self="start">
                                                         <div class="text-subtitle-1">
-                                                            Montant HT: ${ total_amount.toFixed(2) }
+                                                            Montant HT: ${ thousandSeparator(total_amount) }
                                                             ${ bill.bills[bill.selectedBill].currency_name }
                                                         </div>
                                                         <div class="text-subtitle-1">
-                                                            Taxes: ${ total_taxes.toFixed(2) }
+                                                            Taxes: ${ thousandSeparator(total_taxes) }
                                                             ${ bill.bills[bill.selectedBill].currency_name }
                                                         </div>
                                                         <div class="text-subtitle-1">
-                                                            Montant TTC: ${ bill.bills[bill.selectedBill].amount }
+                                                            Montant TTC: ${ thousandSeparator(bill.bills[bill.selectedBill].amount) }
                                                             ${ bill.bills[bill.selectedBill].currency_name }
                                                         </div>
                                                         <div class="text-subtitle-1"> Journal: ${ bill.bills[bill.selectedBill].account }</div>
@@ -74,13 +70,13 @@
                                         </v-card>
                                     </template>
                                     <template v-slot:item.amount_foreign="props">
-                                        <div v-if="props.item.amount_foreign != ''">${ props.item.amount_foreign }</div>
+                                        <div v-if="props.item.amount_foreign != ''">${ thousandSeparator(props.item.amount_foreign) }</div>
                                     </template>
                                     <template v-slot:item.debit="props">
-                                        <div v-if="props.item.debit != ''">${ props.item.debit }</div>
+                                        <div v-if="props.item.debit != ''">${ thousandSeparator(props.item.debit) }</div>
                                     </template>
                                     <template v-slot:item.credit="props">
-                                        <div v-if="props.item.credit != ''">${ props.item.credit }</div>
+                                        <div v-if="props.item.credit != ''">${ thousandSeparator(props.item.credit) }</div>
                                     </template>
                                     <template v-slot:footer.page-text="{ pageStart, pageStop, itemsLength}">
                                         <div class="text-caption">${pageStart} - ${pageStop} sur ${itemsLength}</div>
@@ -88,7 +84,7 @@
                                 </v-data-table>
                             </v-col>
                             <v-col cols="12">
-                                <v-tabs v-model="tabLettering">
+                                <v-tabs v-model="tabBillLines">
                                     <v-tab>
                                         <template v-slot:default>
                                             <div class="text-caption">Lignes de facture</div>
@@ -100,7 +96,7 @@
                                         </template>
                                     </v-tab>
                                 </v-tabs>
-                                <v-tabs-items v-model="tabLettering">
+                                <v-tabs-items v-model="tabBillLines">
                                     <v-tab-item key="lines">
                                          {% include 'billing/bill-lines.html' %}
                                     </v-tab-item>
@@ -201,7 +197,6 @@
                                                     :rules="rules.amount"
                                                     :label="symbolCurrency"
                                                     dense
-                                                    @input="thousandSeparator"
                                                 >
                                                 </v-text-field>
                                             </v-col>
@@ -230,12 +225,25 @@
                             </v-col>
                         </v-row>
                     </v-container>
-                    <v-container v-else>
-                        <v-row >
-                            <v-col cols="12" class="d-flex flex-column justify-center align-center">
-                                <h1>Some</h1>
-                            </v-col>
-                        </v-row>
+
+                    <v-container v-else fluid class="grey lighten-5">
+                        {% include 'billing/tab-menus.html' %}
+                        <v-card :height="windowSize.y * 0.87" flat class="grey lighten-5">
+                            <v-card-text class="d-flex justify-space-around">
+                                <v-img
+                                      lazy-src="{% static 'images/no-bill.png' %}"
+                                      max-height="250"
+                                      max-width="250"
+                                      src="{% static 'images/no-bill.png' %}"
+                                ></v-img>
+                            </v-card-text>
+                            <v-card-actions>
+                                <v-spacer></v-spacer>
+                                <div v-if="bill.bills.length == 0" class="">Pour commencer par ajouter une nouvelle facture pour votre client</div>
+                                <div v-else class="">Vous n'avez choisi aucune facture</div>
+                                <v-spacer></v-spacer>
+                            </v-card-actions>
+                        </v-card>
                     </v-container>
                 </v-sheet>
             </v-main>

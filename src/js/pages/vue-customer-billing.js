@@ -17,6 +17,8 @@ const app = new Vue({
           debitAccountsCopy: [],
           creditAccounts: [],
           creditAccountsCopy: [],
+          debitAccountBalance: null,
+          creditsAccountBalance: null,
           currencies: [],
           currenciesCopy: [],
           partners: [],
@@ -102,12 +104,13 @@ const app = new Vue({
           { text: 'Prix HT', value: 'price' },
           { text: 'Taxes', value: 'taxes', sortable: false },
           { text: 'Prix TTC', value: 'priceWithTax' },
+          { text: '', value: 'actions', sortable: false }
         ],
           loading: false,
         },
         taxes: [],
-        total_amount: 0, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
-        total_taxes: 0, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
+        total_amount: null, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
+        total_taxes: null, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
         minDate: '',
         maxDate: '',
         moduleId:'',
@@ -153,9 +156,13 @@ const app = new Vue({
           ]
         },
         tab: null,
-        tabLettering: null,
+        tabBillLines: null,
+        tablStateBill: null,
 
-        drawerHeight: '',
+        windowSize: {
+          x: 0,
+          y: 0,
+        },
 
         snackbar: false,
         multiLine: false,
@@ -164,6 +171,8 @@ const app = new Vue({
         snacktext: '',
         snackcolor: '',
         timeout: 2000,
+
+        disableValidate: true,
       }
     },
 
@@ -278,9 +287,9 @@ const app = new Vue({
                         account:found_tax.account_name,
                         account_id: found_tax.account_id,
                         label: found_tax.name,
-                        amount_foreign: selected_bill.currency_is_local ? null : 0,
+                        amount_foreign:  null,
                         debit: null,
-                        credit: 0,
+                        credit: null,
                     })
                   }
                 }
@@ -313,8 +322,8 @@ const app = new Vue({
                 customer_entry.debit = selected_bill.amount
 
                 line_entry.amount_foreign = null
-                line_entry.amount = item.price
-                line_entry.credit = item.price
+                line_entry.amount = parseFloat(item.price)
+                line_entry.credit = parseFloat(item.price)
               } else {
                 const rate =  selected_bill.rate
 
@@ -324,61 +333,66 @@ const app = new Vue({
                 customer_entry.debit = amount_customer
 
                 const amount = item.price * rate
-                line_entry.amount_foreign = item.price
+                line_entry.amount_foreign =parseFloat(item.price)
                 line_entry.amount = amount
-                line_entry.credit = amount
+                line_entry.credit = parseFloat(amount)
               }
 
             }
 
           })
 
+          // here  we reset value of evevry tax in entry
           this.bill.entries.forEach(entry => {
-                const tax_entry = this.taxes.find(tax => tax.account_id === entry.account_id && tax.name === entry.label)
 
-                if(tax_entry){
-                  entry.credit = 0
-                  items.forEach(item => {
-                     item.taxes_amount.forEach(amount => {
-                        if(amount.tax_ref === tax_entry.id) {
-                          switch (selected_bill.currency_is_local) {
+            const tax_entry = this.taxes.find(tax => tax.account_id === entry.account_id && tax.name === entry.label)
+
+            if(tax_entry){
+              entry.credit = 0
+              items.forEach(item => {
+                 item.taxes_amount.forEach(amount => {
+                    if(amount.tax_ref === tax_entry.id) {
+                      switch (selected_bill.currency_is_local) {
+                        case true:
+                          switch (tax_entry.currency.is_local) {
                             case true:
-                              switch (tax_entry.currency.is_local) {
-                                case true:
-                                  entry.credit += amount.calculated
-                                  break
-                                case false:
-                                  entry.amount_foreign += amount.calculated
-                                  entry.credit += (amount.calculated * selected_bill.rate)
-                                  break
-                                case null:
-                                  entry.amount_foreign = null
-                                  entry.credit += amount.calculated
-                                  break
-                              }
+                              entry.credit += amount.calculated
                               break
                             case false:
-                              switch (tax_entry.currency.is_local) {
-                                case true:
-                                  entry.credit += amount.calculated
-                                  break
-                                case false:
-                                  entry.amount_foreign += amount.calculated
-                                  entry.credit += (amount.calculated * selected_bill.rate)
-                                  break
-                                case null:
-                                  entry.amount_foreign += amount.calculated
-                                  entry.credit += (amount.calculated * selected_bill.rate)
-                                  break
-                              }
+                              entry.amount_foreign += amount.calculated
+                              entry.credit += (amount.calculated * selected_bill.rate)
+                              break
+                            case null:
+                              entry.amount_foreign = null
+                              entry.credit += amount.calculated
                               break
                           }
-                        }
-                     })
-                  })
-                }
-
+                          break
+                        case false:
+                          switch (tax_entry.currency.is_local) {
+                            case true:
+                              entry.credit += amount.calculated
+                              break
+                            case false:
+                              entry.amount_foreign += amount.calculated
+                              entry.credit += (amount.calculated * selected_bill.rate)
+                              break
+                            case null:
+                              entry.amount_foreign += amount.calculated
+                              entry.credit += (amount.calculated * selected_bill.rate)
+                              break
+                          }
+                          break
+                      }
+                    }
+                 })
               })
+            }
+
+          })
+
+          // disability of the validate button
+          this.disableValidate = this.bill.entries.length === 0;
 
         },
         deep: true
@@ -388,9 +402,11 @@ const app = new Vue({
 
         if (value !== undefined) {
           this.lines.items.splice(0)
-          const actions_header_index= this.lines.headers.findIndex(header => header.value === 'actions')
-          this.lines.headers.splice(actions_header_index, 1)
+          this.bill.entries.splice(0)
         }
+
+        // disability of the validate button
+        this.disableValidate = this.bill.entries.length === 0;
       },
 
       dialogIncomes (val) {
@@ -400,8 +416,6 @@ const app = new Vue({
       dialogIncomesDelete (val) {
         val || this.closeDelete()
       },
-
-
 
     },
 
@@ -428,14 +442,10 @@ const app = new Vue({
           label: '',
           account: default_account,
           quantity: 1,
-          price: 0,
+          price: null,
           taxes: '',
           taxes_amount: []
         })
-
-        if(this.lines.items.length === 1){
-          this.lines.headers.push({ text: '', value: 'actions', sortable: false })
-        }
 
         // here we add accounting entries
         if (this.bill.entries.length === 0 && this.lines.items.length === 1){
@@ -450,8 +460,8 @@ const app = new Vue({
             account: bill.account,
             account_id: bill.account_id,
             label: bill.reference,
-            amount_foreign: bill.currency_is_local ? null : 0,
-            debit: 0,
+            amount_foreign: null,
+            debit: null,
             credit: null,
           })
 
@@ -462,9 +472,9 @@ const app = new Vue({
             account: line.account.label,
             account_id: line.account.id,
             label: '',
-            amount_foreign: bill.currency_is_local ? null : 0,
+            amount_foreign: null,
             debit: null,
-            credit: 0,
+            credit: null,
           })
 
         }
@@ -483,9 +493,9 @@ const app = new Vue({
               account: line.account.label,
               account_id: line.account.id,
               label: '',
-              amount_foreign: bill.currency_is_local ? null : 0,
+              amount_foreign: null,
               debit: null,
-              credit: 0,
+              credit: null,
             })
           }
         }
@@ -495,6 +505,10 @@ const app = new Vue({
       getUrlData(){
         const parse = window.location.pathname.split('/')
         this.moduleName = parse[2]
+      },
+
+      onResize () {
+        this.windowSize = { x: window.innerWidth, y: window.innerHeight }
       },
 
       getModule(){
@@ -524,7 +538,9 @@ const app = new Vue({
               bill_at: this.formatDate(item.bill_at),
               deadline_at: this.formatDate(item.deadline_at),
               reference: item.reference,
+              partner_id: item.partner_id,
               partner: item.partner__name,
+              currency_id: item.currency_id,
               currency_name: item.currency__name,
               currency_is_local: item.currency__is_local,
               rate: item.rate,
@@ -656,6 +672,75 @@ const app = new Vue({
 
       savePartnerAndEdit(){},
 
+      saveBillEntries(){
+
+        let lines = []
+        let entries = []
+        const selected_bill_index = this.bill.selectedBill
+        const selected_bill = this.bill.bills[selected_bill_index]
+
+        this.bill.entries.forEach(entry => {
+
+          const found_line = this.lines.items.find(item => item.ref === entry.line_ref)
+          if (found_line === undefined) {
+              if (entry.debit !== null || entry.credit !== null || entry.debit > 0 || entry.credit > 0) {
+
+                entries.push({
+                  id: null,
+                  currency: selected_bill.currency_id,
+                  rate: selected_bill.rate,
+                  ref_billing_customer: selected_bill.id,
+                  ref_bill_line: null,
+                  account: entry.account_id,
+                  date_at: selected_bill.bill_at,
+                  label: selected_bill.reference,
+                  partner: selected_bill.partner_id,
+                  amount_foreign: entry.amount_foreign,
+                  debit: entry.debit,
+                  credit: entry.credit
+              })
+              }
+          } else {
+            //console.log(selected_bill, entry, data)
+          }
+        })
+
+        if (entries.length > 0) {
+          this.apiCall('post', `api/billing/customer/bill/entries/save`, entries).then(res => {
+            const data = res.data
+
+          }).then(()=> {
+            const bill = {
+            id: selected_bill.id,
+            currency: selected_bill.currency_id,
+            rate: selected_bill.rate,
+            account: selected_bill.account_id,
+            dateBill: selected_bill.bill_at,
+            dateDeadline: selected_bill.deadline_at,
+            partner: selected_bill.partner_id,
+            reference: selected_bill.reference,
+            amount: selected_bill.amount
+          }
+            console.log(bill)
+          })
+        }
+
+        /*
+        this.apiCall('post', '/api/billing/customer/bill/entries/save', data).then(res => {
+
+        })
+
+         */
+
+        if (this.bill.entries.length === 0) {
+          const message = `Aucune écriture comptable n'a été saisie. \r Commencez par entrer un ligne à à votre facture`
+          this.snackcolor = 'red darken-4'
+          this.snacktext = message
+          this.multiLine = true
+          this.snackbar = true
+        }
+      },
+
       getCurrency(){
         this.bill.currencyOperationLoading = true
         this.apiCall('get', `/api/treasury/currencies/get`).then(res => {
@@ -755,6 +840,16 @@ const app = new Vue({
         return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`
       },
 
+      thousandSeparator(item){
+        if (item === null) {
+          return null
+        } else {
+          const parse = parseFloat(item).toFixed(2)
+          return parseFloat(parse).toLocaleString('fr-FR')
+        }
+
+      },
+
       setOperationDate(){
         const now  = (new Date(Date.now() - (new Date()).getTimezoneOffset() * 60000)).toISOString().substr(0, 10)
         const [year, month, day] = now.split('-')
@@ -795,7 +890,6 @@ const app = new Vue({
         this.lines.items.splice(index, 1)
 
         if (this.lines.items.length === 0) {
-          this.lines.headers.splice(-1, 1)
           this.bill.entries.splice(0)
         }
 
@@ -876,28 +970,6 @@ const app = new Vue({
           this.bill.loading = true
           let data = this.setData()
 
-          this.apiCall('post', 'api/treasury/', data).then(res => {
-            let message = res.data.message
-            this.snacktext = message
-            this.snackcolor = 'green darken-3'
-            this.snackbar = true
-            this.bill.editedItem.dialogEntry = false
-            this.bill.loading = false
-
-            Object.assign(this.bill.entries[this.bill.editedIndex], this.bill.editedItem)
-
-            this.$nextTick(() => {
-              this.bill.editedItem = Object.assign({}, this.bill.defaultItem)
-              this.bill.editedIndex = -1
-            })
-
-          }).catch((err) => {
-            let message = err.response.data.message
-            this.bill.loading = false
-            this.snacktext = message
-            this.snackbar = true
-            this.snackcolor = 'red darken-3'
-          })
         } else {
           let data = this.setData()
 
@@ -936,30 +1008,6 @@ const app = new Vue({
         if (this.bill.editedIndex > -1) {
           this.bill.loading = true
           let data = this.setData()
-
-          this.apiCall('post', 'api/treasury/', data).then(res => {
-            let message = res.data.message
-            this.snacktext = message
-            this.snackcolor = 'green darken-3'
-            this.snackbar = true
-            this.bill.dialog = false
-            this.bill.loading = false
-
-            Object.assign(this.bill.entries[this.bill.editedIndex], this.bill.editedItem)
-
-            this.$nextTick(() => {
-              this.bill.editedItem = Object.assign({}, this.bill.defaultItem)
-              this.bill.editedIndex = -1
-            })
-
-          }).catch((err) => {
-            let message = err.response.data.message
-            this.bill.loading = false
-            this.snacktext = message
-            this.snackbar = true
-            this.snackcolor = 'red darken-3'
-            this.bill.dialog = false
-          })
         } else {
           let data = this.setData()
 
@@ -1006,10 +1054,6 @@ const app = new Vue({
     computed: {
       formTitle () {
         return this.bill.editedIndex === -1 ? 'Nouveau Compte' : 'Modifier Compte'
-      },
-
-      thousandSeparator(){
-
       },
 
       selectedBill(){
@@ -1083,7 +1127,7 @@ const app = new Vue({
               this.bill.editedItem.rate = currency.rate
             } else {
               this.bill.isForeigncurrencyOperation = false
-              this.bill.editedItem.rate = ''
+              this.bill.editedItem.rate = null
             }
           }
         })
@@ -1119,7 +1163,8 @@ const app = new Vue({
     },
 
     mounted() {
-
+      this.onResize()
+      this.bill.selectedBill = undefined
     },
 
   })

@@ -1,0 +1,42 @@
+<v-tabs v-model="tablStateBill" class="grey lighten-5">
+    <v-tab>
+        <template v-slot:default>
+            <v-badge
+              :content="bill.bills.length"
+              inline
+            >
+                <div class="text-caption">Facture impayé</div>
+            </v-badge>
+        </template>
+    </v-tab>
+    <v-tab>
+        <template v-slot:default>
+            <v-badge
+              :content="bill.bills.length"
+              inline
+            >
+                <div class="text-caption">Facture payé</div>
+            </v-badge>
+        </template>
+    </v-tab>
+    <v-tab>
+        <template v-slot:default>
+            <v-badge
+              :content="bill.bills.length"
+              inline
+            >
+                <div class="text-caption">Facture en retard</div>
+            </v-badge>
+        </template>
+    </v-tab>
+    <v-tab>
+        <template v-slot:default>
+            <v-badge
+              :content="bill.partners.length"
+              inline
+            >
+                <div class="text-caption">Mes clients</div>
+            </v-badge>
+        </template>
+    </v-tab>
+</v-tabs>
