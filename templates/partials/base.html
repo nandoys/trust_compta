@@ -17,7 +17,13 @@
 
     <link href="{% static 'libs/vuetify/dist/vuetify.min.css'%}" rel="stylesheet" type="text/css" />
     <link href="{% static 'css/materialdesignicons.css' %}"  rel="stylesheet" type="text/css" >
-
+    <script src="{% static 'libs/@lottiefiles/lottie-player/dist/lottie-player.js' %}"></script>
+    <script src="{% static 'libs/vue/dist/vue.min.js'%}"></script>
+    <script src="{% static 'libs/axios/dist/axios.min.js'%}"></script>
+    <script src="{% static 'libs/vuetify/dist/vuetify.min.js'%}"></script>
+    <script src="{% static 'libs/@vue/composition-api/dist/vue-composition-api.js'%}"></script>
+    <script src="{% static 'libs/vue-demi/lib/index.iife.js'%}"></script>
+    <script src="{% static 'libs/pinia/dist/pinia.iife.js'%}"></script>
     <!-- Vuetify Css -->
     {% endblock css %}
 </head>
@@ -42,12 +48,6 @@
     {% block javascript %}
     <!-- JAVASCRIPT -->
     <script src="{% static 'js/plugins/babel-polyfill.js' %}"></script>
-    <script src="{% static 'libs/vue/dist/vue.min.js'%}"></script>
-    <script src="{% static 'libs/axios/dist/axios.min.js'%}"></script>
-    <script src="{% static 'libs/vuetify/dist/vuetify.min.js'%}"></script>
-    <script src="{% static 'libs/@vue/composition-api/dist/vue-composition-api.js'%}"></script>
-    <script src="{% static 'libs/vue-demi/lib/index.iife.js'%}"></script>
-    <script src="{% static 'libs/pinia/dist/pinia.iife.js'%}"></script>
     <script src="{% static 'js/plugins.js'%}"></script>
 
     {% block extra_js %}

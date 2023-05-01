@@ -1,83 +1,127 @@
 <v-navigation-drawer app permanent absolute clipped width="320" ref="drawer">
-    <v-list-item>
-    <v-list-item-content>
-      <v-list-item-title>
-          {% include "billing/form/customer-bill.html" %}
-      </v-list-item-title>
-    </v-list-item-content>
+    <v-list>
+        <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title>
+              {% include "billing/form/customer-bill.html" %}
+          </v-list-item-title>
+        </v-list-item-content>
     </v-list-item>
 
-    <v-list-item-group
-      v-model="bill.selectedBill"
-      color="primary"
-    >
-        <v-data-iterator
-          :items="bill.bills"
-          item-key="id"
-          :items-per-page.sync="bill.itemsPerPage"
-          :page.sync="bill.page"
-          :search="bill.search"
-          no-results-text="Aucun résultat trouvé"
-          no-data-text="Aucune transaction existante"
-          hide-default-footer
+        <v-list-item-group
+          v-model="bill.selectedBill"
+          color="primary"
         >
-            <template v-slot:header>
-                <v-row>
-                    <v-col cols="12">
-                        <v-text-field
-                            v-model="bill.search"
-                            clearable
-                            flat
-                            hide-details
-                            prepend-inner-icon="mdi-magnify"
-                            label="Rechercher..."
-                        ></v-text-field>
-                    </v-col>
-                    <v-col cols="6">
-                        <v-btn elevation="0" text x-small class="pa-0">
-                            <v-icon  @click="formerPage">mdi-chevron-left</v-icon> précédent
-                        </v-btn>
-                    </v-col>
+            <v-data-iterator
+              :items="bill.bills"
+              item-key="id"
+              :items-per-page.sync="bill.itemsPerPage"
+              :page.sync="bill.page"
+              :search="bill.search"
+              no-results-text="Aucune facture trouvée"
+              no-data-text="Aucune facture existante"
+              hide-default-footer
+            >
+                <template v-slot:header>
+                    <v-row>
+                        <v-col cols="12">
+                            <v-text-field
+                                v-model="bill.search"
+                                clearable
+                                flat
+                                hide-details
+                                prepend-inner-icon="mdi-magnify"
+                                label="Rechercher..."
+                            ></v-text-field>
+                        </v-col>
+                        <v-col cols="6">
+                            <v-btn elevation="0" text x-small class="pa-0">
+                                <v-icon  @click="formerPage">mdi-chevron-left</v-icon> précédent
+                            </v-btn>
+                        </v-col>
 
-                    <v-col cols="6">
-                        <v-btn elevation="0" text x-small class="mr-8">
-                            suivant <v-icon  @click="nextPage">mdi-chevron-right</v-icon>
-                        </v-btn>
-                    </v-col>
-                </v-row>
-            </template>
-            <template v-slot:default="{ items, isExpanded, expand }">
-                <v-list v-for="item in items">
-                    <v-list-item  :key="item.text" @click="getBillLines">
-                      <v-list-item-avatar>
-                          <v-icon>mdi-file-document</v-icon>
-                      </v-list-item-avatar>
-                      <v-list-item-content>
-                          <v-list-item-title v-text="item.reference" v-if="item.partner == undefined">
-                              ${item.reference}
-                          </v-list-item-title>
-                          <v-list-item-title v-text="item.partner" v-else>
-                              ${item.partner}
-                          </v-list-item-title>
-                          <v-list-item-subtitle class="text--primary" v-text="item.bill_at"></v-list-item-subtitle>
-                      </v-list-item-content>
-                      <v-list-item-action>
-                          <v-list-item-action-text>${item.currency_name}</v-list-item-action-text>
-                          ${item.amount}
-                      </v-list-item-action>
-                    </v-list-item>
-                    <v-divider></v-divider>
-            </template>
-            </template>
-            <template v-slot:footer="">
-                  <v-row>
-                    <v-col>
-                        Navigation:
-                        <v-icon v-ripple @click="formerPage">mdi-chevron-left</v-icon>
-                        <v-icon v-ripple @click="nextPage">mdi-chevron-right</v-icon>
-                    </v-col>
-                </v-row>
-            </template>
-        </v-data-iterator>
-    </v-list-item-group>
+                        <v-col cols="6">
+                            <v-btn elevation="0" text x-small class="mr-8">
+                                suivant <v-icon  @click="nextPage">mdi-chevron-right</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+                </template>
+                <template v-slot:default="{ items, isExpanded, expand }">
+                    <v-list v-for="item in items" class="pa-0">
+                        <v-list-item  three-line dense color="blue darken-4" :key="item.text" @click="getBillLines">
+                          <v-list-item-avatar>
+                              <v-icon>mdi-file-document</v-icon>
+                          </v-list-item-avatar>
+                          <v-list-item-content>
+                              <v-list-item-title v-text="item.reference" v-if="item.partner == undefined">
+                                  ${item.reference}
+                              </v-list-item-title>
+                              <v-list-item-title v-text="item.partner" v-else>
+                                  ${item.partner}
+                              </v-list-item-title>
+                              <v-list-item-subtitle class="text--primary" v-text="item.bill_at"></v-list-item-subtitle>
+                              <v-list-item-subtitle>
+                                  <v-list-item-title v-if="item.currency_is_local"> ${item.amount} ${item.currency_name}</v-list-item-title>
+                                  <v-list-item-title v-else>${item.amount_foreign}  ${item.currency_name} </v-list-item-title>
+                              </v-list-item-subtitle>
+                          </v-list-item-content>
+                          <v-list-item-action>
+                              <v-menu
+                                bottom
+                                right
+                                :close-on-content-click="false"
+                                :nudge-width="200"
+                                offset-x
+                              >
+                                  <template v-slot:activator="{ on, attrs }">
+                                      <v-btn
+                                        dark
+                                        icon
+                                        v-bind="attrs"
+                                        v-on="on"
+                                      >
+                                        <v-icon color="grey lighten-1">mdi-dots-horizontal</v-icon>
+                                      </v-btn>
+                                  </template>
+                                  <v-card>
+                                      <v-card-text>
+                                          <v-row>
+                                              <v-btn block text small color="blue darken-4" @click="deleteBill(item)">
+                                                  Éditer la facture <v-spacer></v-spacer>
+                                                  <v-icon >mdi-pencil</v-icon>
+                                              </v-btn>
+                                          </v-row>
+                                          <v-row>
+                                              <v-btn block text small color="blue darken-4" @click="deleteBill(item)">
+                                                  Dupliquer la facture <v-spacer></v-spacer>
+                                                  <v-icon >mdi-content-copy</v-icon>
+                                              </v-btn>
+                                          </v-row>
+                                          <v-row>
+                                              <v-btn block text small color="blue darken-4" @click="deleteBill(item)">
+                                                  Supprimer <v-spacer></v-spacer>
+                                                  <v-icon >mdi-trash-can</v-icon>
+                                              </v-btn>
+                                          </v-row>
+                                      </v-card-text>
+                                  </v-card>
+                              </v-menu>
+                          </v-list-item-action>
+                        </v-list-item>
+                        <v-divider></v-divider>
+                    </v-list>
+                </template>
+                <template v-slot:footer="">
+                      <v-row>
+                        <v-col>
+                            Navigation:
+                            <v-icon v-ripple @click="formerPage">mdi-chevron-left</v-icon>
+                            <v-icon v-ripple @click="nextPage">mdi-chevron-right</v-icon>
+                        </v-col>
+                    </v-row>
+                </template>
+            </v-data-iterator>
+        </v-list-item-group>
+    </v-list>
 </v-navigation-drawer>

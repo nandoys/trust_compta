@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import CustomerBill, SupplierBill, BillLine, Partner
+from .models import CustomerBill, SupplierBill, BillLine, BillLineTax, Partner
 
 # Register your models here.
-admin.site.register([CustomerBill, SupplierBill, BillLine, Partner])
+admin.site.register([CustomerBill, SupplierBill, BillLine, BillLineTax, Partner])

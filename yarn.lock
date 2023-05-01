@@ -310,6 +310,29 @@
   resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-3.4.0.tgz#08d6c5e20cf7e4cc02fd181c4b0c225cd31dbb60"
   integrity sha512-dfLbk+PwWvFzSxwk3n5ySL0hfBog779o8h68wK/7/APo/7cgyWp5jcXockbxdk5kFRkbeXWm4Fbi9FrdN381sA==
 
+"@lit-labs/ssr-dom-shim@^1.0.0", "@lit-labs/ssr-dom-shim@^1.1.0":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@lit-labs/ssr-dom-shim/-/ssr-dom-shim-1.1.1.tgz#64df34e2f12e68e78ac57e571d25ec07fa460ca9"
+  integrity sha512-kXOeFbfCm4fFf2A3WwVEeQj55tMZa8c8/f9AKHMobQMkzNUfUj+antR3fRPaZJawsa1aZiP/Da3ndpZrwEe4rQ==
+
+"@lit/reactive-element@^1.3.0", "@lit/reactive-element@^1.6.0":
+  version "1.6.1"
+  resolved "https://registry.yarnpkg.com/@lit/reactive-element/-/reactive-element-1.6.1.tgz#0d958b6d479d0e3db5fc1132ecc4fa84be3f0b93"
+  integrity sha512-va15kYZr7KZNNPZdxONGQzpUr+4sxVu7V/VG7a8mRfPPXUyhEYj5RzXCQmGrlP3tAh0L3HHm5AjBMFYRqlM9SA==
+  dependencies:
+    "@lit-labs/ssr-dom-shim" "^1.0.0"
+
+"@lottiefiles/lottie-player@^1.7.1":
+  version "1.7.1"
+  resolved "https://registry.yarnpkg.com/@lottiefiles/lottie-player/-/lottie-player-1.7.1.tgz#d2827bbdd7b0235e7b967486019acea364e01bef"
+  integrity sha512-U2gokX7ZXHCD+DgRXfaFyxuVsc0SYfC2mXndnCVwGvpdApUGqvpZovihdB8p9fDKU2SBWLWBq38CuJTVz6k3Hg==
+  dependencies:
+    "@types/pako" "^1.0.1"
+    lit "^2.1.2"
+    lottie-web "^5.10.0"
+    pako "^2.0.4"
+    resize-observer-polyfill "^1.5.1"
+
 "@mdi/font@^7.2.96":
   version "7.2.96"
   resolved "https://registry.yarnpkg.com/@mdi/font/-/font-7.2.96.tgz#af800d9fe3b424f85ad45e9baa755bd003ab4986"
@@ -390,6 +413,16 @@
   version "14.18.35"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.18.35.tgz#879c4659cb7b3fe515844f029c75079c941bb65c"
   integrity sha512-2ATO8pfhG1kDvw4Lc4C0GXIMSQFFJBCo/R1fSgTwmUlq5oy95LXyjDQinsRVgQY6gp6ghh3H91wk9ES5/5C+Tw==
+
+"@types/pako@^1.0.1":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/pako/-/pako-1.0.4.tgz#b4262aef92680a9331fcdb8420c69cf3dd98d3f3"
+  integrity sha512-Z+5bJSm28EXBSUJEgx29ioWeEEHUh6TiMkZHDhLwjc9wVFH+ressbkmX6waUZc5R3Gobn4Qu5llGxaoflZ+yhA==
+
+"@types/trusted-types@^2.0.2":
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/@types/trusted-types/-/trusted-types-2.0.3.tgz#a136f83b0758698df454e328759dbd3d44555311"
+  integrity sha512-NfQ4gyz38SL8sDNrSixxU2Os1a5xcdFxipAFxYEuLUlvU2uDwS4NUpsImcf1//SlWItCVMMLiylsxbmNMToV/g==
 
 "@types/vinyl@^2.0.4":
   version "2.0.7"
@@ -3335,6 +3368,31 @@ list.pagination.js@^0.1.1:
   resolved "https://registry.yarnpkg.com/list.pagination.js/-/list.pagination.js-0.1.1.tgz#8fb12610d5e80d120c956b305d0e981e81359436"
   integrity sha512-S2Qp7JaKbr33A8kxE8f3Sqd+IQGSa+YqieOQDfVokv0aFfp/cecsyNWCka/cxoFqQTNVZVSQ+Tywm+rtkVIV3g==
 
+lit-element@^3.3.0:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/lit-element/-/lit-element-3.3.2.tgz#9913bf220b85065f0e5f1bb8878cc44f36b50cfa"
+  integrity sha512-xXAeVWKGr4/njq0rGC9dethMnYCq5hpKYrgQZYTzawt9YQhMiXfD+T1RgrdY3NamOxwq2aXlb0vOI6e29CKgVQ==
+  dependencies:
+    "@lit-labs/ssr-dom-shim" "^1.1.0"
+    "@lit/reactive-element" "^1.3.0"
+    lit-html "^2.7.0"
+
+lit-html@^2.7.0:
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/lit-html/-/lit-html-2.7.3.tgz#903bfa61f9d3296a0ec94128695e452beb9b1a3a"
+  integrity sha512-9DyLzcn/kbRGowz2vFmSANFbRZTxYUgYYFqzie89w6GLpPUiBCDHfcdeRUV/k3Q2ueYxNjfv46yPCtKAEAPOVw==
+  dependencies:
+    "@types/trusted-types" "^2.0.2"
+
+lit@^2.1.2:
+  version "2.7.3"
+  resolved "https://registry.yarnpkg.com/lit/-/lit-2.7.3.tgz#7f7920dbaba12828d359ca3439cd6f73619061da"
+  integrity sha512-0a+u+vVbmgSfPu+fyvqjMPBX0Kwbyj9QOv9MbQFZhWGlV2cyk3lEwgfUQgYN+i/lx++1Z3wZknSIp3QCKxHLyg==
+  dependencies:
+    "@lit/reactive-element" "^1.6.0"
+    lit-element "^3.3.0"
+    lit-html "^2.7.0"
+
 load-json-file@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/load-json-file/-/load-json-file-1.1.0.tgz#956905708d58b4bab4c2261b04f59f31c99374c0"
@@ -3506,6 +3564,11 @@ lodash@^4.17.10, lodash@^4.17.14:
   version "4.17.21"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
   integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
+lottie-web@^5.10.0:
+  version "5.11.0"
+  resolved "https://registry.yarnpkg.com/lottie-web/-/lottie-web-5.11.0.tgz#04bb9fd6cdfbb10e586985dd666de6c727619d95"
+  integrity sha512-9vSt0AtdOH98GKDXwD5LPfFg9Pcmxt5+1BllAbudKM5iqPxpJnJUfuGaP45OyudDrESCOBgsjnntVUTygBNlzw==
 
 lru-queue@^0.1.0:
   version "0.1.0"
@@ -4017,6 +4080,11 @@ p-map@^4.0.0:
   integrity sha512-/bjOqmgETBYB5BoEeGVea8dmvHb2m9GLy1E9W43yeyfP6QQCZGFNa+XRceJEuDB6zqr+gKpIAmlLebMpykw/MQ==
   dependencies:
     aggregate-error "^3.0.0"
+
+pako@^2.0.4:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/pako/-/pako-2.1.0.tgz#266cc37f98c7d883545d11335c00fbd4062c9a86"
+  integrity sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==
 
 parchment@^1.1.4:
   version "1.1.4"
@@ -4547,6 +4615,11 @@ requires-port@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==
+
+resize-observer-polyfill@^1.5.1:
+  version "1.5.1"
+  resolved "https://registry.yarnpkg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
+  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 resolve-dir@^1.0.0, resolve-dir@^1.0.1:
   version "1.0.1"

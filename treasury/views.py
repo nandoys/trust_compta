@@ -25,7 +25,7 @@ from utils.token import set_auth_token
 
 from .forms import OutcomeForm, OutcomeModelForm, IncomeForm, IncomeModelForm
 from .models import Outcome, Income, Currency, CurrencyDailyRate, AccountingEntry, Statement
-from .serializer import IncomeSerializer, OutcomeSerializer
+from .serializers import IncomeSerializer, OutcomeSerializer
 
 months = [
     {'id': 1, 'name': 'Janvier', 'balance': {}}, {'id': 2, 'name': 'Février', 'balance': {}},

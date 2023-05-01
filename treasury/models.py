@@ -77,7 +77,7 @@ class AccountingEntry(models.Model):
                                              related_name='ref_billing_customer_entry')
     ref_billing_supplier = models.ForeignKey('billing.SupplierBill', on_delete=models.CASCADE, null=True, blank=True,
                                              related_name='ref_billing_supplier_entry')
-    ref_bill_line = models.ForeignKey('billing.BillLine', on_delete=models.CASCADE, null=True, related_name='ref_bill_line_entry')
+    ref_bill_line = models.ForeignKey('billing.BillLine', on_delete=models.CASCADE, null=True, blank=True, related_name='ref_bill_line_entry')
     label = models.CharField(max_length=255, null=True, blank=True)
     partner = models.ForeignKey(Partner, on_delete=models.SET_NULL, null=True, blank=True, related_name='partner_entry')
     date_at = models.DateField()

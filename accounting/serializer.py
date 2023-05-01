@@ -18,7 +18,7 @@ class AdditionalSerializer(ModelSerializer):
 class PlanSerializer(ModelSerializer):
     class Meta:
         model = Plan
-        fields = ['id', 'account_number', 'account_namen']
+        fields = ['id', 'account_number', 'account_name']
 
         extra_kwargs = {
             'path': {'write_only': True},

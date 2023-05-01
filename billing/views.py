@@ -15,8 +15,10 @@ from rest_framework_simplejwt.exceptions import InvalidToken
 from accounting.models import Plan
 from settings.models import Journal
 from treasury.models import AccountingEntry, Currency
+from treasury.serializers import AccountingEntrySerializer
 from utils.token import set_auth_token
-from .models import Partner, CustomerBill, BillLine
+from .models import Partner, CustomerBill, BillLine, BillLineTax
+from .serializers import BillLineSerializer, CustomerBillSerializer
 
 
 def customers(request):
@@ -93,12 +95,9 @@ def api_get_customer_bills(request):
 
         bills = CustomerBill.objects.all()
 
-        return Response(
-            bills.values('id', 'bill_at', 'deadline_at', 'partner_id', 'partner__name', 'rate', 'amount',
-                         'amount_foreign',
-                         'account_id', 'account__account_number', 'account__account_name', 'currency__symbol',
-                         'currency__name', 'currency__is_local', 'currency_id', 'label', 'reference', 'is_lettered',
-                         'is_paid'))
+        serializer = CustomerBillSerializer(bills, many=True)
+
+        return Response(serializer.data)
     except Journal.DoesNotExist:
         return Response({'message': "Le journal demandé n'existe pas"})
 
@@ -111,17 +110,10 @@ def api_get_customer_bill_accounting_entries(request, bill_id):
         entries = AccountingEntry.objects.filter(ref_billing_customer_id=bill_id, ref_statement__isnull=True).all()
     except AccountingEntry.DoesNotExist:
         pass
-    data = []
 
-    for entry in entries:
-        partner_name = entry.partner.name if entry.partner is not None else None
-        data.append({
-            'id': entry.id, 'account_number': entry.account.account_number, 'account_name': entry.account.account_name,
-            'date_at': entry.date_at, 'label': entry.label, 'partner_name': partner_name, 'rate': entry.rate,
-            'currency_is_local': entry.currency.is_local, 'currency_name': entry.currency.name, 'debit': entry.debit,
-            'credit': entry.credit, 'amount_foreign': entry.amount_foreign, 'is_verified': entry.is_verified
-        })
-    response = Response(data)
+    serializer = AccountingEntrySerializer(entries, many=True)
+
+    response = Response(serializer.data)
     return response
 
 
@@ -129,10 +121,9 @@ def api_get_customer_bill_accounting_entries(request, bill_id):
 @permission_classes([IsAuthenticated])
 def api_get_customer_bill_lines(request):
     bill_id = request.GET.get('billId')
-    lines = BillLine.objects.filter(customer_bill_lines__id=bill_id).all()
-    return Response(
-        lines.values('id', 'label', 'account__account_number', 'account__account_number', 'account_id', 'quantity',
-                     'price'))
+    lines = BillLine.objects.filter(customer_bill__id=bill_id).all()
+    lineSerialize = BillLineSerializer(lines, many=True)
+    return Response(lineSerialize.data)
 
 
 @api_view(['POST'])
@@ -191,6 +182,7 @@ def api_update_bill(request):
         return Response({'message': _("Quelque chose s'est mal passé avec la création de la facture")},
                         status=status.HTTP_400_BAD_REQUEST)
 
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def api_save_bill_entry(request):
@@ -202,22 +194,52 @@ def api_save_bill_entry(request):
         partner = None
         rate = entry['rate']
         currency = Currency.objects.get(id=entry['currency'])
-        ref_bill_line = None
+        ref_bill_line = entry['ref_bill_line']
         date_at = datetime.datetime.strptime(entry['date_at'], "%d/%m/%Y").date()
         label = entry['label']
         amount_foreign = entry['amount_foreign']
         debit = entry['debit']
         credit = entry['credit']
 
+        print(label, account.account_name)
+        continue
+
+        if entry['is_customer_account']:
+            ref_billing_customer.amount = entry['debit']
+            ref_billing_customer.amount_foreign = entry['amount_foreign']
+            ref_billing_customer.save()
+
         if entry['partner'] is not None:
             partner = Partner.objects.get(id=entry['partner'])
 
-        if entry['ref_bill_line'] is not None:
-            ref_bill_line = BillLine.objects.get(id=ref_bill_line)
+        if ref_bill_line is not None:
+            label_line = ref_bill_line['label']
+            account_line = ref_bill_line['account']
 
-        # AccountingEntry(account=account, currency=currency, rate=rate, ref_billing_customer=ref_billing_customer,
-        #                ref_bill_line=ref_bill_line, label=label, partner=partner, date_at=date_at,
-        #                amount_foreign=amount_foreign, debit=debit, credit=credit, done_by=user).save()
+            bill_line = BillLine(customer_bill=ref_billing_customer, label=label_line, account_id=account_line,
+                                 quantity=ref_bill_line['quantity'], price=ref_bill_line['price'],
+                                 price_with_tax=ref_bill_line['priceWithTax'])
 
-    response = Response({'message': _("Écriture(s) comptable enregistrée avec succès")})
+            bill_line.save()
+
+            # save every taxes in billLiineTax
+            if len(ref_bill_line['taxes']) > 0:
+                taxes = ref_bill_line['taxes']
+
+                for tax in taxes:
+                    tax_id = tax['tax_ref']
+                    tax_amount = tax['calculated']
+
+                    BillLineTax(tax_id=tax_id, tax_amount=tax_amount, bill_line=bill_line).save()
+
+            AccountingEntry(account=account, currency=currency, rate=rate, ref_billing_customer=ref_billing_customer,
+                            ref_bill_line=bill_line, label=label_line, partner=partner, date_at=date_at,
+                            amount_foreign=amount_foreign, debit=debit, credit=credit, done_by=user).save()
+        else:
+            AccountingEntry(account=account, currency=currency, rate=rate, ref_billing_customer=ref_billing_customer,
+                            label=label, partner=partner, date_at=date_at, amount_foreign=amount_foreign, debit=debit,
+                            credit=credit,
+                            done_by=user).save()
+
+    response = Response({'message': _("Écriture comptable enregistrée avec succès")})
     return response

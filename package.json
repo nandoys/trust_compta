@@ -37,6 +37,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.12.1",
     "@ckeditor/ckeditor5-build-classic": "^31.0.0",
+    "@lottiefiles/lottie-player": "^1.7.1",
     "@simonwep/pickr": "^1.8.2",
     "@tarekraafat/autocomplete.js": "^10.2.6",
     "@vue/composition-api": "^1.7.1",
