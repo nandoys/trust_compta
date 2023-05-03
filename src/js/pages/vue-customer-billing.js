@@ -109,6 +109,13 @@ const app = new Vue({
           loading: false,
         },
         taxes: [],
+        filter: {
+          dates: [new Date().toISOString().substr(0, 7), new Date().toISOString().substr(0, 7)],
+          minDate: undefined
+        },
+        modal: {
+          dateRangePicker: false
+        },
         total_amount: null, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
         total_taxes: null, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
         minDate: '',
@@ -891,6 +898,33 @@ const app = new Vue({
         return `${day.padStart(2, '0')}-${month.padStart(2, '0')}-${year}`
       },
 
+      datePicker(){
+        if (this.filter.dates.length === 2){
+          const date1 = this.filter.dates[0]
+          const date2 = this.filter.dates[1]
+          if(new Date(date1) > new Date(date2) ) {
+            this.filter.dates[0] = date2
+            this.filter.dates[1] = date1
+          }
+        }
+        this.$refs.dialogDateRage.save(this.filter.dates)
+        this.modal.dateRangePicker = false
+      },
+
+      outsideDatePicker(){
+        if (this.filter.dates.length === 1) {
+          this.$refs.dialogDateRage.save(this.filter.dates)
+        }
+      },
+
+      setMinDate(){
+        this.filter.minDate = this.filter.dates[0]
+      },
+
+      resetMinDate(){
+        this.filter.minDate = undefined
+      },
+
       thousandSeparator(item){
         if (item === null) {
           return null
@@ -1193,6 +1227,26 @@ const app = new Vue({
         return this.bill.partners.length === 0 ? 'Créer un partenaire' : false
       },
 
+      displayLottieFile(){
+        if (this.bill.bills.length === 0) {
+          lottie.loadAnimation({
+          container: this.$refs.lottieContainer, // the dom element that will contain the animation
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: '/static/images/lottie/add-bill.json' // the path to the animation json
+        });
+        } else {
+          lottie.loadAnimation({
+          container: this.$refs.lottieContainer, // the dom element that will contain the animation
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          path: '/static/images/lottie/woman-pick-bill.json' // the path to the animation json
+        });
+        }
+      },
+
       symbolCurrency(){
         let found
 
@@ -1220,6 +1274,10 @@ const app = new Vue({
         return this.formatDate(this.bill.editedItem.dateDeadline)
       },
 
+      dateRangeText () {
+        return `${this.filter.dates.join(' au ')}`
+      },
+
       numberOfPages () {
         return Math.ceil(this.items.length / this.itemsPerPage)
       },
@@ -1227,6 +1285,7 @@ const app = new Vue({
       filteredKeys () {
         return this.keys.filter(key => key !== 'Name')
       },
+
 
       ...Pinia.mapState(currencyStore, ['currency_asset'])
     },
@@ -1244,5 +1303,9 @@ const app = new Vue({
       this.onResize()
       this.bill.selectedBill = undefined
     },
+
+    update(){
+
+    }
 
   })

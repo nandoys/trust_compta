@@ -8,10 +8,17 @@ class Partner(models.Model):
     id = models.UUIDField(primary_key=True, unique=True, editable=False, default=uuid.uuid4)
     name = models.CharField(max_length=255)
     street = models.CharField(max_length=255, null=True)
+    street_number = models.CharField(max_length=255, null=True)
+    quarter = models.CharField(max_length=255, null=True)
+    municipality = models.CharField(max_length=255, null=True)
     town = models.CharField(max_length=255, null=True)
-    state = models.CharField(max_length=255, null=True)
+    country = models.CharField(max_length=255, null=True)
     email = models.EmailField(max_length=255, null=True)
     telephone = models.CharField(max_length=255, null=True)
+    bank_name = models.CharField(max_length=255, null=True)
+    bank_number = models.CharField(max_length=255, null=True)
+    bank_iban = models.CharField(max_length=255, null=True)
+    bank_swift_code = models.CharField(max_length=255, null=True)
 
 
 class CustomerBill(Document):
@@ -49,6 +56,7 @@ class BillLine(models.Model):
     quantity = models.IntegerField()
     price = models.FloatField()
     price_with_tax = models.FloatField()
+    discount = models.FloatField(null=True, blank=True)
 
 
 class BillLineTax(models.Model):

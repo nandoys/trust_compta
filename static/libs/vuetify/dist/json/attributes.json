@@ -373,7 +373,7 @@
   },
   "v-autocomplete/filter": {
     "type": "function",
-    "description": "The filtering algorithm used when searching. [example](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/components/VAutocomplete/VAutocomplete.ts#L40)"
+    "description": "The filtering algorithm used when searching. [example](https://github.com/vuetifyjs/vuetify/blob/v2-stable/packages/vuetify/src/components/VAutocomplete/VAutocomplete.ts#L40)"
   },
   "v-autocomplete/flat": {
     "type": "boolean",
@@ -561,7 +561,7 @@
   },
   "v-autocomplete/value-comparator": {
     "type": "function",
-    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/util/helpers.ts)"
+    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/v2-stable/packages/vuetify/src/util/helpers.ts)"
   },
   "v-avatar/color": {
     "type": "string",
@@ -2833,7 +2833,7 @@
   },
   "v-combobox/value-comparator": {
     "type": "function",
-    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/util/helpers.ts)"
+    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/v2-stable/packages/vuetify/src/util/helpers.ts)"
   },
   "v-data-iterator/checkbox-color": {
     "type": "string",
@@ -5637,7 +5637,7 @@
   },
   "v-overflow-btn/value-comparator": {
     "type": "function",
-    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/util/helpers.ts)"
+    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/v2-stable/packages/vuetify/src/util/helpers.ts)"
   },
   "v-overlay/absolute": {
     "type": "boolean",
@@ -6625,7 +6625,7 @@
   },
   "v-select/value-comparator": {
     "type": "function",
-    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/master/packages/vuetify/src/util/helpers.ts)"
+    "description": "The comparison algorithm used for values. [More info](https://github.com/vuetifyjs/vuetify/blob/v2-stable/packages/vuetify/src/util/helpers.ts)"
   },
   "v-skeleton-loader/boilerplate": {
     "type": "boolean",

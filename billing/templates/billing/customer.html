@@ -1,6 +1,6 @@
 {% extends "partials/base.html" %}
 {% load static %}
-{% block title %}Revenus{% endblock title %}
+{% block title %}Facture client{% endblock title %}
 {% block extra_css %}
 
 {% endblock extra_css %}
@@ -229,26 +229,82 @@
                     <v-container v-else fluid class="grey lighten-5">
                         {% include 'billing/tab-menus.html' %}
                         <v-card :height="windowSize.y * 0.87" flat class="grey lighten-5">
-                            <v-card-text class="d-flex justify-space-around">
-                                <v-img
-                                      lazy-src="{% static 'images/no-bill.png' %}"
-                                      max-height="250"
-                                      max-width="250"
-                                      src="{% static 'images/no-bill.png' %}"
-                                ></v-img>
-                                <lottie-player
-                                  autoplay
-                                  loop
-                                  mode="normal"
-                                  src="{% static 'images/lottie/rocket-launch.json' %}"
-                                  style="width: 320px"
-                                >
-                                </lottie-player>
+                            <v-card-text>
+                                <v-container fluid>
+                                    <v-row no-gutters>
+                                        <v-col cols="12">
+                                            <v-container>
+                                                <v-row justify="center" class="mb-0">
+                                                    <v-dialog
+                                                        ref="dialogDateRage"
+                                                        :return-value.sync="filter.dates"
+                                                        width="290px"
+                                                        v-model="modal.dateRangePicker"
+                                                        @click:outside="outsideDatePicker"
+                                                    >
+                                                        <template v-slot:activator="{ on, attrs }">
+                                                            <v-autocomplete
+                                                              v-model="filter.dates"
+                                                              :items="filter.dates"
+                                                              label="filtre période"
+                                                              append-icon="mdi-filter-variant"
+                                                              chips
+                                                              filled
+                                                              clearable
+                                                              multiple
+                                                              small-chips
+                                                              v-bind="attrs" v-on="on"
+                                                              readonly
+                                                              no-data-text="Aucun filtre"
+                                                              @focus="modal.dateRangePicker = true"
+                                                            >
+                                                            </v-autocomplete>
+                                                        </template>
+                                                        <v-date-picker
+                                                          v-model="filter.dates"
+                                                          range
+                                                          scrollable
+                                                          locale="fr-fr"
+                                                          :selected-items-text="dateRangeText"
+                                                          @change="datePicker"
+                                                        >
+                                                        </v-date-picker>
+                                                    </v-dialog>
+                                                </v-row>
+                                                <v-row class="mt-0">
+                                                    <v-col cols="4" class="pl-0 py-0">
+                                                            <v-list elevation="2" class="py-0">
+                                                                <v-list-item>
+                                                                    <v-list-item-title>Total en CDF</v-list-item-title>
+                                                                </v-list-item>
+                                                            </v-list>
+                                                    </v-col>
+                                                    <v-col cols="4" class="py-0">
+                                                        <v-list elevation="2" class="py-0">
+                                                            <v-list-item>Total en USD</v-list-item>
+                                                        </v-list>
+                                                    </v-col>
+                                                    <v-col cols="4" class="pr-0 py-0">
+                                                        <v-list elevation="2" class="py-0">
+                                                            <v-list-item>
+                                                                <v-list-item-title>Total mois x</v-list-item-title>
+                                                            </v-list-item>
+                                                        </v-list>
+                                                    </v-col>
+                                                </v-row>
+                                            </v-container>
+                                        </v-col>
+                                        <v-col cols="12" class="d-flex justify-center">
+                                            ${displayLottieFile}
+                                            <div ref="lottieContainer" style="width:320px;height: 320px"></div>
+                                        </v-col>
+                                    </v-row>
+                                </v-container>
                             </v-card-text>
                             <v-card-actions>
                                 <v-spacer></v-spacer>
-                                <div v-if="bill.bills.length == 0" class="">Pour commencer par ajouter une nouvelle facture pour votre client</div>
-                                <div v-else class="">Vous n'avez choisi aucune facture</div>
+                                <div v-if="bill.bills.length == 0">Pour commencer par ajouter une nouvelle facture pour votre client</div>
+                                <div v-else>Vous n'avez choisi aucune facture</div>
                                 <v-spacer></v-spacer>
                             </v-card-actions>
                         </v-card>

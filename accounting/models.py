@@ -166,7 +166,8 @@ class Document(models.Model):
     label = models.CharField(max_length=255, null=True, blank=True)
     account = models.ForeignKey(Plan, on_delete=models.CASCADE)
     partner = models.ForeignKey('billing.Partner', on_delete=models.SET_NULL, null=True, blank=True)
-    can_edit = models.BooleanField(default=True)
+    is_draft = models.BooleanField(default=True)
+    note = models.TextField(null=True, blank=True)
 
     class Meta:
         abstract = True
