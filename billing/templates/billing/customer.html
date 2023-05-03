@@ -26,6 +26,8 @@
                             <v-col cols="12">
                                 <v-data-table
                                     :headers="bill.headers"
+                                    height="150"
+                                    fixed-header
                                     :loading="bill.loading"
                                     loading-text="Chargement... Veuillez attendre"
                                     :items="bill.entries"

@@ -185,7 +185,7 @@ def api_update_bill(request):
 
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
-def api_save_bill_entry(request):
+def api_save_customer_bill_entry(request):
     user = request.user
     entries = request.data
     for entry in entries:
@@ -200,9 +200,6 @@ def api_save_bill_entry(request):
         amount_foreign = entry['amount_foreign']
         debit = entry['debit']
         credit = entry['credit']
-
-        print(label, account.account_name)
-        continue
 
         if entry['is_customer_account']:
             ref_billing_customer.amount = entry['debit']
@@ -242,4 +239,13 @@ def api_save_bill_entry(request):
                             done_by=user).save()
 
     response = Response({'message': _("Écriture comptable enregistrée avec succès")})
+    return response
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def api_delete_customer_bill_entry(request):
+    line_id = request.data['id']
+    BillLine.objects.get(id=line_id).delete()
+    response = Response({'message': _("Écriture comptable supprimée avec succès")})
     return response

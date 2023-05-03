@@ -120,7 +120,7 @@ const app = new Vue({
         total_taxes: null, // i put this outside of lines var to avoid crash, infinite loop will be triggered in watch observer
         minDate: '',
         maxDate: '',
-        moduleId:'',
+        module:'',
         moduleName:'',
         currentCurrency:'',
         currentMonth: '',
@@ -186,9 +186,9 @@ const app = new Vue({
     watch: {
 
       // here i calculate amount with taxes, but watching changing data on lines data
-      lines: {
+      linesItems: {
         handler(v, old){
-          const items = v.items
+          const items = v
 
           // this code is to calculate the total sum of the bill at the bottom
           this.total_amount = null // amount without taxes
@@ -323,9 +323,7 @@ const app = new Vue({
             if (!Number.isNaN(parseFloat(item.price))) {
               const index_entry = this.bill.entries.findIndex(entry => entry.line_ref === item.ref)
 
-              const index_customer_account = this.bill.entries.findIndex(entry => entry.is_customer_account === true)
-
-              const customer_entry = this.bill.entries[index_customer_account]
+              const customer_entry = this.bill.entries.find(entry => entry.account_id === this.module.account.id)
 
               const line_entry = this.bill.entries[index_entry]
 
@@ -333,9 +331,11 @@ const app = new Vue({
 
               if(selected_bill.currency_is_local) {
 
-                customer_entry.amount_foreign = null
-                customer_entry.amount = selected_bill.amount
-                customer_entry.debit = selected_bill.amount
+                if (customer_entry !== undefined) {
+                  customer_entry.amount_foreign = null
+                  customer_entry.amount = selected_bill.amount
+                  customer_entry.debit = selected_bill.amount
+                }
 
                 line_entry.amount_foreign = null
                 line_entry.amount =  isNaN(total) ? null : total
@@ -343,10 +343,12 @@ const app = new Vue({
               } else {
                 const rate =  selected_bill.rate
 
-                const amount_customer = selected_bill.amount * rate
-                customer_entry.amount_foreign = selected_bill.amount
-                customer_entry.amount = amount_customer
-                customer_entry.debit = amount_customer
+                if (customer_entry !== undefined) {
+                  const amount_customer = selected_bill.amount * rate
+                  customer_entry.amount_foreign = selected_bill.amount
+                  customer_entry.amount = amount_customer
+                  customer_entry.debit = amount_customer
+                }
 
                 const amount = total * rate
                 line_entry.amount_foreign = isNaN(total) ? null : total
@@ -364,6 +366,7 @@ const app = new Vue({
               const tax_entry = this.taxes.find(tax => tax.account_id === entry.account_id && tax.name === entry.label)
 
               if(tax_entry){
+
                 entry.credit = null
                 items.forEach(item => {
                    item.taxes_amount.forEach(amount => {
@@ -410,6 +413,7 @@ const app = new Vue({
             // disability of the validate button
             this.disableValidate = this.bill.entries.length === 0;
           }
+
         },
         deep: true,
       },
@@ -563,8 +567,7 @@ const app = new Vue({
 
       getModule(){
         this.apiCall('get', `/api/settings/journal?type=${this.moduleName}`).then(res => {
-          const data = res.data
-          this.moduleId = data['id']
+          this.module= res.data
         }).then(()=> {
           this.getBills() // this method is called to fill the left menu with all existing customers bill of this module
         }).then(()=> {
@@ -577,7 +580,7 @@ const app = new Vue({
       getBills() {
         this.bill.billsLoading = true
 
-        this.apiCall('get', `/api/billing/customer/bills/get?journal=${this.moduleId}`).then(res => {
+        this.apiCall('get', `/api/billing/customer/bills/get?journal=${this.module.id}`).then(res => {
           let data = res.data
 
           let jsonData = []
@@ -631,7 +634,7 @@ const app = new Vue({
 
       getDebitAccounts(){
         this.bill.debitLoading = true
-        this.apiCall('get', `/api/accounting/journal/${this.moduleId}/get`).then(res => {
+        this.apiCall('get', `/api/accounting/journal/${this.module.id}/get`).then(res => {
           let data = res.data
           let jsonData = []
           if(data.length > 0) {
@@ -652,7 +655,7 @@ const app = new Vue({
       },
 
       getTaxes(){
-        this.apiCall('get', `/api/accounting/taxes/get?journal=${this.moduleId}`).then(res => {
+        this.apiCall('get', `/api/accounting/taxes/get?journal=${this.module.id}`).then(res => {
           const data = res.data
 
           Array.from(data).forEach(item => {
@@ -976,14 +979,39 @@ const app = new Vue({
       },
 
       deleteItem (index, item) {
-        this.lines.items.splice(index, 1)
+        const line_id = this.lines.items[index].id
 
-        if (this.lines.items.length === 0) {
-          this.bill.entries.splice(0)
+        function removeLineAndEntry(self){
+          self.lines.items.splice(index, 1)
+
+          if (self.lines.items.length === 0) {
+            self.bill.entries.splice(0)
+          }
+
+          const entry_index = self.bill.entries.findIndex(entry => entry.line_ref === item.ref)
+          self.bill.entries.splice(entry_index, 1)
         }
 
-        const entry_index = this.bill.entries.findIndex(entry => entry.line_ref === item.ref)
-        this.bill.entries.splice(entry_index, 1)
+        if (line_id !== undefined) {
+          let text = "Voulez-vous supprimer cette ligne de la facture ?";
+
+          if (confirm(text) === true) {
+            const data = {id: line_id}
+            this.apiCall('post', '/api/billing/customer/bill/entries/delete', data).then(res => {
+              removeLineAndEntry(this)
+              this.snacktext = res.data.message
+              this.snackbar = true
+              this.snackcolor = 'green darken-3'
+            })
+          } else {
+            const message = "Suppression annulée!";
+            this.snacktext = message
+            this.snackbar = true
+            this.snackcolor = 'error darken-2'
+          }
+        } else {
+          removeLineAndEntry(this)
+        }
       },
 
       deleteItemConfirm () {
@@ -1146,7 +1174,12 @@ const app = new Vue({
       },
 
       selectedBill(){
+
         return this.bill.selectedBill
+      },
+
+      linesItems(){
+        return this.lines.items
       },
 
       // here i get the lines of the selectedBill
@@ -1228,10 +1261,12 @@ const app = new Vue({
       },
 
       displayLottieFile(){
+
         if (this.bill.bills.length === 0) {
           lottie.loadAnimation({
           container: this.$refs.lottieContainer, // the dom element that will contain the animation
           renderer: 'svg',
+          name: 'addBill',
           loop: true,
           autoplay: true,
           path: '/static/images/lottie/add-bill.json' // the path to the animation json
@@ -1240,6 +1275,7 @@ const app = new Vue({
           lottie.loadAnimation({
           container: this.$refs.lottieContainer, // the dom element that will contain the animation
           renderer: 'svg',
+           name: 'pickBill',
           loop: true,
           autoplay: true,
           path: '/static/images/lottie/woman-pick-bill.json' // the path to the animation json

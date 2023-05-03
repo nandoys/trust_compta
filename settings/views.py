@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 
 from settings.models import Journal
+from settings.serializers import JournalSerializer
 
 
 @api_view(['GET'])
@@ -18,6 +19,6 @@ def api_get_journal(request):
     journal_root = None
     for journal in journals:
         if journal.is_root():
-            journal_root = journal.serializable_value('id')
+            journal_root = JournalSerializer(journal)
 
-    return Response({'id': journal_root})
+    return Response(journal_root.data)
